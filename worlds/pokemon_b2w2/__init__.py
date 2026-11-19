@@ -17,7 +17,7 @@ from .options.groups import option_groups
 from .regions import create_regions_and_locations, check_goal_completion
 from .rom import PokemonB2W2Patch, PokemonB2Patch, PokemonW2Patch
 
-APWORLD_VERSION = "0.0.1"
+APWORLD_VERSION = "0.0.2"
 
 bizhawk_client.register_client()
 
@@ -61,7 +61,7 @@ class PokemonB2W2World(World):
     options_dataclass = PokemonB2W2Options
     options: PokemonB2W2Options
     topology_present = True
-    ut_can_gen_stuff: ClassVar[bool] = True
+    ut_can_gen_without_yaml: ClassVar[bool] = True
     web = PokemonB2W2WebWorld()
 
     item_name_to_id = ITEM_NAME_TO_ID
@@ -101,7 +101,10 @@ class PokemonB2W2World(World):
                 ):
                     if opt_name in pt_opts and hasattr(self.options, opt_name):
                         cur_opt = getattr(self.options, opt_name)
-                        setattr(self.options, opt_name, type(cur_opt).from_any(pt_opts[opt_name]))
+                        val = pt_opts[opt_name]
+                        if hasattr(cur_opt, "range_start") and hasattr(cur_opt, "range_end") and isinstance(val, int):
+                            val = max(cur_opt.range_start, min(cur_opt.range_end, val))
+                        setattr(self.options, opt_name, type(cur_opt).from_any(val))
 
         if not hasattr(self, "starting_day"):
             self.starting_day = self.random.choice(range(7))
@@ -126,8 +129,8 @@ class PokemonB2W2World(World):
             if not top_allowed.value and "top_trainers" in active_goals:
                 top_allowed.value = {self.random.choice(sorted(top_allowed.valid_keys))}
             allowed_count = len(top_allowed.value)
-            if top_req.value > allowed_count:
-                top_req.value = max(1, allowed_count) if allowed_count > 0 else 0
+            if allowed_count > 0 and top_req.value > allowed_count:
+                top_req.value = allowed_count
 
         leg_allowed = getattr(self.options, "legendary_hunt_allowed", None)
         leg_req = getattr(self.options, "legendary_hunt_required", None)
@@ -135,8 +138,8 @@ class PokemonB2W2World(World):
             if not leg_allowed.value and "legendary_hunt" in active_goals:
                 leg_allowed.value = {self.random.choice(sorted(leg_allowed.valid_keys))}
             allowed_count = len(leg_allowed.value)
-            if leg_req.value > allowed_count:
-                leg_req.value = max(1, allowed_count) if allowed_count > 0 else 0
+            if allowed_count > 0 and leg_req.value > allowed_count:
+                leg_req.value = allowed_count
 
         # Pull starting inventory from the pool
         start_inv = getattr(self.options, "start_inventory", None)
@@ -159,7 +162,7 @@ class PokemonB2W2World(World):
         classification = info.classification
         goal_val = getattr(self.options, "goal", None)
         active_goals = goal_val.value if (goal_val is not None and hasattr(goal_val, "value") and isinstance(goal_val.value, set)) else set()
-        if "tmhm_hunt" in active_goals and name.startswith("TM"):
+        if name.startswith("TM") and classification == ItemClassification.useful:
             classification = ItemClassification.progression_skip_balancing
         elif name == "Rare Candy":
             inf_candy = getattr(self.options, "infinite_rare_candies", None)
@@ -225,6 +228,7 @@ class PokemonB2W2World(World):
             "DNA Splicers",
             "Lunar Wing",
             "Magma Stone",
+            "Permit",
             "TM70 Flash",
         ]
         for item_name in other_progression_items:
@@ -514,7 +518,6 @@ class PokemonB2W2World(World):
                 "remove_surf_bike_music": bool(self.options.remove_surf_bike_music.value),
                 "infinite_repels": bool(self.options.infinite_repels.value),
                 "infinite_rare_candies": bool(self.options.infinite_rare_candies.value),
-                "skip_pokestar_studios": bool(self.options.skip_pokestar_studios.value),
                 "skip_pwt": int(self.options.skip_pwt.value),
                 "skip_catching_tutorial": bool(self.options.skip_catching_tutorial.value),
                 "skip_join_avenue": bool(self.options.skip_join_avenue.value),

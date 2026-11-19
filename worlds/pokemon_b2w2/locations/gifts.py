@@ -10,14 +10,16 @@ NPC_GIFT_LOCATIONS: dict[str, tuple[int, int | None, str | None, tuple[int, int]
     'Abyssal Ruins - Gift: 4F Central altar chamber crown': (300164, 1469, 'Abyssal Ruins', None),
 
     # Accumula Town
-    'Accumula Town - Gift: Girl in nursery house 1F': (300220, 2766, 'Accumula Town', None),
-    'Accumula Town - Gift: Girl in nursery house 2F': (300221, 2767, 'Accumula Town', None),
-    'Accumula Town - Gift: Maid in east house': (300223, 335, 'Accumula Town', None),
-    'Accumula Town - Gift: Girl in east house': (300225, 337, 'Accumula Town', None),
-    'Accumula Town - Gift: Pianist in piano house 2F': (300228, 2335, 'Accumula Town', None),
+    'Accumula Town - Gift: Youngster in northwest building 1F': (300220, 2766, 'Accumula Town', None),
+    'Accumula Town - Gift: Lass in northwest building 2F': (300221, 2767, 'Accumula Town', None),
+    'Accumula Town - Gift: Man in northern building': (300223, 335, 'Accumula Town', None),
+    'Accumula Town - Gift: Girl in northwest building': (300225, 337, 'Accumula Town', None),
+    'Accumula Town - Gift: Pianist in northeastern house': (300228, 2335, 'Accumula Town', None),
+    'Accumula Town - Gift: Man in building next to gate': (300322, 103, 'Accumula Town', None),
 
     # Anville Town
     'Anville Town - Gift: Railwayman in Lost and Found': (300311, 239, 'Anville Town', None),
+    'Anville Town - Gift: Girl on platform after finding Pansage': (300321, 365, 'Anville Town', None),
 
     # Aspertia City
     'Aspertia City - Gift: Bianca at lookout': (300001, 2802, 'Aspertia City', None),
@@ -30,11 +32,11 @@ NPC_GIFT_LOCATIONS: dict[str, tuple[int, int | None, str | None, tuple[int, int]
     'Aspertia Gym - Gift: Clyde': (300007, 115, 'Aspertia Gym', None),
 
     # Bridge Gates (placed in their respective route/city regions)
-    'Gate - Gift: Girl at Village Bridge gate': (300167, 442, 'Village Bridge', None),
     'Gate - Gift: Clerk at Route 8 gate': (300197, 346, 'Route 8', None),
     'Gate - Gift: Roughneck at Route 16 gate': (300216, 385, 'Route 16', None),
 
     # Castelia City
+    'Castelia City - Gift: Clerk at Bridge Gate': (300167, 442, 'Castelia City', None),
     'Castelia City - Gift: Harlequin near Prime Pier': (300047, 2338, 'Castelia City', None),
     'Castelia City - Gift: Harlequin after finding clowns': (300074, 2339, 'Castelia City', None),
     'Castelia City - Gift: Mode Street - Casteliacone stand lady': (300050, 2752, 'Castelia City', None),
@@ -57,13 +59,14 @@ NPC_GIFT_LOCATIONS: dict[str, tuple[int, int | None, str | None, tuple[int, int]
 
     # Castelia Sewers
     'Castelia Sewers - Gift: Scientist in northern room (Spring/Summer, Surf)': (300281, 2781, 'Castelia Sewers', None),
-    'Castelia Sewers - Gift: Scientist in room near Doctor (Medicine experiment)': (300284, 2782, 'Castelia Sewers', None),
+    'Castelia Sewers - Gift: Scientist in room near Doctor': (300284, 2782, 'Castelia Sewers', None),
 
     # Celestial Tower
     'Celestial Tower - Gift: Professor Juniper on 1F': (300192, 766, 'Celestial Tower', None),
 
     # Chargestone Cave
-    'Chargestone Cave - Gift: Nugget Brothers on B1F': (300153, 296, 'Chargestone Cave', None),
+    'Chargestone Cave - Gift: Nugget Brothers on B1F 1': (300153, 296, 'Chargestone Cave', None),
+    'Chargestone Cave - Gift: Nugget Brothers on B1F 2': (300359, 2585, 'Chargestone Cave', None),
 
     # Desert Resort
     'Desert Resort - Gift: Man in black in sand pit': (300149, 216, 'Desert Resort', None),
@@ -71,19 +74,22 @@ NPC_GIFT_LOCATIONS: dict[str, tuple[int, int | None, str | None, tuple[int, int]
     # Dragonspiral Tower
     'Dragonspiral Tower - Gift: Cedric at tower entrance': (300162, 2341, 'Dragonspiral Tower', None),
 
+    # Dreamyard
+    'Dreamyard - Gift: Soul Dew after battling Latios/Latias': (300365, 497, 'Dreamyard', None),
+
     # Driftveil City
     'Driftveil City - Gift: Clyde': (300108, 111, 'Driftveil City', None),
     'Driftveil City - Gift: Girl on upper floor of Pokemon Center': (300109, 122, 'Driftveil City', None),
-    'Driftveil City - Gift: Old man on 1F of Grand Hotel Driftveil (70+ Seen)': (300112, 319, 'Driftveil City', None),
+    'Driftveil City - Gift: Old man on 1F of Grand Hotel Driftveil': (300112, 319, 'Driftveil City', None),
     'Driftveil City - Gift: Lady on 1F of Driftveil Luxury Suites (TM move)': (300113, 2759, 'Driftveil City', None),
-    'Driftveil City - Gift: Man in black at market (Lv 30+ Pokemon)': (300117, 324, 'Driftveil City', None),
+    'Driftveil City - Gift: Man in black at market': (300117, 324, 'Driftveil City', None),
     'Driftveil City - Gift: Gentleman on 25F of Driftveil Chateau Hotel': (300301, 318, 'Driftveil City', None),
     'Driftveil City - Gift: Axew on 19F of Grand Hotel Driftveil': (300302, 320, 'Driftveil City', None),
     'Driftveil City - Gift: Waiter on 23F of Driftveil Luxury Suites': (300303, 322, 'Driftveil City', None),
     'Driftveil City - Gift: Veteran on 25F of Driftveil Continental Hotel': (300304, 323, 'Driftveil City', None),
 
     # Driftveil Drawbridge
-    'Driftveil Drawbridge - Gift: Bird watcher on bridge': (300169, 282, 'Driftveil Drawbridge', None),
+    'Driftveil Drawbridge - Gift: Youngster on bridge': (300169, 282, 'Driftveil Drawbridge', None),
 
     # Floccesy Ranch
     'Floccesy Ranch - Gift: After battling Hugh': (300017, 2343, 'Floccesy Ranch', None),
@@ -94,46 +100,57 @@ NPC_GIFT_LOCATIONS: dict[str, tuple[int, int | None, str | None, tuple[int, int]
     'Floccesy Town - Gift: Mr Medal after defeating School Kids': (300010, 267, 'Floccesy Town', None),
     'Floccesy Town - Gift: Bianca after defeating Cheren': (300011, 2345, 'Floccesy Town', None),
 
-
     # Giant Chasm
-    'Giant Chasm - Gift: Plasma Grunt near cave exit': (300163, 2346, 'Giant Chasm', None),
-    'Giant Chasm - Gift: Cheren after defeating Kyurem (Kyurem)': (300310, 481, 'Giant Chasm', None),
+    'Giant Chasm - Gift: Rood after defeating Plasma Grunt': (300163, 2346, 'Giant Chasm', None),
+    'Giant Chasm - Gift: DNA Splicers after defeating Ghetsis': (300310, 481, 'Giant Chasm', None),
 
     # Humilau City
-    'Humilau City - Gift: Girl on walkway': (300271, 2347, 'Humilau City', None),
-    'Humilau City - Gift: Nurse in stilt house': (300272, 342, 'Humilau City', None),
-    'Humilau City - Gift: Swimmer girl near house': (300274, 2768, 'Humilau City', None),
-    'Humilau City - Gift: Attendant at Marine Tube gate': (300278, 117, 'Humilau City', None),
+    'Humilau City - Gift: Couple after Celestial Tower bell': (300271, 2347, 'Humilau City', None),
+    'Humilau City - Gift: Nurse in northeastern house': (300272, 342, 'Humilau City', None),
+    'Humilau City - Gift: Socialite in house near Route 22': (300274, 2768, 'Humilau City', None),
+
+    # Humilau Gym
+    'Humilau Gym - Gift: Clyde': (300278, 117, 'Humilau Gym', None),
 
     # Icirrus City
-    'Icirrus City - Gift: Shadow Triad member near Gym': (300123, 120, 'Icirrus City', None),
-    'Icirrus City - Gift: Fan Club Chairman': (300126, 203, 'Icirrus City', None),
-    'Icirrus City - Gift: Fan Club member': (300128, 202, 'Icirrus City', None),
+    'Icirrus City - Gift: Battle Girl in Pokemon Center': (300123, 120, 'Icirrus City', None),
+    'Icirrus City - Gift: Fan Club Chairman 1': (300126, 201, 'Icirrus City', None),
+    'Icirrus City - Gift: Fan Club Chairman 2': (300366, 202, 'Icirrus City', None),
+    'Icirrus City - Gift: Fan Club Chairman 3': (300367, 203, 'Icirrus City', None),
 
     # Lacunosa Town
-    'Lacunosa Town - Gift: Girl near town fountain': (300232, 2784, 'Lacunosa Town', None),
+    'Lacunosa Town - Gift: Executive in northeast house (Night)': (300232, 2784, 'Lacunosa Town', None),
 
     # Lentimas Town
-    'Lentimas Town - Gift: Hiker near airfield': (300268, 294, 'Lentimas Town', None),
+    'Lentimas Town - Gift: Old woman in Pokemon Center': (300268, 294, 'Lentimas Town', None),
 
     # Marine Tube
-    'Marine Tube - Gift: Lady admiring Mantine': (300270, 389, 'Marine Tube', None),
+    'Marine Tube - Gift: Female Ace Trainer': (300270, 389, 'Marine Tube', None),
 
     # Mistralton City
     'Mistralton City - Gift: Professor Juniper on runway': (300118, 1707, 'Mistralton City', None),
-    'Mistralton City - Gift: Mechanic near planes': (300120, 472, 'Mistralton City', None),
-    'Mistralton City - Gift: TM collector in Pokemon Center 1': (300121, 452, 'Mistralton City', None),
+    'Mistralton City - Gift: Veteran in Cargo Service building': (300358, 121, 'Mistralton City', None),
+    'Mistralton City - Gift: Pilot in Cargo Service building': (300120, 472, 'Mistralton City', None),
+    'Mistralton City - Gift: TM collector in Pokemon Center (10 TMs)': (300313, 450, 'Mistralton City', None),
+    'Mistralton City - Gift: TM collector in Pokemon Center (20 TMs)': (300314, 451, 'Mistralton City', None),
+    'Mistralton City - Gift: TM collector in Pokemon Center (35 TMs)': (300121, 452, 'Mistralton City', None),
+    'Mistralton City - Gift: TM collector in Pokemon Center (50 TMs)': (300315, 453, 'Mistralton City', None),
+    'Mistralton City - Gift: TM collector in Pokemon Center (70 TMs)': (300316, 454, 'Mistralton City', None),
+    'Mistralton City - Gift: TM collector in Pokemon Center (95 TMs)': (300317, 455, 'Mistralton City', None),
+
+    # Mistralton Gym
+    'Mistralton Gym - Gift: Clyde': (300357, 112, 'Mistralton Gym', None),
 
     # Musical Theater
     'Musical Theater - Gift: Owner at theater entrance': (300099, 2350, 'Musical Theater', None),
 
     # N's Castle
-    'N\'s Castle - Gift: N in throne room': (300175, 1708, 'N\'s Castle', None),
+    'N\'s Castle - Gift: 5F, N after the first battle': (300175, 1708, 'N\'s Castle', None),
 
     # Nacrene City
-    'Nacrene City - Gift: Clerk in museum': (300036, 445, 'Nacrene City', None),
-    'Nacrene City - Gift: Woman near cafe outdoor tables': (300043, 2735, 'Nacrene City', None),
-    'Nacrene City - Gift: Dancer on southern street (Winter)': (300046, 2353, 'Nacrene City', None),
+    'Nacrene City - Gift: Lenora in museum': (300036, 445, 'Nacrene City', None),
+    'Nacrene City - Gift: Waitress in Cafe Warehouse (Wed/Sat)': (300043, 2735, 'Nacrene City', None),
+    'Nacrene City - Gift: Customer in Cafe Warehouse (Sun/Thu)': (300046, 2353, 'Nacrene City', None),
 
     # Nimbasa City
     'Nimbasa City - Gift: Rosa/Nate at Battle Subway entrance': (300077, 764, 'Nimbasa City', None),
@@ -141,24 +158,26 @@ NPC_GIFT_LOCATIONS: dict[str, tuple[int, int | None, str | None, tuple[int, int]
     'Nimbasa City - Gift: Socialite in northwest building': (300081, 305, 'Nimbasa City', None),
     'Nimbasa City - Gift: Madame in northwest building': (300105, 262, 'Nimbasa City', None),
     'Nimbasa City - Gift: Ace Trainer in 2F of northwestern building': (300107, 213, 'Nimbasa City', None),
-
-    # Nimbasa Gate
-    'Nimbasa Gate - Gift: Baseball fan at Route 4 gate': (300106, 263, 'Nimbasa Gate', None),
+    'Nimbasa City - Gift: Woman in old Gym': (300364, 459, 'Nimbasa City', None),
 
     # Nuvema Town
-    'Nuvema Town - Gift: Player\'s mom in bedroom': (300218, 413, 'Nuvema Town', None),
+    'Nuvema Town - Gift: Cheren\'s father': (300218, 413, 'Nuvema Town', None),
+    'Nuvema Town - Gift: Cedric Juniper': (300363, 2437, 'Nuvema Town', None),
 
     # Opelucid City
-    'Opelucid City - Gift: Clyde at Gym entrance': (300129, 114, 'Opelucid City', None),
-    'Opelucid City - Gift: Black Belt in battle house 1F': (300132, 240, 'Opelucid City', None),
-    'Opelucid City - Gift: Ace Trainer in battle house 2F': (300133, 241, 'Opelucid City', None),
-    'Opelucid City - Gift: Boy near Drayden\'s house': (300138, 236, 'Opelucid City', None),
+    'Opelucid City - Gift: Clyde': (300129, 114, 'Opelucid City', None),
+    'Opelucid City - Gift: Linebacker on 2F of Drayden\'s house': (300132, 240, 'Opelucid City', None),
+    'Opelucid City - Gift: Woman on 2F of Drayden\'s house': (300133, 241, 'Opelucid City', None),
+    'Opelucid City - Gift: Woman in house east of Gym': (300138, 236, 'Opelucid City', None),
 
+    # P2 Laboratory
+    'P2 Laboratory - Gift: Scientist Dudley 1': (300319, 2443, 'P2 Laboratory', None),
+    'P2 Laboratory - Gift: Scientist Dudley 2': (300320, 2461, 'P2 Laboratory', None),
 
     # Pinwheel Forest
     'Pinwheel Forest - Gift: Ranger near Challenge Rock': (300142, 2760, 'Pinwheel Forest', None),
-    'Pinwheel Forest - Gift: Scientist near hollow tree': (300144, 908, 'Pinwheel Forest', None),
-    'Pinwheel Forest - Gift: Girl at forest exit': (300148, 470, 'Pinwheel Forest', None),
+    'Pinwheel Forest - Gift: Cheren after meeting Gorm': (300144, 908, 'Pinwheel Forest', None),
+    'Pinwheel Forest - Gift: Scientist after Habitat List': (300148, 470, 'Pinwheel Forest', None),
 
     # Plasma Frigate
     'Plasma Frigate - Gift: Colress in bridge chamber': (300306, 429, 'Plasma Frigate', None),
@@ -170,18 +189,27 @@ NPC_GIFT_LOCATIONS: dict[str, tuple[int, int | None, str | None, tuple[int, int]
 
     # Reversal Mountain
 
+    # Route 1
+    'Route 1 - Gift: Woman in second patch of tall grass': (300362, 425, 'Route 1', None),
+
     # Route 11
-    'Route 11 - Gift: Ranger near waterfall': (300207, 384, 'Route 11', None),
+    'Route 11 - Gift: Ranger inside trailer': (300207, 384, 'Route 11', None),
 
     # Route 13
     'Route 13 - Gift: Flute gentleman on beach 1': (300208, 2738, 'Route 13', None),
     'Route 13 - Gift: Girl on cliff near house': (300213, 304, 'Route 13', None),
 
+    # Route 16
+    'Route 16 - Gift: Man in Nimbasa Gate': (300106, 263, 'Route 16', None),
+
+    # Route 18
+    'Route 18 - Gift: Northern cliff east of Veteran Chester': (300368, 943, 'Route 18', None),
+
     # Route 19
     'Route 19 - Gift: Alder after Floccesy events': (300008, 2361, 'Route 19', None),
 
     # Route 2
-    'Route 2 - Gift: Boy in front of house': (300179, 2362, 'Route 2', None),
+    'Route 2 - Gift: Lady east of Youngster Mikey': (300179, 2362, 'Route 2', None),
 
     # Route 20
     'Route 20 - Gift: Cheren near dark grass': (300012, 2363, 'Route 20', None),
@@ -190,50 +218,53 @@ NPC_GIFT_LOCATIONS: dict[str, tuple[int, int | None, str | None, tuple[int, int]
     'Route 22 - Gift: Colress at Terrakion plateau': (300279, 2364, 'Route 22', None),
 
     # Route 3
-    'Route 3 - Gift: Day-Care lady near pond': (300180, 471, 'Route 3', None),
+    'Route 3 - Gift: School Kid after Habitat List': (300180, 471, 'Route 3', None),
 
     # Route 4
     'Route 4 - Gift: Colress after battle': (300181, 1705, 'Route 4', None),
     'Route 4 - Gift: Ace Trainer in house': (300182, 2772, 'Route 4', None),
     'Route 4 - Gift: Black Belt in first left house': (300288, 386, 'Route 4', None),
-    'Route 4 - Gift: Waitress in final right house (Guess Pokémon cry)': (300289, 363, 'Route 4', None),
+    'Route 4 - Gift: Maid in house (Guess Pokémon cry)': (300289, 363, 'Route 4', None),
 
     # Route 5
     'Route 5 - Gift: Item bought from Breeder': (300186, 2751, 'Route 5', None),
 
     # Route 6
-    'Route 6 - Gift: Girl inside Season Research Lab': (300190, 383, 'Route 6', None),
+    'Route 6 - Gift: Girl in house near Hiker': (300190, 383, 'Route 6', None),
 
     # Route 8
     'Route 8 - Gift: Parasol lady near puddles 2': (300195, 2749, 'Route 8', None),
 
     # Shopping Mall
-    'Shopping Mall - Gift: Clerk at counter 3': (300200, 2765, 'Shopping Mall', None),
+    'Shopping Mall - Gift: Lady in bottom section': (300200, 2765, 'Shopping Mall', None),
 
     # Skyarrow Bridge
-    'Skyarrow Bridge - Gift: Girl in bridge pavilion': (300166, 858, 'Skyarrow Bridge', None),
+    'Skyarrow Bridge - Gift: Runner after bridge quest': (300166, 2586, 'Skyarrow Bridge', None),
 
     # Strange House
     'Strange House - Gift: Ghost girl in bedroom': (300287, 899, 'Strange House', None),
 
     # Striaton City
-    'Striaton City - Gift: Waitress in restaurant': (300028, 140, 'Striaton City', None),
+    'Striaton City - Gift: Fisherman left of Route 3 gate (Surf)': (300028, 140, 'Striaton City', None),
+    'Striaton City - Gift: Roughneck in eastmost alley': (300361, 142, 'Striaton City', None),
     'Striaton City - Gift: Chef in restaurant': (300030, 2777, 'Striaton City', None),
     'Striaton City - Gift: Girl in Pokemon Center': (300033, 381, 'Striaton City', None),
-    'Striaton City - Gift: School Kid near school': (300034, 104, 'Striaton City', None),
-    'Striaton City - Gift: Nursery aide in garden': (300035, 355, 'Striaton City', None),
+    'Striaton City - Gift: Man on 1F of lower east apartment': (300034, 104, 'Striaton City', None),
+    'Striaton City - Gift: Schoolboy quiz in Trainers\' School': (300035, 355, 'Striaton City', None),
 
     # Twist Mountain
     'Twist Mountain - Gift: Fossil worker in cave 5': (300159, 2747, 'Twist Mountain', None),
 
     # Undella Town
-    'Undella Town - Gift: Swimmer girl on beach': (300235, 295, 'Undella Town', None),
+    'Undella Town - Gift: Man in Pokemon Center': (300235, 295, 'Undella Town', None),
+    'Undella Town - Gift: Zinzolin in front of gate': (300360, 2803, 'Undella Town', None),
 
     # Victory road
 
     # Village Bridge
-    'Village Bridge - Gift: Baker in sandwich shop': (300170, 468, 'Village Bridge', None),
-    'Village Bridge - Gift: Girl near restaurant': (300171, 457, 'Village Bridge', None),
+    'Village Bridge - Gift: Girl near restaurant': (300170, 468, 'Village Bridge', None),
+    'Village Bridge - Gift: Baker after battle (Post-Game)': (300171, 457, 'Village Bridge', None),
+    'Village Bridge - Gift: Fisherman by river': (300318, 299, 'Village Bridge', None),
 
     # Virbank City
     'Virbank City - Gift: Attendant in Route 20 gate': (300019, 2367, 'Virbank City', None),
@@ -249,6 +280,42 @@ NPC_GIFT_LOCATIONS: dict[str, tuple[int, int | None, str | None, tuple[int, int]
 
     # Virbank Gym
     'Virbank Gym - Gift: Clyde': (300022, 116, 'Virbank Gym', None),
+
+    # Pokemon Ranger post-battle Berry gifts
+    'Chargestone Cave - Gift: Ranger Briana (B1F, southeast)': (300323, 2467, 'Chargestone Cave', None),
+    'Chargestone Cave - Gift: Ranger Louis (1F, south)': (300324, 2469, 'Chargestone Cave', None),
+    'Clay Tunnel - Gift: Ranger Katie in Room 3 north (Surf)': (300325, 2471, 'Clay Tunnel', None),
+    'Clay Tunnel - Gift: Ranger Maxwell in Room 3 south': (300326, 2472, 'Clay Tunnel', None),
+    'Desert Resort - Gift: Ranger Anja in east': (300327, 2473, 'Desert Resort', None),
+    'Desert Resort - Gift: Ranger Jaden near entrance': (300328, 2475, 'Desert Resort', None),
+    'Lostlorn Forest - Gift: Ranger Forrest in north': (300329, 2479, 'Lostlorn Forest', None),
+    'Lostlorn Forest - Gift: Ranger Serenity in west': (300330, 2483, 'Lostlorn Forest', None),
+    'Moor of Icirrus - Gift: Ranger Elaine': (300331, 2484, 'Moor of Icirrus', None),
+    'Moor of Icirrus - Gift: Ranger Parker': (300332, 2488, 'Moor of Icirrus', None),
+    'Pinwheel Forest - Gift: Ranger Dwayne': (300333, 2491, 'Pinwheel Forest', None),
+    'Pinwheel Forest - Gift: Ranger Hillary': (300334, 2492, 'Pinwheel Forest', None),
+    'Pinwheel Forest - Gift: Ranger Melita': (300335, 2493, 'Pinwheel Forest', None),
+    'Pinwheel Forest - Gift: Ranger Ralph': (300336, 2501, 'Pinwheel Forest', None),
+    'Reversal Mountain - Gift: Ranger Eliza (1F B2 / 2F W2)': (300337, 2507, 'Reversal Mountain', None),
+    'Reversal Mountain - Gift: Ranger Lewis (2F B2 / 1F W2)': (300338, 2511, 'Reversal Mountain', None),
+    'Route 1 - Gift: Ranger Audra': (300339, 2515, 'Route 1', None),
+    'Route 1 - Gift: Ranger Rick': (300340, 2516, 'Route 1', None),
+    'Route 11 - Gift: Ranger Crofton': (300341, 2517, 'Route 11', None),
+    'Route 11 - Gift: Ranger Thalia (Surf, Waterfall)': (300342, 2519, 'Route 11', None),
+    'Route 13 - Gift: Ranger Daryl': (300343, 2520, 'Route 13', None),
+    'Route 13 - Gift: Ranger Dianne': (300344, 2523, 'Route 13', None),
+    'Route 20 - Gift: Pokemon Ranger Bret on central island (Basic Badge, Autumn, Surf)': (300345, 2529, 'Route 20', None),
+    'Route 20 - Gift: Pokemon Ranger Leaf on southeast island (Basic Badge, Autumn, Surf)': (300346, 2535, 'Route 20', None),
+    'Route 20 - Gift: Pokemon Ranger Malory on eastern island (Basic Badge, Autumn, Surf)': (300347, 2536, 'Route 20', None),
+    'Route 20 - Gift: Pokemon Ranger Naoko above waterfall (Basic Badge, Autumn, Surf, Waterfall)': (300348, 2537, 'Route 20', None),
+    'Route 23 - Gift: Ranger Lena': (300349, 2540, 'Route 23', None),
+    'Route 23 - Gift: Ranger Steve': (300350, 2544, 'Route 23', None),
+    'Route 5 - Gift: Ranger Lois above road': (300351, 2549, 'Route 5', None),
+    'Route 6 - Gift: Ranger Richard (Behind Season Research Lab)': (300352, 2551, 'Route 6', None),
+    'Seaside Cave - Gift: Ranger Johan': (300353, 2567, 'Seaside Cave', None),
+    'Seaside Cave - Gift: Ranger Mikiko': (300354, 2568, 'Seaside Cave', None),
+    'Victory Road - Gift: Ranger Eddie (2F)': (300355, 2572, 'Victory Road', None),
+    'Victory Road - Gift: Ranger Elle (2F)': (300356, 2577, 'Victory Road', None),
 
 }
 
@@ -289,9 +356,6 @@ TM_REWARD_LOCATIONS: dict[str, tuple[int, int | None, str | None, tuple[int, int
     # Aspertia Gym
     'Aspertia Gym - Gift: Cheren after defeating Gym': (500083, 2377, 'Aspertia Gym', None),
 
-    # Bridge Gate (Route 13)
-    'Bridge Gate - Gift: Girl at Route 13 gate': (500042, 343, 'Route 13', None),
-
     # Castelia City
     'Castelia City - Gift: North Street - Guitarist in building 11F': (500044, 209, 'Castelia City', None),
     'Castelia City - Gift: North Street - Party girl in building 47F': (500045, 416, 'Castelia City', None),
@@ -311,13 +375,19 @@ TM_REWARD_LOCATIONS: dict[str, tuple[int, int | None, str | None, tuple[int, int
     'Humilau City - Gift: Marlon after defeating Gym': (500055, 2384, 'Humilau City', None),
 
     # Lentimas Town
-    'Lentimas Town - Gift: Girl behind runway': (500057, 118, 'Lentimas Town', None),
+    'Lentimas Town - Gift: Woman in house near girl with Krokorok': (500057, 118, 'Lentimas Town', None),
 
     # Lostlorn Forest
     'Lostlorn Forest - Gift: Backpacker in northern clearing': (500095, 967, 'Lostlorn Forest', None),
 
+    # Marine Tube
+    'Marine Tube - Gift: Parasol Lady at Humilau City entrance': (500042, 343, 'Marine Tube', None),
+
     # Mistralton City
     'Mistralton City - Gift: Skyla after defeating Gym': (500062, 2382, 'Mistralton City', None),
+
+    # Musical Theater
+    'Musical Theater - Gift: Lady next to reception counter': (500049, 211, 'Musical Theater', None),
 
     # Nimbasa City
     'Nimbasa City - Gift: Elesa after defeating Gym': (500072, 2380, 'Nimbasa City', None),
@@ -326,7 +396,7 @@ TM_REWARD_LOCATIONS: dict[str, tuple[int, int | None, str | None, tuple[int, int
     'Opelucid City - Gift: Drayden after defeating Gym': (500082, 2383, 'Opelucid City', None),
 
     # Reversal Mountain
-    'Reversal Mountain - Gift: Professor Juniper at cave entrance': (500054, 469, 'Reversal Mountain', None),
+    'Reversal Mountain - Gift: Scientist after Habitat List': (500054, 469, 'Reversal Mountain', None),
 
     # Route 23
     'Route 23 - Gift: Ace Trainer in house': (500035, 473, 'Route 23', None),
@@ -341,17 +411,14 @@ TM_REWARD_LOCATIONS: dict[str, tuple[int, int | None, str | None, tuple[int, int
     'Tubeline Bridge - Gift: Battle Girl on bridge': (500043, 345, 'Tubeline Bridge', None),
 
     # Undella Town
-    'Undella Town - Gift: Hugh outside villa': (500006, 414, 'Undella Town', None),
+    'Undella Town - Gift: Hugh in front of Marine Tube gate': (500006, 414, 'Undella Town', None),
 
     # Victory road
-    'Victory Road - Gift: N at entrance hall': (500005, 2374, 'Victory Road', None),
+    'Victory Road - Gift: N at badge check gates': (500005, 2374, 'Victory Road', None),
     'Victory Road - Gift: Hugh': (500024, 2375, 'Victory Road', None),
 
     # Virbank City
     'Virbank City - Gift: Roxie after defeating Team Plasma Grunt': (500001, 1704, 'Virbank City', None),
-
-    # Virbank Complex
-    'Virbank Complex - Gift: Roughneck trading Poke Ball for Great Ball': (300023, 2763, 'Virbank Complex', None),
 
     # Virbank Complex Inside
     'Virbank Complex Inside - Gift: Man at entrance after defeating all three Workers': (500094, 465, 'Virbank Complex Inside', None),

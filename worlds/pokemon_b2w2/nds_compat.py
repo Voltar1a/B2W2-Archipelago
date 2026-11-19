@@ -103,7 +103,7 @@ class NintendoDSRom:
     def __init__(self, data: bytes | bytearray | None = None):
         if data is None:
             raise ValueError("NintendoDSRom requires ROM bytes; use fromFile or pass bytes")
-        self._rom: Rom = Rom.from_bytes(bytes(data))
+        self._rom: Rom = Rom.from_bytes(bytes(data), decrypt_modcrypt=False)
         self.files = _FilesProxy(self._rom)
         self.filenames = _FilenamesProxy()
         self._arm9_overlay_table: bytes = b""
@@ -143,6 +143,17 @@ class NintendoDSRom:
     @arm9OverlayTable.setter
     def arm9OverlayTable(self, value: bytes | bytearray) -> None:
         self._arm9_overlay_table = bytes(value)
+
+    @property
+    def pad088(self) -> bytes:
+        return bytes(self._rom.header.data[0x088:0x0C0])
+
+    @pad088.setter
+    def pad088(self, value: bytes | bytearray) -> None:
+        raw = bytes(value)
+        if len(raw) != 0x38:
+            raw = (raw + bytes(0x38))[:0x38]
+        self._rom.header.data[0x088:0x0C0] = raw
 
     def getFileByName(self, filename: str) -> bytes | None:
         return self._rom.files.get(_norm_path(filename))

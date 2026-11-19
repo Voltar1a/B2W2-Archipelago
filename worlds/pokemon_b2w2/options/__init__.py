@@ -63,7 +63,6 @@ from .qol import (
     GuaranteedEscape,
     FastHatch,
     InfiniteRepels,
-    SkipPokestarStudios,
     SkipPWT,
     SkipJoinAvenue,
     SkipCinematicMovies,
@@ -237,7 +236,6 @@ class PokemonB2W2Options(PerGameCommonOptions):
     # level_cap_type: LevelCapType
     # level_cap_item_value: LevelCapItemValue
     # progressive_level_cap: ProgressiveLevelCap
-    infinite_rare_candies: InfiniteRareCandies
     # auto_scale_acquired_pokemon: AutoScaleAcquiredPokemon
 
     # Incomplete: field_rock_smash, hm_badge_requirements, strength_boulders, extra_cut_trees,
@@ -250,8 +248,6 @@ class PokemonB2W2Options(PerGameCommonOptions):
     randomise_starter_pokemon: RandomiseStarterPokemon
     randomise_abilities: RandomiseAbilities
     randomise_level_up_movesets: RandomiseLevelUpMovesets
-    catch_rate_multiplier: CatchRateMultiplier
-    exp_multiplier: ExpMultiplier
     # Incomplete: randomise_static_pokemon, randomise_gift_pokemon, randomise_trade_pokemon,
     # randomise_legendary_pokemon, wild_randomisation_blacklist, trainer_randomisation_blacklist,
     # weighted_bst, adjust_levels, all_pokemon_seen, modify_item_pool, modify_logic, filler_items_blacklist
@@ -261,31 +257,36 @@ class PokemonB2W2Options(PerGameCommonOptions):
     skip_intro_gender: SkipIntroGender
     rival_name: RivalName
 
-    instant_text: InstantText
-    blind_trainers: BlindTrainers
-    guaranteed_catch: GuaranteedCatch
-    tmhm_fully_compatible: TMHMFullyCompatible
+    # Quality of life — APtransceiver (changeable ingame)
+    auto_run: AutoRun
     bike_everywhere: BikeEverywhere
-    fast_fishing: FastFishing
-    hold_a_turbo: HoldATurbo
+    blind_trainers: BlindTrainers
+    catch_rate_multiplier: CatchRateMultiplier
     check_log_filter: CheckLogFilter
+    exp_multiplier: ExpMultiplier
+    fast_fishing: FastFishing
+    guaranteed_catch: GuaranteedCatch
+    guaranteed_escape: GuaranteedEscape
+    hold_a_turbo: HoldATurbo
+
+    # Quality of life — Non-APtransceiver (NOT changeable ingame)
+    instant_text: InstantText
+    fast_hatch: FastHatch
+    infinite_rare_candies: InfiniteRareCandies
+    infinite_repels: InfiniteRepels
+    tmhm_fully_compatible: TMHMFullyCompatible
     remove_surf_bike_music: RemoveSurfBikeMusic
+    max_friendship: MaxFriendship
     battle_scene: BattleScene
     battle_style: BattleStyle
-    auto_run: AutoRun
-    guaranteed_escape: GuaranteedEscape
-    fast_hatch: FastHatch
     # efficient_dialogue: EfficientDialogue  # INCOMPLETE
-    infinite_repels: InfiniteRepels
 
     # Cutscene skips
     living_room_starter: LivingRoomStarter
-    skip_pokestar_studios: SkipPokestarStudios
     skip_pwt: SkipPWT
     skip_catching_tutorial: SkipCatchingTutorial
     skip_join_avenue: SkipJoinAvenue
     skip_cinematic_movies: SkipCinematicMovies
-    max_friendship: MaxFriendship
     start_inventory_from_pool: StartInventoryPool
 
 

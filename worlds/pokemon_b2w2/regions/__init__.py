@@ -80,6 +80,35 @@ def create_regions_and_locations(world: "PokemonB2W2World") -> dict[str, Region]
         "Route 4 - Trainer: Biker Stanley in western fenced area",
         "Route 4 - Trainer: Hooligans Rob & Sal on western street",
         "Route 4 - Trainer: Youngster Sinclair in western fenced area",
+        "Reversal Mountain - Item: 1F, dead-end tunnel north of Battle Girl",
+        "Reversal Mountain - Item: 1F, dead-end tunnel east of Doctor",
+        "Reversal Mountain - Item: 1F, south of Hiker",
+        "Reversal Mountain - Item: 1F, east of Black Belt",
+        "Reversal Mountain - Item: 1F, dead-end tunnel east of Backpacker and Hiker",
+        "Reversal Mountain - Hidden: 2F, in the smaller stalagmite",
+        "Reversal Mountain - Hidden: 1F, in the stalagmite north of Backpacker and Hiker",
+        "Reversal Mountain - Hidden: 1F, in stalagmite south of Scientist",
+        "Reversal Mountain - Hidden: 1F, in stalagmite east of Battle Girl",
+        "Reversal Mountain - Hidden: 1F, northern dead end south of Ace Trainers",
+        "Reversal Mountain - Hidden: 1F, dead-end tunnel east of Backpacker and Hiker",
+        "Plasma Frigate - Item: B2F, near Grunt with Krokorok and Krookodile (Max Revive)",
+        "Plasma Frigate - Item: B2F, near Grunt with Krokorok and Krookodile (Max Elixir)",
+        "Plasma Frigate - Item: B1F, top right room",
+        "Plasma Frigate - Item: B2F, bow side from Grunt with Drapion",
+        "Plasma Frigate - Trainer: Team Plasma Grunt 1",
+        "Plasma Frigate - Trainer: Team Plasma Zinzolin (Bridge Double)",
+        "Plasma Frigate - Trainer: Team Plasma Shadow 1",
+        "Plasma Frigate - Trainer: Team Plasma Grunt 6",
+        "Plasma Frigate - Trainer: Team Plasma Grunt 7",
+        "Plasma Frigate - Trainer: Team Plasma Grunt 8",
+        "Plasma Frigate - Trainer: Team Plasma Grunt 9",
+        "Plasma Frigate - Trainer: Team Plasma Grunt 10",
+        "Plasma Frigate - Trainer: Team Plasma Shadow 2",
+        "Plasma Frigate - Trainer: Team Plasma Shadow 3",
+        "Plasma Frigate - Trainer: Team Plasma Grunt 19",
+        "Plasma Frigate - Trainer: Team Plasma Grunt 32",
+        "Plasma Frigate - Trainer: Team Plasma Grunt 24",
+        "Plasma Frigate - Trainer: Team Plasma Grunt 26",
     }
 
     WHITE2_EXCLUSIVE_LOCATIONS = {
@@ -100,6 +129,31 @@ def create_regions_and_locations(world: "PokemonB2W2World") -> dict[str, Region]
         "Route 4 - Trainer: Twins Tara & Val in central ruins",
         "Route 4 - Trainer: Backpacker Clifford in southeast",
         "Route 4 - Trainer: Lady Lina in central ruins",
+        "Reversal Mountain - Item: 1F, near female Backpacker",
+        "Reversal Mountain - Item: 1F, north of Hiker and female Backpacker",
+        "Reversal Mountain - Item: 1F, northwest of Black Belt",
+        "Reversal Mountain - Item: 1F, south of Scientist",
+        "Reversal Mountain - Item: 1F, north of Battle Girl",
+        "Reversal Mountain - Hidden: 1F, near Battle Girl",
+        "Reversal Mountain - Hidden: 1F, in a rock near Black Belt",
+        "Reversal Mountain - Hidden: 1F, northern dead end west of Ace Trainers",
+        "Reversal Mountain - Hidden: 2F, in a rock near the big rock",
+        "Reversal Mountain - Hidden: 1F, southern dead end west of Ace Trainers, in a rock",
+        "Reversal Mountain - Hidden: 1F, southeastern part, in a rock",
+        "Plasma Frigate - Item: B2F, near Grunt with Scolipede (Max Revive)",
+        "Plasma Frigate - Item: B2F, near Grunt with Scolipede (Max Elixir)",
+        "Plasma Frigate - Item: B1F, bigger room on the left",
+        "Plasma Frigate - Item: B2F, in the yellow warp panel maze",
+        "Plasma Frigate - Trainer: Team Plasma Grunt 11",
+        "Plasma Frigate - Trainer: Team Plasma Grunt 12",
+        "Plasma Frigate - Trainer: Team Plasma Grunt 13",
+        "Plasma Frigate - Trainer: Team Plasma Grunt 14",
+        "Plasma Frigate - Trainer: Team Plasma Grunt 15",
+        "Plasma Frigate - Trainer: Team Plasma Grunt 16",
+        "Plasma Frigate - Trainer: Team Plasma Grunt 17",
+        "Plasma Frigate - Trainer: Team Plasma Grunt 18",
+        "Plasma Frigate - Trainer: Team Plasma Grunt 33",
+        "Plasma Frigate - Trainer: Team Plasma Grunt 34",
     }
 
     v_opt = getattr(world.options, "version", None)
@@ -125,6 +179,8 @@ def create_regions_and_locations(world: "PokemonB2W2World") -> dict[str, Region]
                 src.connect(dst, conn_name, lambda state, fn=rule_fn: fn(state, world.player))
         else:
             src.connect(dst, conn_name)
+
+    world.multiworld.regions.extend(regions.values())
 
     def make_access_rule(loc_name: str, base_rule):
         tags = []
@@ -276,7 +332,6 @@ def create_regions_and_locations(world: "PokemonB2W2World") -> dict[str, Region]
         except Exception:
             pass
 
-    world.multiworld.regions.extend(regions.values())
     return regions
 
 

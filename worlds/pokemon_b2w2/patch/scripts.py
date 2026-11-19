@@ -41,6 +41,7 @@ def patch_scripts_from_rom(rom: "NintendoDSRom", slot_data: dict[str, Any] | Non
     patch_item_ball_scripts(script_narc, flag_to_text_id)
     patch_hidden_item_scripts(script_narc, flag_to_text_id, hard_required_dowsing=hard_required_dowsing)
     patch_npc_gift_scripts(script_narc, flag_to_text_id)
+    patch_gym_clyde_autocollect(script_narc)
     patch_special_gift_requirements(script_narc, flag_to_text_id)
     patch_roadblock_scripts(script_narc, rom)
 
@@ -683,11 +684,12 @@ VAR_TO_GIFT_FLAG: dict[tuple[int, int], int] = {
     (16610, 6): 2339,   # Castelia Harlequin after finding clowns
     (16622, 7): 2347,   # Humilau walkway
     (16519, 2): 2350,   # musical owner
-    (16604, 3): 2353,   # Nacrene dancer
-    (16774, 0): 2362,   # Route 2 boy
+    (16604, 3): 2353,   # Nacrene Cafe Warehouse Fluffy Tail
+    (16648, 7): 2586,   # Skyarrow Bridge Marathon Runner
 }
 
 CUSTOM_GIFT_INJECTIONS: list[tuple[int, list[Any], int]] = [
+    (638, ["WorkSet", 32768, 109], 2362),    # Route 2 Dawn Stone lady
     (896, ["WorkSet", 32768, 420], 1704),    # Virbank Roxie outside gym (HM01 cut)
     (652, ["WorkSet", 32768, 46], 1705),     # Route 4 (B2) Colress after battle
     (1102, ["WorkSet", 32768, 46], 1705),    # Route 4 (W2) Colress after battle
@@ -696,6 +698,8 @@ CUSTOM_GIFT_INJECTIONS: list[tuple[int, list[Any], int]] = [
     (556, ["WorkSet", 32768, 617], 1708),    # N's castle N in throne room (B2 dark stone)
     (556, ["WorkSet", 32768, 616], 1708),    # N's castle N in throne room (W2 light stone)
     (824, ["WorkSet", 32768, 425], 414),     # Undella Town Hugh outside villa (HM06 dive)
+    (824, ["WorkSet", 32768, 89], 2803),      # Undella Town Zinzolin in front of gate (Big Pearl)
+    (824, ["WorkSetConst", 32768, 89], 2803),
     (752, ["WorkSet", 32768, 638], 1710),    # Abundant Shrine elder
     (56, ["WorkSet", 32768, 450], 2338),     # Castelia harlequin (bicycle)
     (56, ["WorkSet", 32768, 50], 2339),      # Castelia harlequin after finding clowns
@@ -726,6 +730,7 @@ CUSTOM_GIFT_INJECTIONS: list[tuple[int, list[Any], int]] = [
     (946, ["WorkSet", 32768, 382], 2384),    # Humilau gym Marlon (TM55 scald)
     (854, ["WorkSet", 32768, 354], 2368),    # Aspertia city Bianca outside gym (TM27 return)
     (890, ["WorkSet", 32768, 348], 2371),    # Floccesy ranch Plasma grunt (TM21 frustration)
+    (516, ["WorkSet", 32768, 7], 299),       # Village Bridge fisherman (Dive Ball x5)
 ]
 
 # Gym leader & interior helper/Clyde scripts -> badge index (0..7)
@@ -734,6 +739,16 @@ GYM_BADGE_MAP: dict[int, int] = {
     58: 2, 910: 1, 220: 5,
 }
 GYM_LEADER_SCRIPTS: list[int] = [978, 1004, 976, 126, 194, 216, 242, 946]
+GYM_CLYDE_FLAGS: dict[int, int] = {
+    978: 115,   # Aspertia Gym - Clyde
+    1004: 116,  # Virbank Gym - Clyde
+    976: 109,   # Castelia Gym - Clyde
+    126: 110,   # Nimbasa Gym - Clyde
+    194: 111,   # Driftveil Gym - Clyde
+    216: 112,   # Mistralton Gym - Clyde
+    242: 114,   # Opelucid Gym - Clyde
+    946: 117,   # Humilau Gym - Clyde
+}
 GYM_TRAINERS_BY_LEADER_SCRIPT: dict[int, tuple[int, list[int]]] = {
     978: (0, [171, 172]),
     1004: (1, [178, 179]),
@@ -804,6 +819,36 @@ def patch_gym_leader_badges(script_narc: NARC) -> None:
                 pass
 
 
+def patch_gym_clyde_autocollect(script_narc: NARC) -> None:
+    """Set Clyde's gift flag when defeating each gym leader so missed Clyde checks auto-collect."""
+    from .script_editing import disassemble, assemble, Line
+
+    for s_idx, clyde_flag in GYM_CLYDE_FLAGS.items():
+        if len(script_narc.files) <= s_idx or s_idx not in GYM_BADGE_MAP:
+            continue
+        clear_flag = 2414 + GYM_BADGE_MAP[s_idx]
+        try:
+            scr = disassemble(script_narc.files[s_idx])
+            modified = False
+            i = 0
+            while i < len(scr.lines):
+                if scr.lines[i].type == "command" and scr.lines[i].parts == ["FlagSet", clear_flag]:
+                    nearby_flags = {
+                        scr.lines[k].parts[1]
+                        for k in range(max(0, i - 10), min(len(scr.lines), i + 25))
+                        if scr.lines[k].type == "command" and scr.lines[k].parts[0] == "FlagSet"
+                    }
+                    if clyde_flag not in nearby_flags:
+                        scr.lines.insert(i + 1, Line(type="command", parts=["FlagSet", clyde_flag]))
+                        modified = True
+                        i += 1
+                i += 1
+            if modified:
+                script_narc.files[s_idx] = bytes(assemble(scr))
+        except Exception:
+            pass
+
+
 def patch_gift_flag_injections(script_narc: NARC) -> None:
     # Injects physical FlagSet <flag_id> into cutscenes and story scripts that award gifts
     from .script_editing import disassemble, assemble, Line
@@ -823,6 +868,36 @@ def patch_gift_flag_injections(script_narc: NARC) -> None:
                     script_narc.files[s_idx] = bytes(assemble(scr))
             except Exception:
                 pass
+
+
+def patch_gym_clyde_autocollect(script_narc: NARC) -> None:
+    """Set Clyde's gift flag when defeating each gym leader so missed Clyde checks auto-collect."""
+    from .script_editing import disassemble, assemble, Line
+
+    for s_idx, clyde_flag in GYM_CLYDE_FLAGS.items():
+        if len(script_narc.files) <= s_idx or s_idx not in GYM_BADGE_MAP:
+            continue
+        clear_flag = 2414 + GYM_BADGE_MAP[s_idx]
+        try:
+            scr = disassemble(script_narc.files[s_idx])
+            modified = False
+            i = 0
+            while i < len(scr.lines):
+                if scr.lines[i].type == "command" and scr.lines[i].parts == ["FlagSet", clear_flag]:
+                    nearby_flags = {
+                        scr.lines[k].parts[1]
+                        for k in range(max(0, i - 10), min(len(scr.lines), i + 25))
+                        if scr.lines[k].type == "command" and scr.lines[k].parts[0] == "FlagSet"
+                    }
+                    if clyde_flag not in nearby_flags:
+                        scr.lines.insert(i + 1, Line(type="command", parts=["FlagSet", clyde_flag]))
+                        modified = True
+                        i += 1
+                i += 1
+            if modified:
+                script_narc.files[s_idx] = bytes(assemble(scr))
+        except Exception:
+            pass
 
     for s_idx in range(len(script_narc.files)):
         if s_idx in (856, 1238, 1239, 1240, 1241, 1242, 1243):
@@ -877,10 +952,13 @@ def patch_scripted_trainer_battles(script_narc: NARC) -> None:
                         tid1 = line.parts[2]
                         tid2 = line.parts[3]
                         flags = line.parts[4] if len(line.parts) > 4 else 0
-                        if isinstance(tid1, int) and 0 < tid1 < 1000:
-                            to_inject.append(1520 + tid1)
-                        if isinstance(tid2, int) and 0 < tid2 < 1000 and tid2 != tid1:
-                            to_inject.append(1520 + tid2)
+                        if s_idx == 14 and tid1 in (494, 495, 496) and tid2 in (494, 495, 496):
+                            to_inject.extend([2014, 2015])
+                        else:
+                            if isinstance(tid1, int) and 0 < tid1 < 1000:
+                                to_inject.append(1520 + tid1)
+                            if isinstance(tid2, int) and 0 < tid2 < 1000 and tid2 != tid1:
+                                to_inject.append(1520 + tid2)
                         if flags == 1:
                             is_losable = True
 
@@ -1113,6 +1191,57 @@ def patch_npc_gift_scripts(script_narc: NARC, flag_to_text_id: dict[int, int]) -
                     break
         except Exception:
             pass
+
+    ranger_trainer_to_gift_flag = {
+        543: 2467, 544: 2469, 509: 2471, 508: 2472, 667: 2473, 666: 2475,
+        298: 2479, 297: 2483, 579: 2484, 578: 2488, 640: 2491, 642: 2492,
+        641: 2493, 639: 2501, 517: 2507, 518: 2507, 515: 2511, 516: 2511,
+        410: 2515, 409: 2516, 305: 2517, 304: 2519, 294: 2520, 295: 2523,
+        388: 2529, 386: 2535, 389: 2536, 387: 2537, 483: 2540, 484: 2544,
+        293: 2549, 292: 2551, 473: 2567, 474: 2568, 658: 2572, 659: 2577,
+    }
+    try:
+        sc1239 = disassemble(script_narc.files[1239])
+        lines1239 = sc1239.lines
+        for i, l in enumerate(lines1239):
+            if l.type == "label" and l.parts == ["sub31"]:
+                for j in range(i + 1, min(len(lines1239), i + 12)):
+                    if lines1239[j].type == "command" and lines1239[j].parts == ["TrainerGetPrizeItem", 32800, 32768]:
+                        if (
+                            j + 2 < len(lines1239)
+                            and lines1239[j + 1].parts == ["WorkSetConst", 32769, 1]
+                            and lines1239[j + 2].parts == ["RTCallGlobal", 2805]
+                        ):
+                            dispatch: list[Line] = []
+                            branches: list[Line] = []
+                            for tid, gflag in ranger_trainer_to_gift_flag.items():
+                                if gflag in flag_to_text_id:
+                                    lbl = f"lbl_ranger_gift_{tid}"
+                                    dispatch.append(Line("command", ["WorkCmpConst", 32800, tid]))
+                                    dispatch.append(Line("command", ["VMJumpIf", 1, lbl]))
+                                    branches.extend([
+                                        Line("label", [lbl]),
+                                        Line("command", ["WorkSetConst", 16798, flag_to_text_id[gflag]]),
+                                        Line("command", ["WorkSetConst", 32768, 639]),
+                                        Line("command", ["WorkSetConst", 32769, 1]),
+                                        Line("command", ["RTCallGlobal", 2805]),
+                                        Line("command", ["FlagSet", gflag]),
+                                        Line("command", ["VMJump", "lbl_ranger_gift_done"]),
+                                    ])
+                            if dispatch:
+                                fallback = [
+                                    Line("command", ["TrainerGetPrizeItem", 32800, 32768]),
+                                    Line("command", ["WorkSetConst", 32769, 1]),
+                                    Line("command", ["RTCallGlobal", 2805]),
+                                    Line("command", ["VMJump", "lbl_ranger_gift_done"]),
+                                ]
+                                lines1239[j : j + 3] = dispatch + fallback + branches + [Line("label", ["lbl_ranger_gift_done"])]
+                                sc1239.lines = lines1239
+                                script_narc.files[1239] = bytes(assemble(sc1239))
+                        break
+                break
+    except Exception:
+        pass
 
     if 2763 in flag_to_text_id:
         try:

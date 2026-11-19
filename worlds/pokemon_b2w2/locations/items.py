@@ -9,9 +9,9 @@ OVERWORLD_ITEM_LOCATIONS: dict[str, tuple[int, int | None, str | None, tuple[int
 
     # Abundant Shrine
     'Abundant Shrine - Item: Western fence perimeter': (100253, 1353, 'Abundant Shrine', None),
-    'Abundant Shrine - Item: East of Youngster Jaye': (100254, 1354, 'Abundant Shrine', None),
-    'Abundant Shrine - Item: East of Lass Lurleen': (100255, 1355, 'Abundant Shrine', None),
-    'Abundant Shrine - Item: North of Youngster Wes': (100256, 1356, 'Abundant Shrine', None),
+    'Abundant Shrine - Item: East of Youngster (TM92 spot)': (100254, 1354, 'Abundant Shrine', None),
+    'Abundant Shrine - Item: East of Lass': (100255, 1355, 'Abundant Shrine', None),
+    'Abundant Shrine - Item: North of Youngster': (100256, 1356, 'Abundant Shrine', None),
     'Abundant Shrine - Item: East of the Landorus shrine (Surf)': (100257, 1357, 'Abundant Shrine', None),
 
     # Abyssal Ruins
@@ -66,7 +66,7 @@ OVERWORLD_ITEM_LOCATIONS: dict[str, tuple[int, int | None, str | None, tuple[int
     'Accumula Town - Item: Western elevated plateau ledge': (100305, 1405, 'Accumula Town', None),
 
     # Aspertia City
-    'Aspertia City - Item: High grass patch across pond southeast (Surf)': (100000, 1100, 'Aspertia City', None),
+    'Aspertia City - Item: Across pond southeast (Surf)': (100000, 1100, 'Aspertia City', None),
 
     # Castelia City
     'Castelia City - Item: Castelia Street - In Battle Company 47F': (100023, 1123, 'Castelia City', None),
@@ -90,11 +90,11 @@ OVERWORLD_ITEM_LOCATIONS: dict[str, tuple[int, int | None, str | None, tuple[int
     'Castelia Sewers - Item: West of Scientist in southeast (Spring/Summer, Surf)': (100039, 1139, 'Castelia Sewers', None),
 
     # Celestial Tower
-    'Celestial Tower - Item: 2F, west of Psychic Joyce': (100105, 1205, 'Celestial Tower', None),
-    'Celestial Tower - Item: 2F, east of School Kid Alberta': (100106, 1206, 'Celestial Tower', None),
-    'Celestial Tower - Item: 3F, southwest of Pokefan Georgia': (100107, 1207, 'Celestial Tower', None),
-    'Celestial Tower - Item: 4F, north of Socialite Grace': (100108, 1208, 'Celestial Tower', None),
-    'Celestial Tower - Item: 4F, east of Psychic Sarah': (100109, 1209, 'Celestial Tower', None),
+    'Celestial Tower - Item: 2F, west of Psychic': (100105, 1205, 'Celestial Tower', None),
+    'Celestial Tower - Item: 2F, east of School Kid': (100106, 1206, 'Celestial Tower', None),
+    'Celestial Tower - Item: 3F, southwest of Pokefan': (100107, 1207, 'Celestial Tower', None),
+    'Celestial Tower - Item: 4F, north of Socialite': (100108, 1208, 'Celestial Tower', None),
+    'Celestial Tower - Item: 4F, east of Psychic': (100109, 1209, 'Celestial Tower', None),
 
     # Chargestone Cave
     'Chargestone Cave - Item: 1F, near Route 6 entrance': (100088, 1188, 'Chargestone Cave', None),
@@ -187,9 +187,9 @@ OVERWORLD_ITEM_LOCATIONS: dict[str, tuple[int, int | None, str | None, tuple[int
     'Humilau City - Item: Southeast of the Lady': (100304, 1404, 'Humilau City', None),
 
     # Icirrus City
-    'Route 8 - Item: Near water in swamp north of bridge (Surf)': (100220, 1320, 'Route 8', None),
+    'Route 8 - Item: North of Youngster Astor': (100220, 1320, 'Route 8', None),
     'Icirrus City - Item: East of the Pokemon Center': (100223, 1323, 'Icirrus City', None),
-    'Icirrus City - Item: West of Pokemon Center W': (100239, 1339, 'Icirrus City', None),
+    'Icirrus City - Item: West of Pokemon Center (Winter)': (100239, 1339, 'Icirrus City', None),
 
     # Lacunosa Town
     'Lacunosa Town - Item: Inside northwest house on table': (100141, 1241, 'Lacunosa Town', None),
@@ -222,9 +222,9 @@ OVERWORLD_ITEM_LOCATIONS: dict[str, tuple[int, int | None, str | None, tuple[int
     'Moor of Icirrus - Item: Northeast of Pokemon Ranger Parker': (100228, 1328, 'Moor of Icirrus', None),
 
     # N's Castle
-    'N\'s Castle - Item: Castle entrance hall west side': (100216, 1316, 'N\'s Castle', None),
-    'N\'s Castle - Item: Castle entrance hall east side': (100217, 1317, 'N\'s Castle', None),
-    'N\'s Castle - Item: Ruined hall upper ledge': (100219, 1319, 'N\'s Castle', None),
+    'N\'s Castle - Item: 4F, inside N\'s room': (100216, 1316, 'N\'s Castle', None),
+    'N\'s Castle - Item: 4F, south of N\'s room': (100217, 1317, 'N\'s Castle', None),
+    'N\'s Castle - Item: 4F, in the southeast corner': (100219, 1319, 'N\'s Castle', None),
 
     # Nature Preserve
     'Nature Preserve - Item: Northwest of the plane': (100272, 1372, 'Nature Preserve', None),
@@ -259,15 +259,17 @@ OVERWORLD_ITEM_LOCATIONS: dict[str, tuple[int, int | None, str | None, tuple[int
     'Pinwheel Forest - Item: Outer forest south of Lass Helia (Surf)': (100271, 1371, 'Pinwheel Forest', None),
 
     # Plasma Frigate
-    'Plasma Frigate - Item: B2F, bow side of the pipe maze': (100187, 1287, 'Plasma Frigate', None),
-    'Plasma Frigate - Item: B2F, near the Grunt with Krokorok and Krookodile': (100188, 1288, 'Plasma Frigate', None),
+    'Plasma Frigate - Item: B2F, bow side of the maze': (100187, 1287, 'Plasma Frigate', None),
+    'Plasma Frigate - Item: B2F, near Grunt with Krokorok and Krookodile (Max Revive)': (100188, 1288, 'Plasma Frigate', None),
+    'Plasma Frigate - Item: B2F, near Grunt with Scolipede (Max Revive)': (100391, 1288, 'Plasma Frigate', None),
     'Plasma Frigate - Item: B1F, bigger room on the left': (100189, 1289, 'Plasma Frigate', None),
-    'Plasma Frigate - Item: B2F stern hallway corner': (100190, 1290, 'Plasma Frigate', None),
+    'Plasma Frigate - Item: B2F, near Grunt with Krokorok and Krookodile (Max Elixir)': (100190, 1290, 'Plasma Frigate', None),
+    'Plasma Frigate - Item: B2F, near Grunt with Scolipede (Max Elixir)': (100392, 1290, 'Plasma Frigate', None),
     'Plasma Frigate - Item: B1F, top right room': (100191, 1291, 'Plasma Frigate', None),
-    'Plasma Frigate - Item: B2F, bow side from the Grunt with Drapion': (100192, 1292, 'Plasma Frigate', None),
+    'Plasma Frigate - Item: B2F, bow side from Grunt with Drapion': (100192, 1292, 'Plasma Frigate', None),
     'Plasma Frigate - Item: B2F, in the yellow warp panel maze': (100193, 1293, 'Plasma Frigate', None),
-    'Plasma Frigate - Item: 1F bow deck crates': (100378, 1478, 'Plasma Frigate', None),
-    'Plasma Frigate - Item: 1F, at the stern of the ship': (100379, 1479, 'Plasma Frigate', None),
+    'Plasma Frigate - Item: 1F, bow deck crates': (100378, 1478, 'Plasma Frigate (Route 21)', None),
+    'Plasma Frigate - Item: 1F, at the stern of the ship': (100379, 1479, 'Plasma Frigate (Route 21)', None),
 
     # Relic Castle
     'Relic Castle - Item: Lowest floor easternmost room (Relic Passage)': (100261, 1361, 'Relic Castle', None),
@@ -284,25 +286,30 @@ OVERWORLD_ITEM_LOCATIONS: dict[str, tuple[int, int | None, str | None, tuple[int
     'Relic Passage - Item: Castelia section north of male Scientist': (100383, 1483, 'Relic Passage (Castelia)', None),
 
     # Reversal Mountain
-    'Reversal Mountain - Item: Behind the Strange House': (100115, 1215, 'Reversal Mountain', None),
-    'Reversal Mountain - Item: Mountain exterior eastern valley path': (100116, 1216, 'Reversal Mountain', None),
-    'Reversal Mountain - Item: On the hill, accessed from inside the mountain': (100117, 1217, 'Reversal Mountain', None),
-    'Reversal Mountain - Item: Volcanic interior north chamber': (100118, 1218, 'Reversal Mountain', None),
-    'Reversal Mountain - Item: Tunnel north of Battle Girl Chan / Near female Backpacker': (100119, 1219, 'Reversal Mountain', None),
-    'Reversal Mountain - Item: Tunnel east of Doctor Derek / North of Hiker Jared': (100120, 1220, 'Reversal Mountain', None),
-    'Reversal Mountain - Item: South of Hiker Jared / Northwest of Black Belt': (100121, 1221, 'Reversal Mountain', None),
-    'Reversal Mountain - Item: East of Black Belt Corey / South of Scientist': (100122, 1222, 'Reversal Mountain', None),
-    'Reversal Mountain - Item: Tunnel east of Backpacker Kiyo / North of Battle Girl': (100123, 1223, 'Reversal Mountain', None),
+    'Reversal Mountain - Item: Exterior, behind the Strange House': (100115, 1215, 'Reversal Mountain', None),
+    'Reversal Mountain - Item: Exterior, eastern valley path': (100116, 1216, 'Reversal Mountain', None),
+    'Reversal Mountain - Item: Exterior, on the hill, accessed from inside the mountain': (100117, 1217, 'Reversal Mountain', None),
+    'Reversal Mountain - Item: Exterior, near entrance from Lentimas Town': (100382, 1482, 'Reversal Mountain', None),
+    'Reversal Mountain - Item: 1F, near exit to Lentimas Town': (100118, 1218, 'Reversal Mountain', None),
+    'Reversal Mountain - Item: 1F, dead-end tunnel north of Battle Girl': (100119, 1219, 'Reversal Mountain', None),
+    'Reversal Mountain - Item: 1F, near female Backpacker': (100386, 1219, 'Reversal Mountain', None),
+    'Reversal Mountain - Item: 1F, dead-end tunnel east of Doctor': (100120, 1220, 'Reversal Mountain', None),
+    'Reversal Mountain - Item: 1F, north of Hiker and female Backpacker': (100387, 1220, 'Reversal Mountain', None),
+    'Reversal Mountain - Item: 1F, south of Hiker': (100121, 1221, 'Reversal Mountain', None),
+    'Reversal Mountain - Item: 1F, northwest of Black Belt': (100388, 1221, 'Reversal Mountain', None),
+    'Reversal Mountain - Item: 1F, east of Black Belt': (100122, 1222, 'Reversal Mountain', None),
+    'Reversal Mountain - Item: 1F, south of Scientist': (100389, 1222, 'Reversal Mountain', None),
+    'Reversal Mountain - Item: 1F, dead-end tunnel east of Backpacker and Hiker': (100123, 1223, 'Reversal Mountain', None),
+    'Reversal Mountain - Item: 1F, north of Battle Girl': (100390, 1223, 'Reversal Mountain', None),
     'Reversal Mountain - Item: Lentimas entrance cavern ledge': (100124, 1224, 'Reversal Mountain', None),
-    'Reversal Mountain - Item: Undella entrance cavern chamber': (100125, 1225, 'Reversal Mountain', None),
-    'Reversal Mountain - Item: Mountain exterior near crater stairs': (100382, 1482, 'Reversal Mountain', None),
+    'Reversal Mountain - Item: 2F, near the entrance to 1F': (100125, 1225, 'Reversal Mountain', None),
 
     # Route 1
     'Route 1 - Item: West of the waterfront near the 17 gate (Surf)': (100307, 1407, 'Route 1', None),
     'Route 1 - Item: In the south (Surf)': (100308, 1408, 'Route 1', None),
 
     # Route 11
-    'Route 11 - Item: Right of Pokemon Ranger Thalia (Surf and Waterfall)': (100154, 1254, 'Route 11', None),
+    'Route 11 - Item: Right of Pokemon Ranger (Surf and Waterfall)': (100154, 1254, 'Route 11', None),
     'Route 11 - Item: Up the northern waterfall on the western ledge (Surf and Waterfall)': (100155, 1255, 'Route 11', None),
     'Route 11 - Item: At the end of the short land strip west to the bridge, behind the fence (Surf)': (100156, 1256, 'Route 11', None),
 
@@ -313,21 +320,21 @@ OVERWORLD_ITEM_LOCATIONS: dict[str, tuple[int, int | None, str | None, tuple[int
     'Route 12 - Item: Dark grass north patch west': (100374, 1474, 'Route 12', None),
 
     # Route 13
-    'Route 13 - Item: South of Ace Trainer Miguel (Cut)': (100133, 1233, 'Route 13', None),
-    'Route 13 - Item: On a hill near Parasol Lady Laura (Strength)': (100134, 1234, 'Route 13', None),
-    'Route 13 - Item: South of Ace Trainer Angi': (100135, 1235, 'Route 13', None),
-    'Route 13 - Item: Ledge north of Ranger Dianne': (100136, 1236, 'Route 13', None),
+    'Route 13 - Item: South of Ace Trainer (Cut)': (100133, 1233, 'Route 13', None),
+    'Route 13 - Item: On a hill near Parasol Lady (Strength)': (100134, 1234, 'Route 13', None),
+    'Route 13 - Item: South of female Ace Trainer': (100135, 1235, 'Route 13', None),
+    'Route 13 - Item: Ledge north of Pokemon Ranger': (100136, 1236, 'Route 13', None),
     'Route 13 - Item: On a shore south of the Giant Chasm entrance': (100137, 1237, 'Route 13', None),
-    'Route 13 - Item: East of Ace Trainer Miguel, near a rock': (100138, 1238, 'Route 13', None),
-    'Route 13 - Item: Near Fisherman Vince (Surf)': (100139, 1239, 'Route 13', None),
+    'Route 13 - Item: East of male Ace Trainer, near a rock': (100138, 1238, 'Route 13', None),
+    'Route 13 - Item: Near Fisherman (Surf)': (100139, 1239, 'Route 13', None),
     'Route 13 - Item: On the island with dark grass (Surf)': (100140, 1240, 'Route 13', None),
-    'Route 13 - Item: Grass patch south of Ranger Dianne': (100373, 1473, 'Route 13', None),
+    'Route 13 - Item: Grass patch south of Pokemon Ranger': (100373, 1473, 'Route 13', None),
 
     # Route 14
-    'Route 14 - Item: East of Socialite Marian': (100129, 1229, 'Route 14', None),
-    'Route 14 - Item: North of Backpacker Reece (Surf)': (100130, 1230, 'Route 14', None),
-    'Route 14 - Item: East of Fisherman Sid': (100131, 1231, 'Route 14', None),
-    'Route 14 - Item: Near Black Belt Jay (Surf and Waterfall)': (100132, 1232, 'Route 14', None),
+    'Route 14 - Item: East of Socialite': (100129, 1229, 'Route 14', None),
+    'Route 14 - Item: North of Backpacker (Surf)': (100130, 1230, 'Route 14', None),
+    'Route 14 - Item: East of Fisherman': (100131, 1231, 'Route 14', None),
+    'Route 14 - Item: Near Black Belt (Surf and Waterfall)': (100132, 1232, 'Route 14', None),
 
     # Route 15
     'Route 15 - Item: Southeast of the Black CityB2/White ForestW2 gate (Strength)': (100251, 1351, 'Route 15', None),
@@ -379,19 +386,19 @@ OVERWORLD_ITEM_LOCATIONS: dict[str, tuple[int, int | None, str | None, tuple[int
     'Route 22 - Item: West of the pond (Surf)': (100173, 1273, 'Route 22', None),
     'Route 22 - Item: In the dark grass south of Terrakion': (100174, 1274, 'Route 22', None),
     'Route 22 - Item: At the end of the ridge south of Terrakion': (100175, 1275, 'Route 22', None),
-    'Route 22 - Item: Near Giant Chasm entrance passage': (100370, 1470, 'Route 22', None),
+    'Route 22 - Item: Northwest corner of the northern dark grass': (100370, 1470, 'Route 22', None),
     'Route 22 - Item: Southeast of the Giant Chasm entrance': (100371, 1471, 'Route 22', None),
 
     # Route 23
     'Route 23 - Item: Mountain cliff ledge': (100194, 1294, 'Route 23', None),
     'Route 23 - Item: Behind the house near southern ledge': (100195, 1295, 'Route 23', None),
-    'Route 23 - Item: Next to Pokemon Ranger Steve': (100196, 1296, 'Route 23', None),
+    'Route 23 - Item: Next to Pokemon Ranger': (100196, 1296, 'Route 23', None),
     'Route 23 - Item: At the end of a stream past the first house (Cut or Surf)': (100197, 1297, 'Route 23', None),
-    'Route 23 - Item: At a dead end above Ace Trainer Tom (Cut)': (100198, 1298, 'Route 23', None),
-    'Route 23 - Item: At a dead end in the southwestern-most section of the forest, past Hiker Doug (Cut)': (100199, 1299, 'Route 23', None),
+    'Route 23 - Item: At a dead end above Ace Trainer (Cut)': (100198, 1298, 'Route 23', None),
+    'Route 23 - Item: At a dead end in the southwestern-most section of the forest, past Hiker (Cut)': (100199, 1299, 'Route 23', None),
     'Route 23 - Item: On the pedestal where Azelf appears (Cut)': (100200, 1300, 'Route 23', None),
-    'Route 23 - Item: At a dead end west of Black Belt Benjamin (Cut)': (100201, 1301, 'Route 23', None),
-    'Route 23 - Item: Near Battle Girl Tiffany on a mountaintop (Cut and Strength)': (100202, 1302, 'Route 23', None),
+    'Route 23 - Item: At a dead end west of Black Belt (Cut)': (100201, 1301, 'Route 23', None),
+    'Route 23 - Item: Near Battle Girl on a mountaintop (Cut and Strength)': (100202, 1302, 'Route 23', None),
     'Route 23 - Item: On a lone mountaintop (Cut and Strength)': (100203, 1303, 'Route 23', None),
     'Route 23 - Item: In a grass patch to the northeast of the Strength puzzle (Cut and Strength)': (100372, 1472, 'Route 23', None),
 
@@ -445,11 +452,11 @@ OVERWORLD_ITEM_LOCATIONS: dict[str, tuple[int, int | None, str | None, tuple[int
     'Route 9 - Item: Behind the fence southeast of the Tubeline Bridge gate': (100161, 1261, 'Route 9', None),
 
     # Seaside Cave
-    'Seaside Cave - Item: B1F, north of Battle Girl Maki (Strength)': (100162, 1262, 'Seaside Cave', None),
-    'Seaside Cave - Item: 1F, between the Pokemon Rangers Mikiko and Johan': (100163, 1263, 'Seaside Cave', None),
-    'Seaside Cave - Item: 1F, south of Battle Girl Tia': (100165, 1265, 'Seaside Cave', None),
-    'Seaside Cave - Item: 1F, on the small island east of the Black Belt Drago': (100166, 1266, 'Seaside Cave', None),
-    'Seaside Cave - Item: 1F, north of Battle Girl Tia, accessible from B1F (Strength)': (100167, 1267, 'Seaside Cave', None),
+    'Seaside Cave - Item: B1F, north of Battle Girl (Strength)': (100162, 1262, 'Seaside Cave', None),
+    'Seaside Cave - Item: 1F, between the two Pokemon Rangers': (100163, 1263, 'Seaside Cave', None),
+    'Seaside Cave - Item: 1F, south of Battle Girl': (100165, 1265, 'Seaside Cave', None),
+    'Seaside Cave - Item: 1F, on the small island east of Black Belt (Surf)': (100166, 1266, 'Seaside Cave', None),
+    'Seaside Cave - Item: 1F, north of Battle Girl, accessible from B1F (Strength)': (100167, 1267, 'Seaside Cave', None),
     'Seaside Cave - Item: B1F, south of the two-way entrance': (100168, 1268, 'Seaside Cave', None),
 
     # Shopping Mall
@@ -477,11 +484,11 @@ OVERWORLD_ITEM_LOCATIONS: dict[str, tuple[int, int | None, str | None, tuple[int
     'Twist Mountain - Item: West of Nurse Carol': (100246, 1346, 'Twist Mountain', None),
     'Twist Mountain - Item: South of Veteran Chloris': (100247, 1347, 'Twist Mountain', None),
     'Twist Mountain - Item: South of Worker Ryan (Winter)': (100248, 1348, 'Twist Mountain', None),
-    'Twist Mountain - Item: Workers shed near Victor': (100249, 1349, 'Twist Mountain', None),
+    'Twist Mountain - Item: Workers shed near Victor (Spring/Summer/Autumn)': (100249, 1349, 'Twist Mountain', None),
     'Twist Mountain - Item: On the north end of the highest tier of planks': (100250, 1350, 'Twist Mountain', None),
 
     # Undella Bay
-    'Undella Bay - Item: Near Ace Trainer Summer': (100127, 1227, 'Undella Bay', None),
+    'Undella Bay - Item: Near Ace Trainer': (100127, 1227, 'Undella Bay', None),
     'Undella Bay - Item: Northeast of the Undella Town Pokemon Center': (100128, 1228, 'Undella Bay', None),
 
     # Undella Town
@@ -491,20 +498,20 @@ OVERWORLD_ITEM_LOCATIONS: dict[str, tuple[int, int | None, str | None, tuple[int
     'Victory Road - Item: Entrance exterior cul-de-sac east of Pokemon Center': (100012, 1112, 'Victory Road', None),
     'Victory Road - Item: Entrance path ledge north of bridge': (100018, 1118, 'Victory Road', None),
     'Victory Road - Item: Outside 1 entrance terrace': (100091, 1191, 'Victory Road', None),
-    'Victory Road - Item: Outside 1 east of Doctor Logan': (100204, 1304, 'Victory Road', None),
+    'Victory Road - Item: Outside 1 east of Doctor': (100204, 1304, 'Victory Road', None),
     'Victory Road - Item: Cave 1 central rock ledge': (100205, 1305, 'Victory Road', None),
-    'Victory Road - Item: Outside 1 near Ace Trainer Pierce': (100206, 1306, 'Victory Road', None),
+    'Victory Road - Item: Outside 1 near Ace Trainer': (100206, 1306, 'Victory Road', None),
     'Victory Road - Item: Cave 2 upper terrace': (100207, 1307, 'Victory Road', None),
     'Victory Road - Item: Outside 1 southeastern corner': (100208, 1308, 'Victory Road', None),
     'Victory Road - Item: Cave 1 northern ledge': (100209, 1309, 'Victory Road', None),
     'Victory Road - Item: Grove northeastern corner': (100210, 1310, 'Victory Road', None),
-    'Victory Road - Item: Outside 1 south of Veteran Cathy': (100211, 1311, 'Victory Road', None),
+    'Victory Road - Item: Outside 1 south of Veteran / west of Ace Trainer': (100211, 1311, 'Victory Road', None),
     'Victory Road - Item: Grove southwestern corner (Cut)': (100212, 1312, 'Victory Road', None),
     'Victory Road - Item: Summit plateau before League gate': (100213, 1313, 'Victory Road', None),
     'Victory Road - Item: Castle ruins interior throne hall': (100214, 1314, 'Victory Road', None),
     'Victory Road - Item: Northern cave dark chamber (Flash)': (100215, 1315, 'Victory Road', None),
     'Victory Road - Item: Eastern cave boulder maze (Strength)': (100218, 1318, 'Victory Road', None),
-    'Victory Road - Item: 3F, west of Veteran Hugo': (100322, 1422, 'Victory Road', None),
+    'Victory Road - Item: 3F, west of Veteran': (100322, 1422, 'Victory Road', None),
 
     # Village Bridge
     'Village Bridge - Item: In the southwest area': (100148, 1248, 'Village Bridge', None),
@@ -529,19 +536,19 @@ OVERWORLD_ITEM_LOCATIONS: dict[str, tuple[int, int | None, str | None, tuple[int
     # Wellspring Cave
     'Wellspring Cave - Item: 1F, West of Battle Girl Maggie (Surf)': (100281, 1381, 'Wellspring Cave', None),
     'Wellspring Cave - Item: B1F northern pool chamber': (100282, 1382, 'Wellspring Cave', None),
-    'Wellspring Cave - Item: B1F, Southeast of Black Belt Thomas, before ledge (Surf)': (100283, 1383, 'Wellspring Cave', None),
+    'Wellspring Cave - Item: B1F, Southeast of Black Belt, before ledge (Surf)': (100283, 1383, 'Wellspring Cave', None),
     'Wellspring Cave - Item: B1F, Northern end (Surf)': (100284, 1384, 'Wellspring Cave', None),
     'Wellspring Cave - Item: 1F, East of Hiker Zaiem': (100285, 1385, 'Wellspring Cave', None),
-    'Wellspring Cave - Item: B1F, On cliff, south of Battle Girl Xiao': (100287, 1387, 'Wellspring Cave', None),
+    'Wellspring Cave - Item: B1F, On cliff, south of Battle Girl': (100287, 1387, 'Wellspring Cave', None),
 }
 
 # Hidden items (domain: 200000 + N, flag = 2820 + N)
 HIDDEN_ITEM_LOCATIONS: dict[str, tuple[int, int | None, str | None, tuple[int, int] | None]] = {
 
     # Abundant Shrine
-    'Abundant Shrine - Hidden: West of Youngster Jaye': (200177, 2997, 'Abundant Shrine', None),
+    'Abundant Shrine - Hidden: West of Youngster': (200177, 2997, 'Abundant Shrine', None),
     'Abundant Shrine - Hidden: Eastern part of ledge near pond': (200178, 2998, 'Abundant Shrine', None),
-    'Abundant Shrine - Hidden: Southeast of Youngster Wes': (200179, 2999, 'Abundant Shrine', None),
+    'Abundant Shrine - Hidden: Southeast of Youngster': (200179, 2999, 'Abundant Shrine', None),
     'Abundant Shrine - Hidden: Eastern fence perimeter': (200180, 3000, 'Abundant Shrine', None),
 
     # Accumula Town
@@ -646,7 +653,7 @@ HIDDEN_ITEM_LOCATIONS: dict[str, tuple[int, int | None, str | None, tuple[int, i
     'Pinwheel Forest - Hidden: In a puddle near Ace Trainer Kelsey': (200043, 2863, 'Pinwheel Forest', None),
     'Pinwheel Forest - Hidden: Outer forest east of School Kid behind northern fence': (200044, 2864, 'Pinwheel Forest', None),
     'Pinwheel Forest - Hidden: On the eastern part of ledge northwest of Battle Girl Lee': (200045, 2865, 'Pinwheel Forest', None),
-    'Pinwheel Forest - Hidden: North-East of the Youngster Nicholas': (200046, 2866, 'Pinwheel Forest', None),
+    'Pinwheel Forest - Hidden: North-east of the Youngster Nicholas': (200046, 2866, 'Pinwheel Forest', None),
     'Pinwheel Forest - Hidden: West of Lass Helia and Youngster Henley': (200047, 2867, 'Pinwheel Forest', None),
     'Pinwheel Forest - Hidden: East of the bridge, on the river margin': (200048, 2868, 'Pinwheel Forest', None),
     'Pinwheel Forest - Hidden: East of the bridge, near patch of dark grass on the river margin': (200049, 2869, 'Pinwheel Forest', None),
@@ -666,18 +673,21 @@ HIDDEN_ITEM_LOCATIONS: dict[str, tuple[int, int | None, str | None, tuple[int, i
     'Relic Passage - Hidden: Middle section south room (Strength)': (200116, 2936, 'Relic Passage', None),
 
     # Reversal Mountain
-    'Reversal Mountain - Hidden: In the smaller stalagmite': (200087, 2907, 'Reversal Mountain', None),
-    'Reversal Mountain - Hidden: In the stalagmite north of Backpacker Kiyo and Hiker Markus': (200088, 2908, 'Reversal Mountain', None),
-    'Reversal Mountain - Hidden: In stalagmite south of Scientist / Near Battle Girl': (200089, 2909, 'Reversal Mountain', None),
-    'Reversal Mountain - Hidden: In stalagmite east of Battle Girl Chan / Rock near Black Belt': (200090, 2910, 'Reversal Mountain', None),
-    'Reversal Mountain - Hidden: In stalagmite south of Ace Trainers': (200091, 2911, 'Reversal Mountain', None),
-    'Reversal Mountain - Hidden: Dead-end tunnel east of Backpacker Kiyo and Hiker Markus': (200092, 2912, 'Reversal Mountain', None),
-    'Reversal Mountain - Hidden: In a rock near the big rock': (200093, 2913, 'Reversal Mountain', None),
+    'Reversal Mountain - Hidden: 2F, in the smaller stalagmite': (200087, 2907, 'Reversal Mountain', None),
+    'Reversal Mountain - Hidden: 1F, in the stalagmite north of Backpacker and Hiker': (200088, 2908, 'Reversal Mountain', None),
+    'Reversal Mountain - Hidden: 1F, in stalagmite south of Scientist': (200089, 2909, 'Reversal Mountain', None),
+    'Reversal Mountain - Hidden: 1F, near Battle Girl': (200213, 2909, 'Reversal Mountain', None),
+    'Reversal Mountain - Hidden: 1F, in stalagmite east of Battle Girl': (200090, 2910, 'Reversal Mountain', None),
+    'Reversal Mountain - Hidden: 1F, in a rock near Black Belt': (200214, 2910, 'Reversal Mountain', None),
+    'Reversal Mountain - Hidden: 1F, northern dead end south of Ace Trainers': (200091, 2911, 'Reversal Mountain', None),
+    'Reversal Mountain - Hidden: 1F, northern dead end west of Ace Trainers': (200215, 2911, 'Reversal Mountain', None),
+    'Reversal Mountain - Hidden: 1F, dead-end tunnel east of Backpacker and Hiker': (200092, 2912, 'Reversal Mountain', None),
+    'Reversal Mountain - Hidden: 2F, in a rock near the big rock': (200093, 2913, 'Reversal Mountain', None),
     'Reversal Mountain - Hidden: In central chamber stalagmite': (200094, 2914, 'Reversal Mountain', None),
-    'Reversal Mountain - Hidden: Southern dead end west of the Ace Trainers, in a rock': (200095, 2915, 'Reversal Mountain', None),
+    'Reversal Mountain - Hidden: 1F, southern dead end west of Ace Trainers, in a rock': (200095, 2915, 'Reversal Mountain', None),
     'Reversal Mountain - Hidden: In rock west of Ace Trainers': (200096, 2916, 'Reversal Mountain', None),
     'Reversal Mountain - Hidden: In eastern chamber rock': (200097, 2917, 'Reversal Mountain', None),
-    'Reversal Mountain - Hidden: Southeastern part, in a rock': (200098, 2918, 'Reversal Mountain', None),
+    'Reversal Mountain - Hidden: 1F, southeastern part, in a rock': (200098, 2918, 'Reversal Mountain', None),
 
     # Route 1
     'Route 1 - Hidden: North of the second patch of tall grass': (200128, 2948, 'Route 1', None),
@@ -694,18 +704,18 @@ HIDDEN_ITEM_LOCATIONS: dict[str, tuple[int, int | None, str | None, tuple[int, i
 
     # Route 13
     'Route 13 - Hidden: On northern beach sand': (200170, 2990, 'Route 13', None),
-    'Route 13 - Hidden: On a hill near Parasol Lady Laura': (200171, 2991, 'Route 13', None),
-    'Route 13 - Hidden: On beach north of Parasol Lady Laura': (200172, 2992, 'Route 13', None),
-    'Route 13 - Hidden: In rock east of Ace Trainer Miguel': (200173, 2993, 'Route 13', None),
+    'Route 13 - Hidden: On a hill near Parasol Lady (Strength)': (200171, 2991, 'Route 13', None),
+    'Route 13 - Hidden: On beach north of Parasol Lady': (200172, 2992, 'Route 13', None),
+    'Route 13 - Hidden: In rock east of male Ace Trainer': (200173, 2993, 'Route 13', None),
     'Route 13 - Hidden: In rock near dark grass entrance': (200174, 2994, 'Route 13', None),
 
     # Route 14
-    'Route 14 - Hidden: East of Black Belt Jay, near (Surf and Waterfall)': (200175, 2995, 'Route 14', None),
+    'Route 14 - Hidden: East of Black Belt, near waterfall (Surf and Waterfall)': (200175, 2995, 'Route 14', None),
     'Route 14 - Hidden: On cliff east of Abundant Shrine entrance (Surf and Waterfall)': (200176, 2996, 'Route 14', None),
 
     # Route 15
     'Route 15 - Hidden: On the ground by the dark grass (Strength)': (200181, 3001, 'Route 15', None),
-    'Route 15 - Hidden: Behind a rock east of Backpacker Talon': (200182, 3002, 'Route 15', None),
+    'Route 15 - Hidden: Behind a rock east of Backpacker': (200182, 3002, 'Route 15', None),
 
     # Route 16
     'Route 16 - Hidden: North of Backpacker (Strength)': (200183, 3003, 'Route 16', None),
@@ -743,8 +753,8 @@ HIDDEN_ITEM_LOCATIONS: dict[str, tuple[int, int | None, str | None, tuple[int, i
     'Route 23 - Hidden: In a rock south of the Strength puzzle (Cut and Strength)': (200099, 2919, 'Route 23', None),
     'Route 23 - Hidden: At a dead end in the beginning of the forest section (Cut)': (200100, 2920, 'Route 23', None),
     'Route 23 - Hidden: On a lone mountaintop (Cut and Strength)': (200101, 2921, 'Route 23', None),
-    'Route 23 - Hidden: In rock southeast of Black Belt Luke': (200197, 3017, 'Route 23', None),
-    'Route 23 - Hidden: East of Ace Trainer Juliet': (200198, 3018, 'Route 23', None),
+    'Route 23 - Hidden: In rock southeast of Black Belt': (200197, 3017, 'Route 23', None),
+    'Route 23 - Hidden: East of Ace Trainer': (200198, 3018, 'Route 23', None),
 
     # Route 3
     'Route 3 - Hidden: In the sandbox west of the daycare': (200132, 2952, 'Route 3', None),
@@ -784,7 +794,7 @@ HIDDEN_ITEM_LOCATIONS: dict[str, tuple[int, int | None, str | None, tuple[int, i
 
     # Seaside Cave
     'Seaside Cave - Hidden: 1F, in the rock at the northeast corner': (200123, 2943, 'Seaside Cave', None),
-    'Seaside Cave - Hidden: 1F, south of Pokemon Ranger Mikiko': (200124, 2944, 'Seaside Cave', None),
+    'Seaside Cave - Hidden: 1F, south of Pokemon Ranger': (200124, 2944, 'Seaside Cave', None),
 
     # Striaton City
     'Striaton City - Hidden: To the right of the Route 3 entrance (Surf)': (200000, 2820, 'Striaton City', None),
@@ -793,7 +803,7 @@ HIDDEN_ITEM_LOCATIONS: dict[str, tuple[int, int | None, str | None, tuple[int, i
     # Twist Mountain
     'Twist Mountain - Hidden: Outside, inside the trash can next to the vending machine (Spring/Summer/Autumn)': (200066, 2886, 'Twist Mountain', None),
     'Twist Mountain - Hidden: Inside a boulder south of Worker Patton': (200067, 2887, 'Twist Mountain', None),
-    'Twist Mountain - Hidden: Northeast of Worker Ryan W': (200068, 2888, 'Twist Mountain', None),
+    'Twist Mountain - Hidden: Northeast of Worker Ryan (Winter)': (200068, 2888, 'Twist Mountain', None),
     'Twist Mountain - Hidden: Southwest corner of the cave Veteran Chloris can be found': (200069, 2889, 'Twist Mountain', None),
     'Twist Mountain - Hidden: Inside boulder on worker terrace (Spring/Summer/Autumn)': (200070, 2890, 'Twist Mountain', None),
 
@@ -803,8 +813,8 @@ HIDDEN_ITEM_LOCATIONS: dict[str, tuple[int, int | None, str | None, tuple[int, i
     # Undella Town
     'Undella Town - Hidden: In front of the bulldozer': (200201, 3021, 'Undella Town', None),
     'Undella Town - Hidden: On the beach; southwest of the Pokemon Center': (200202, 3022, 'Undella Town', None),
-    'Undella Town - Hidden: In sand southeast of Pokemon Center': (200203, 3023, 'Undella Town', None),
-    'Undella Town - Hidden: In sand north of Pokemon Center': (200204, 3024, 'Undella Town', None),
+    'Undella Town - Hidden: On the beach, south of the gate': (200203, 3023, 'Undella Town', None),
+    'Undella Town - Hidden: On the beach, southeast of Reversal Mountain entrance': (200204, 3024, 'Undella Town', None),
 
     # Victory road
     'Victory Road - Hidden: In Cave 1 south rock': (200102, 2922, 'Victory Road', None),
@@ -832,8 +842,8 @@ HIDDEN_ITEM_LOCATIONS: dict[str, tuple[int, int | None, str | None, tuple[int, i
     'Virbank Complex - Hidden: At end of dark grass': (200086, 2906, 'Virbank Complex Inside', None),
 
     # Wellspring Cave
-    'Wellspring Cave - Hidden: B1F, East of Black Belt Thomas': (200134, 2954, 'Wellspring Cave', None),
-    'Wellspring Cave - Hidden: B1F, East of Veteran Shaun (Surf)': (200135, 2955, 'Wellspring Cave', None),
-    'Wellspring Cave - Hidden: B1F, Southwest of Veteran Shaun (Surf)': (200136, 2956, 'Wellspring Cave', None),
+    'Wellspring Cave - Hidden: B1F, East of Black Belt': (200134, 2954, 'Wellspring Cave', None),
+    'Wellspring Cave - Hidden: B1F, East of Veteran (Surf)': (200135, 2955, 'Wellspring Cave', None),
+    'Wellspring Cave - Hidden: B1F, Southwest of Veteran (Surf)': (200136, 2956, 'Wellspring Cave', None),
 }
 

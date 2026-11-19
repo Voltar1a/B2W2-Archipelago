@@ -537,7 +537,7 @@ def apply_aptransceiver(rom: NintendoDSRom, options: dict[str, Any]) -> None:
         sub_seasons_menu.extend([
             Line("command", ["ListMenuAdd", 166, 65535, 99]),
             Line("command", ["MsgSystem", 99, 0]),
-            Line("command", ["ListMenuShow"]),
+            Line("command", ["ListMenuShow2"]),
             Line("command", ["MsgSystemClose"]),
             Line("command", ["WorkCmpConst", 32808, 99]),
             Line("command", ["VMJumpIf", 1, "lbl_seasons_back"]),
@@ -573,7 +573,7 @@ def apply_aptransceiver(rom: NintendoDSRom, options: dict[str, Any]) -> None:
         sub_days_menu.extend([
             Line("command", ["ListMenuAdd", 166, 65535, 99]),
             Line("command", ["MsgSystem", 171, 0]),
-            Line("command", ["ListMenuShow"]),
+            Line("command", ["ListMenuShow2"]),
             Line("command", ["MsgSystemClose"]),
             Line("command", ["WorkCmpConst", 32808, 99]),
             Line("command", ["VMJumpIf", 1, "lbl_days_back"]),
@@ -591,7 +591,7 @@ def apply_aptransceiver(rom: NintendoDSRom, options: dict[str, Any]) -> None:
         ])
 
         blind_trainers_opt = 1 if bool(options.get("blind_trainers", False)) else 2
-        hold_a_turbo_opt = 1 if bool(options.get("hold_a_turbo", True)) else 2
+        hold_a_turbo_opt = 1 if bool(options.get("hold_a_turbo", False)) else 2
         auto_run_opt = 1 if bool(options.get("auto_run", False)) else 2
         guaranteed_escape_opt = 1 if bool(options.get("guaranteed_escape", False)) else 2
         fast_fishing_opt = 1 if bool(options.get("fast_fishing", True)) else 2
@@ -642,10 +642,10 @@ def apply_aptransceiver(rom: NintendoDSRom, options: dict[str, Any]) -> None:
             Line("label", ["lbl_mod_root"]),
             *_toggle_init(16794, blind_trainers_opt, "blind"),
             *_toggle_init(16795, hold_a_turbo_opt, "turbo"),
-            *_toggle_init(16801, auto_run_opt, "autorun"),
-            *_toggle_init(16802, guaranteed_escape_opt, "escape"),
-            *_toggle_init(16803, fast_fishing_opt, "fishing"),
-            *_toggle_init(16804, bike_everywhere_opt, "bike"),
+            *_toggle_init(16807, auto_run_opt, "autorun"),
+            *_toggle_init(16808, guaranteed_escape_opt, "escape"),
+            *_toggle_init(16809, fast_fishing_opt, "fishing"),
+            *_toggle_init(16810, bike_everywhere_opt, "bike"),
             Line("command", ["WorkCmpConst", 16792, 0]),
             Line("command", ["VMJumpIf", 1, "lbl_init_catch"]),
             Line("command", ["VMJump", "lbl_check_init_exp"]),
@@ -663,10 +663,10 @@ def apply_aptransceiver(rom: NintendoDSRom, options: dict[str, Any]) -> None:
 
             *_toggle_menu_add(16794, 187, 210, 1, "blind"),
             *_toggle_menu_add(16795, 188, 211, 2, "turbo"),
-            *_toggle_menu_add(16801, 250, 251, 6, "autorun"),
-            *_toggle_menu_add(16802, 254, 255, 7, "escape"),
-            *_toggle_menu_add(16803, 258, 259, 8, "fishing"),
-            *_toggle_menu_add(16804, 262, 263, 9, "bike"),
+            *_toggle_menu_add(16807, 250, 251, 6, "autorun"),
+            *_toggle_menu_add(16808, 254, 255, 7, "escape"),
+            *_toggle_menu_add(16809, 258, 259, 8, "fishing"),
+            *_toggle_menu_add(16810, 262, 263, 9, "bike"),
 
             Line("command", ["ListMenuAdd", 167, 65535, 3]),  # Catch rate
             Line("command", ["ListMenuAdd", 168, 65535, 4]),  # exp rate
@@ -697,10 +697,10 @@ def apply_aptransceiver(rom: NintendoDSRom, options: dict[str, Any]) -> None:
 
             *_toggle_handler(16794, 190, 191, "blind"),
             *_toggle_handler(16795, 192, 193, "turbo"),
-            *_toggle_handler(16801, 252, 253, "autorun"),
-            *_toggle_handler(16802, 256, 257, "escape"),
-            *_toggle_handler(16803, 260, 261, "fishing"),
-            *_toggle_handler(16804, 264, 265, "bike"),
+            *_toggle_handler(16807, 252, 253, "autorun"),
+            *_toggle_handler(16808, 256, 257, "escape"),
+            *_toggle_handler(16809, 260, 261, "fishing"),
+            *_toggle_handler(16810, 264, 265, "bike"),
 
             Line("label", ["lbl_mod_catch"]),
             Line("command", ["WorkCmpConst", 16792, 255]),
@@ -791,7 +791,7 @@ def apply_aptransceiver(rom: NintendoDSRom, options: dict[str, Any]) -> None:
             starting_day = options.get("starting_day", 0)
             starting_season = options.get("starting_season", 0)
             blind_trainers = 1 if bool(options.get("blind_trainers", False)) else 2
-            hold_a_turbo = 1 if bool(options.get("hold_a_turbo", True)) else 2
+            hold_a_turbo = 1 if bool(options.get("hold_a_turbo", False)) else 2
             auto_run = 1 if bool(options.get("auto_run", False)) else 2
             guaranteed_escape = 1 if bool(options.get("guaranteed_escape", False)) else 2
             fast_fishing = 1 if bool(options.get("fast_fishing", True)) else 2
@@ -811,10 +811,10 @@ def apply_aptransceiver(rom: NintendoDSRom, options: dict[str, Any]) -> None:
                     Line("command", ["WorkSetConst", 16793, exp_mult]),
                     Line("command", ["WorkSetConst", 16794, blind_trainers]),
                     Line("command", ["WorkSetConst", 16795, hold_a_turbo]),
-                    Line("command", ["WorkSetConst", 16801, auto_run]),
-                    Line("command", ["WorkSetConst", 16802, guaranteed_escape]),
-                    Line("command", ["WorkSetConst", 16803, fast_fishing]),
-                    Line("command", ["WorkSetConst", 16804, bike_everywhere]),
+                    Line("command", ["WorkSetConst", 16807, auto_run]),
+                    Line("command", ["WorkSetConst", 16808, guaranteed_escape]),
+                    Line("command", ["WorkSetConst", 16809, fast_fishing]),
+                    Line("command", ["WorkSetConst", 16810, bike_everywhere]),
                     Line("command", ["WorkSetConst", 16799, starting_day]),
                     Line("command", ["WorkSetConst", 16800, starting_season]),
                     Line("command", ["FlagSet", 3040]),

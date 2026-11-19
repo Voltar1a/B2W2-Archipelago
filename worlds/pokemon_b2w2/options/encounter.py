@@ -12,24 +12,25 @@ from .common import ToggleSet
 class RandomiseWildPokemon(ToggleSet):
     """
     Randomises wild Pokémon encounters.
+    Selecting any modifier automatically enables 'Randomise'.
     Modifiers:
+    - Randomise: Toggles wild Pokémon being randomised.
     - Global 1 to 1: Replaces every wild species consistently across all Unova areas.
     - Level appropriate evolutions: Ensures wild encounters have appropriate evolutions.
-    - Randomise: Toggles wild Pokémon being randomised.
     - Type themed areas: Tries to give all Pokémon in an area a common type.
     """
     display_name = "Randomise Wild Pokémon"
     valid_keys = [
+        "Randomise",
         "Global 1 to 1",
         "Level appropriate evolutions",
-        "Randomise",
         "Type themed areas",
     ]
     auto_add_if_any = "Randomise"
     default = {
+        "Randomise",
         "Global 1 to 1",
         "Level appropriate evolutions",
-        "Randomise",
         "Type themed areas",
     }
 
@@ -37,24 +38,25 @@ class RandomiseWildPokemon(ToggleSet):
 class RandomiseTrainerPokemon(ToggleSet):
     """
     Randomises trainer Pokémon.
+    Selecting any modifier automatically enables 'Randomise'.
     Modifiers:
+    - Randomise: Toggles trainer Pokémon being randomised.
     - Consistent enemy teams: Keeps recurring trainer teams (rival, bosses) consistent across encounters.
     - Level appropriate evolutions: Ensures trainer Pokémon have appropriate evolutions.
-    - Randomise: Toggles trainer Pokémon being randomised.
     - Type themed: All Pokémon of a trainer share at least one type.
     """
     display_name = "Randomise Trainer Pokémon"
     valid_keys = [
+        "Randomise",
         "Consistent enemy teams",
         "Level appropriate evolutions",
-        "Randomise",
         "Type themed",
     ]
     auto_add_if_any = "Randomise"
     default = {
+        "Randomise",
         "Consistent enemy teams",
         "Level appropriate evolutions",
-        "Randomise",
         "Type themed",
     }
 
@@ -62,19 +64,20 @@ class RandomiseTrainerPokemon(ToggleSet):
 class RandomiseStarterPokemon(ToggleSet):
     """
     Randomises starter Pokémon choices.
+    Selecting any modifier automatically enables 'Randomise'.
     Modifiers:
-    - Base with 2 evolutions: Ensures starters have a 3-stage evolution line.
     - Randomise: Toggles starter Pokémon being randomised.
+    - Base with 2 evolutions: Ensures starters have a 3-stage evolution line.
     """
     display_name = "Randomise Starter Pokémon"
     valid_keys = [
-        "Base with 2 evolutions",
         "Randomise",
+        "Base with 2 evolutions",
     ]
     auto_add_if_any = "Randomise"
     default = {
-        "Base with 2 evolutions",
         "Randomise",
+        "Base with 2 evolutions",
     }
 
 
@@ -123,16 +126,17 @@ class RandomiseStarterPokemon(ToggleSet):
 class RandomiseAbilities(ToggleSet):
     """
     Randomises the abilities of every Pokémon species.
+    Selecting any modifier automatically enables 'Randomise'.
     Modifiers:
+    - Randomise: Toggles abilities being randomised.
     - Include hidden abilities: Randomises hidden abilities as well.
     - One per pokemon: Gives every species only one ability across all slots.
-    - Randomise: Toggles abilities being randomised.
     """
     display_name = "Randomise Abilities"
     valid_keys = [
+        "Randomise",
         "Include hidden abilities",
         "One per pokemon",
-        "Randomise",
     ]
     auto_add_if_any = "Randomise"
 
@@ -163,7 +167,7 @@ class RandomiseLevelUpMovesets(ToggleSet):
 
 
 class CatchRateMultiplier(Range):
-    """Multiplies base catch rates of all Pokémon (1x to 10x)."""
+    """Multiplies base catch rates of all Pokémon (1x to 10x). Changeable ingame via APtransceiver."""
     display_name = "Catch Rate Multiplier"
     range_start = 1
     range_end = 10

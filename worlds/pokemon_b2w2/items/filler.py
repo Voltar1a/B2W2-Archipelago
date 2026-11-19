@@ -65,7 +65,6 @@ FILLER_ITEM_TABLE: dict[str, ItemInfo] = {
     "Gram 2":                  ItemInfo(100624, 0x0270, "key_items", ItemClassification.filler),
     "Gram 3":                  ItemInfo(100625, 0x0271, "key_items", ItemClassification.filler),
     "Xtransceiver (Yellow)":   ItemInfo(100626, 0x0272, "key_items", ItemClassification.filler),
-    "Permit":                  ItemInfo(100630, 0x0276, "key_items", ItemClassification.filler),
     "Oval Charm":              ItemInfo(100631, 0x0277, "key_items", ItemClassification.useful),
     "Shiny Charm":             ItemInfo(100632, 0x0278, "key_items", ItemClassification.useful),
     "Dropped Item (Red)":      ItemInfo(100636, 0x027C, "key_items", ItemClassification.filler),

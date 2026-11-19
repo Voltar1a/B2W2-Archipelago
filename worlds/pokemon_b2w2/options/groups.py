@@ -56,7 +56,6 @@ from . import (
 
     # Cutscene skips
     LivingRoomStarter,
-    SkipPokestarStudios,
     SkipPWT,
     SkipCatchingTutorial,
     SkipJoinAvenue,
@@ -95,20 +94,22 @@ option_groups: list[OptionGroup] = [
         SkipIntroGender,
     ]),
     OptionGroup("Quality of life and engine patches", [
-        InstantText,
+        # APtransceiver (changeable ingame)
         AutoRun,
         BikeEverywhere,
-        GuaranteedCatch,
+        BlindTrainers,
         CatchRateMultiplier,
-        ExpMultiplier,
-        HoldATurbo,
         CheckLogFilter,
-        GuaranteedEscape,
-        FastHatch,
+        ExpMultiplier,
         FastFishing,
+        GuaranteedCatch,
+        GuaranteedEscape,
+        HoldATurbo,
+        # Non-APtransceiver (NOT changeable ingame)
+        InstantText,
+        FastHatch,
         InfiniteRareCandies,
         InfiniteRepels,
-        BlindTrainers,
         TMHMFullyCompatible,
         RemoveSurfBikeMusic,
         MaxFriendship,
@@ -117,7 +118,6 @@ option_groups: list[OptionGroup] = [
     ]),
     OptionGroup("Cutscene skips", [
         LivingRoomStarter,
-        SkipPokestarStudios,
         SkipPWT,
         SkipCatchingTutorial,
         SkipJoinAvenue,

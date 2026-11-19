@@ -7,9 +7,10 @@ from Options import Toggle
 class InfiniteRareCandies(Toggle):
     """
     Starts the player with 999 Rare Candies and automatically replenishes them upon use.
+    NOT changeable ingame.
     """
     display_name = "Infinite Rare Candies"
-    default = True
+    default = False
 
 
 # from typing import Any

@@ -31,49 +31,49 @@ class RivalName(FreeText):
 
 
 class InstantText(Toggle):
-    """All dialogue and textboxes display instantly."""
+    """All dialogue and textboxes display instantly. NOT changeable ingame."""
     display_name = "Instant Text"
     default = True
 
 
 class BlindTrainers(Toggle):
-    """Trainers will not initiate battle on sight (talk to them to battle)."""
+    """Trainers will not initiate battle on sight (talk to them to battle). Changeable ingame via APtransceiver."""
     display_name = "Blind Trainers"
-    default = True
+    default = False
 
 
 class GuaranteedCatch(Toggle):
-    """Any Poké Ball thrown guarantees 100% catch rate."""
+    """Any Poké Ball thrown guarantees 100% catch rate. Changeable ingame via APtransceiver."""
     display_name = "Guaranteed Catch Rate"
-    default = True
+    default = False
 
 
 class TMHMFullyCompatible(Toggle):
-    """Allows all Pokémon to learn all TMs and HMs."""
+    """Allows all Pokémon to learn all TMs and HMs. NOT changeable ingame."""
     display_name = "Universal TM/HM Compatibility"
-    default = True
+    default = False
 
 
 class BikeEverywhere(Toggle):
-    """Ride bicycle indoors etc."""
+    """Ride bicycle indoors etc. Changeable ingame via APtransceiver."""
     display_name = "Ride Bicycle Everywhere"
     default = True
 
 
 class FastFishing(Toggle):
-    """Immediate bite and 100% bite rate on fishing rods."""
+    """Immediate bite and 100% bite rate on fishing rods. Changeable ingame via APtransceiver."""
     display_name = "Fast Fishing"
     default = True
 
 
 class HoldATurbo(Toggle):
-    """Holding A advances text rapidly."""
+    """Holding A (or B) advances text and menus rapidly. Changeable ingame via APtransceiver."""
     display_name = "Hold A Turbo"
-    default = True
+    default = False
 
 
 class CheckLogFilter(Choice):
-    """Default check log filter in APtransceiver."""
+    """Default check log filter in APtransceiver. Changeable ingame via APtransceiver."""
     display_name = "Check Log Filter"
     option_progression = 0
     option_progression_plus_useful = 1
@@ -82,13 +82,13 @@ class CheckLogFilter(Choice):
 
 
 class RemoveSurfBikeMusic(Toggle):
-    """Keeps area background music playing while surfing or biking."""
+    """Keeps area background music playing while surfing or biking. NOT changeable ingame."""
     display_name = "Remove Surfing and Bicycle Music"
     default = True
 
 
 class BattleScene(Choice):
-    """Move battle animations."""
+    """Move battle animations. NOT changeable ingame via APtransceiver (vanilla Options menu)."""
     display_name = "Battle Scene Animations"
     option_on = 0
     option_off = 1
@@ -96,27 +96,27 @@ class BattleScene(Choice):
 
 
 class BattleStyle(Choice):
-    """In-battle switch prompt when opponent faints."""
+    """In-battle switch prompt when opponent faints. NOT changeable ingame via APtransceiver (vanilla Options menu)."""
     display_name = "Battle Style"
     option_shift = 0
     option_set = 1
-    default = 1
+    default = 0
 
 
 class AutoRun(Toggle):
-    """Player automatically runs without needing to hold B."""
+    """Player automatically runs without needing to hold B. Changeable ingame via APtransceiver."""
     display_name = "Auto-Run"
-    default = True
+    default = False
 
 
 class GuaranteedEscape(Toggle):
-    """Fleeing from wild Pokémon battles is always 100% successful."""
+    """Fleeing from wild Pokémon battles is always 100% successful. Changeable ingame via APtransceiver."""
     display_name = "Guaranteed Escape"
-    default = True
+    default = False
 
 
 class FastHatch(Toggle):
-    """Eggs hatch after walking just a few steps (1 egg cycle)."""
+    """Eggs hatch after walking just a few steps (1 egg cycle). NOT changeable ingame."""
     display_name = "Fast Egg Hatching"
     default = True
 
@@ -128,15 +128,9 @@ class FastHatch(Toggle):
 
 
 class InfiniteRepels(Toggle):
-    """Starts you with 999 Max Repels and refills them automatically upon use."""
+    """Starts you with 999 Max Repels and refills them automatically upon use. NOT changeable ingame."""
     display_name = "Infinite Repels"
-    default = True
-
-
-class SkipPokestarStudios(Toggle):
-    """Skips mandatory Pokéstar Studios sequence after Roxie."""
-    display_name = "Skip Pokéstar Studios"
-    default = True
+    default = False
 
 
 class SkipPWT(Choice):
@@ -173,7 +167,7 @@ class LivingRoomStarter(Toggle):
 
 
 class MaxFriendship(Toggle):
-    """All obtained Pokémon join with maximum friendship (255)."""
+    """All obtained Pokémon join with maximum friendship (255). NOT changeable ingame."""
     display_name = "Max Friendship"
     default = True
 
@@ -181,10 +175,10 @@ class MaxFriendship(Toggle):
 class ExpMultiplier(Range):
     """
     Multiplier applied to all gained experience points (1x to 10x).
-    Can also be dynamically modified in-game at any time via the APtransceiver.
+    Changeable ingame via APtransceiver.
     """
     display_name = "EXP Multiplier"
     range_start = 1
     range_end = 10
-    default = 2
+    default = 1
 

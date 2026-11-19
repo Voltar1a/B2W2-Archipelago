@@ -41,6 +41,11 @@ def has_wave_badge(state: CollectionState, player: int) -> bool:
     return state.has("Wave Badge", player)
 
 
+def has_tm_count(state: CollectionState, player: int, count: int) -> bool:
+    from ..items.tms import TM_ITEM_TABLE
+    return sum(1 for item_name in TM_ITEM_TABLE if state.has(item_name, player)) >= count
+
+
 ALL_BADGES = (
     "Basic Badge",
     "Toxic Badge",
@@ -132,6 +137,10 @@ def has_dna_splicers(state: CollectionState, player: int) -> bool:
 
 def has_card_key(state: CollectionState, player: int) -> bool:
     return state.has("Card Key", player)
+
+
+def has_permit(state: CollectionState, player: int) -> bool:
+    return state.has("Permit", player)
 
 
 def can_enter_giant_chasm(state: CollectionState, player: int) -> bool:

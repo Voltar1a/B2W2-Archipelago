@@ -26,7 +26,6 @@ def _inject_bag_key_gate(
     anchor_label: str,
     tag: str,
 ) -> bool:
-    # Inserts a bag check right after anchor_label in scr0 to gate the encounter
     from .script_editing import Line
 
     idx = scr.find_label(anchor_label)
@@ -58,7 +57,6 @@ def _inject_bag_key_gate(
 
 
 def apply_story_roadblocks(rom: "NintendoDSRom", is_white2: bool, options: dict[str, Any]) -> None:
-    # Decouples world progression gates from vanilla story cutscenes
     try:
         from ..nds_compat import NARC
     except (ImportError, ValueError):
@@ -251,7 +249,6 @@ def apply_story_roadblocks(rom: "NintendoDSRom", is_white2: bool, options: dict[
     except Exception:
         pass
 
-    # Route 4 (White 2): Colress Crustle blockade gated on Insect Badge (badge 2)
     try:
         if a126 is not None and len(a126.files) > 497:
             f497 = bytearray(a126.files[497])
@@ -261,7 +258,7 @@ def apply_story_roadblocks(rom: "NintendoDSRom", is_white2: bool, options: dict[
             f497[col_off + 8 : col_off + 10] = (757).to_bytes(2, "little")
             if nt > 0:
                 p_trig = base + 36 * nn + 20 * nw
-                f497[p_trig + 2 : p_trig + 4] = (0).to_bytes(2, "little")  # Var_val = 0
+                f497[p_trig + 2 : p_trig + 4] = (0).to_bytes(2, "little")
             a126.files[497] = bytes(f497)
             modified_entities = True
 
@@ -590,7 +587,7 @@ def apply_story_roadblocks(rom: "NintendoDSRom", is_white2: bool, options: dict[
         pass
 
     # Make time-dependent events/checks always active regardless of IRL time of day:
-    # - s822 (Lacunosa Town - Gift: Girl near town fountain): always reset hide-flag 786
+    # - s822 (Lacunosa Town - Gift: Executive in northeast house (Night)): always reset hide-flag 786
     try:
         if len(scripts_narc.files) > 822:
             sf_822 = disassemble(scripts_narc.files[822])
@@ -622,8 +619,7 @@ def apply_story_roadblocks(rom: "NintendoDSRom", is_white2: bool, options: dict[
     except Exception:
         pass
 
-    # - s158 (Big Stadium) / s168 (Small Court): never set practice-hour lockout Flag 220
-    #   so the free-roam gifts (Athlete in Small Court / Fan in Big Stadium stands) are always available
+    # incomplete stadium bypass
     for stadium_sid in (158, 168):
         try:
             if len(scripts_narc.files) > stadium_sid:
@@ -638,6 +634,406 @@ def apply_story_roadblocks(rom: "NintendoDSRom", is_white2: bool, options: dict[
                     modified_scripts = True
         except Exception:
             pass
+
+    # s928 (Marine Tube): give Black Sludge check without requiring a held Poison Barb
+    try:
+        if len(scripts_narc.files) > 928:
+            sf_928 = disassemble(scripts_narc.files[928])
+            changed_928 = False
+            new_928 = []
+            for l in sf_928.lines:
+                if l.type == "command" and l.parts == ["StackPush", 32803] and any(
+                    nl.type == "command" and nl.parts == ["VMJumpIf", 255, "lbl8_21"]
+                    for nl in sf_928.lines
+                ):
+                    new_928.append(Line("command", ["StackPushConst", 1]))
+                    changed_928 = True
+                elif l.type == "command" and l.parts == ["MsgActor", 1024, 10, 0, 0]:
+                    changed_928 = True
+                    continue
+                else:
+                    new_928.append(l)
+            if changed_928:
+                sf_928.lines = new_928
+                scripts_narc.files[928] = bytes(assemble(sf_928))
+                modified_scripts = True
+    except Exception:
+        pass
+
+    # s516 (Village Bridge): Fisherman gives Dive Ball check whenever talked to (no daily fish quest)
+    try:
+        if len(scripts_narc.files) > 516:
+            sf_516 = disassemble(scripts_narc.files[516])
+            idx_scr0 = sf_516.find_label("scr0")
+            if idx_scr0 != -1:
+                sf_516.lines[idx_scr0 + 1 : idx_scr0 + 1] = [
+                    Line("command", ["ActorPauseAll"]),
+                    Line("command", ["PlaySound", 1351]),
+                    Line("command", ["ActorSetEyeToEye"]),
+                    Line("command", ["StackPushFlag", 299]),
+                    Line("command", ["StackPushConst", 0]),
+                    Line("command", ["StackCmp", 1]),
+                    Line("command", ["VMJumpIf", 255, "lbl1_4"]),
+                    Line("command", ["StackPush", 32768]),
+                    Line("command", ["StackPush", 32769]),
+                    Line("command", ["WorkSet", 32768, 7]),
+                    Line("command", ["WorkSet", 32769, 5]),
+                    Line("command", ["RTCallGlobal", 2806]),
+                    Line("command", ["StackPop", 32769]),
+                    Line("command", ["StackPop", 32768]),
+                    Line("command", ["FlagSet", 299]),
+                    Line("command", ["VMJump", "lbl1_4"]),
+                ]
+                scripts_narc.files[516] = bytes(assemble(sf_516))
+                modified_scripts = True
+    except Exception:
+        pass
+
+    # s1030 (Seaside Cave 1F): gate Black Belt Rocky & Crustle on Colress MCHN (item 635)
+    try:
+        if len(scripts_narc.files) > 1030:
+            sf_1030 = disassemble(scripts_narc.files[1030])
+            new_1030 = []
+            i = 0
+            changed_1030 = False
+            lines_1030 = sf_1030.lines
+            while i < len(lines_1030):
+                l = lines_1030[i]
+                if (
+                    i + 2 < len(lines_1030)
+                    and l.type == "command"
+                    and (l.parts == ["StackPush", 16600] or l.parts == ["StackPushFlag", 368])
+                    and lines_1030[i + 1].type == "command"
+                    and lines_1030[i + 1].parts in (["StackPushConst", 2], ["StackPushConst", 1])
+                    and lines_1030[i + 2].type == "command"
+                    and lines_1030[i + 2].parts == ["StackCmp", 1]
+                ):
+                    new_1030.extend([
+                        Line("command", ["CheckItemBagNumber", 635, 1, 32800]),
+                        Line("command", ["StackPush", 32800]),
+                        Line("command", ["StackPushConst", 1]),
+                        Line("command", ["StackCmp", 1]),
+                    ])
+                    changed_1030 = True
+                    i += 3
+                    continue
+                new_1030.append(l)
+                i += 1
+            if changed_1030:
+                sf_1030.lines = new_1030
+                scripts_narc.files[1030] = bytes(assemble(sf_1030))
+                modified_scripts = True
+    except Exception:
+        pass
+
+    # Driftveil Drawbridge (Script 506): remove Charizard party requirement from Youngster gift (flag 282)
+    try:
+        raw_506 = scripts_narc.files[506]
+        if raw_506:
+            sf_506 = disassemble(raw_506)
+            changed_506 = False
+            for i, line in enumerate(sf_506.lines):
+                if (
+                    line.type == "command"
+                    and len(line.parts) >= 2
+                    and line.parts[0] == "PokePartyFindBySpecies"
+                    and line.parts[1] == 6
+                ):
+                    for j in range(i + 1, min(i + 6, len(sf_506.lines))):
+                        jl = sf_506.lines[j]
+                        if jl.type == "command" and jl.parts[0] == "VMJumpIf":
+                            sf_506.lines[j] = Line("command", ["VMJump", jl.parts[-1]])
+                            changed_506 = True
+                            break
+                    break
+            if changed_506:
+                scripts_narc.files[506] = bytes(assemble(sf_506))
+                modified_scripts = True
+    except Exception:
+        pass
+
+    # Icirrus City Fan Club Chairman (Script 238): grant flags 201/202/203 (25/50/99 levels) for any non-Egg Pokemon
+    try:
+        raw_238 = scripts_narc.files[238]
+        if raw_238:
+            sf_238 = disassemble(raw_238)
+            changed_238 = False
+            new_238 = []
+            for line in sf_238.lines:
+                new_238.append(line)
+                if not changed_238 and line.type == "command" and line.parts == ["WorkSub", 32804, 32803]:
+                    new_238.extend([
+                        Line("command", ["StackPushFlag", 201]),
+                        Line("command", ["StackPushConst", 0]),
+                        Line("command", ["StackCmp", 1]),
+                        Line("command", ["VMJumpIf", 255, "ap_fanclub_chk202"]),
+                        Line("command", ["WorkSetConst", 32804, 25]),
+                        Line("command", ["VMJump", "ap_fanclub_done"]),
+                        Line("label", ["ap_fanclub_chk202"]),
+                        Line("command", ["StackPushFlag", 202]),
+                        Line("command", ["StackPushConst", 0]),
+                        Line("command", ["StackCmp", 1]),
+                        Line("command", ["VMJumpIf", 255, "ap_fanclub_chk203"]),
+                        Line("command", ["WorkSetConst", 32804, 50]),
+                        Line("command", ["VMJump", "ap_fanclub_done"]),
+                        Line("label", ["ap_fanclub_chk203"]),
+                        Line("command", ["StackPushFlag", 203]),
+                        Line("command", ["StackPushConst", 0]),
+                        Line("command", ["StackCmp", 1]),
+                        Line("command", ["VMJumpIf", 255, "ap_fanclub_done"]),
+                        Line("command", ["WorkSetConst", 32804, 99]),
+                        Line("label", ["ap_fanclub_done"]),
+                    ])
+                    changed_238 = True
+            if changed_238:
+                sf_238.lines = new_238
+                scripts_narc.files[238] = bytes(assemble(sf_238))
+                modified_scripts = True
+    except Exception:
+        pass
+
+    # Striaton City Pokemon Center (Script 16): remove Shaymin requirement from Gracidea gift (flag 381)
+    try:
+        raw_16 = scripts_narc.files[16]
+        if raw_16:
+            sf_16 = disassemble(raw_16)
+            changed_16 = False
+            for i, line in enumerate(sf_16.lines):
+                if (
+                    line.type == "command"
+                    and len(line.parts) >= 2
+                    and line.parts[0] == "PokePartyFindEx"
+                    and line.parts[1] == 492
+                ):
+                    sf_16.lines[i] = Line("command", ["WorkSetConst", 32801, 1])
+                    changed_16 = True
+                    break
+            if changed_16:
+                scripts_narc.files[16] = bytes(assemble(sf_16))
+                modified_scripts = True
+    except Exception:
+        pass
+
+    # P2 Laboratory Scientist Dudley (Script 478): remove Genesect requirement and tag his two Drive gifts
+    try:
+        raw_478 = scripts_narc.files[478]
+        if raw_478:
+            sf_478 = disassemble(raw_478)
+            changed_478 = False
+            new_478 = []
+            gift_idx = 0
+            gift_flags = (2443, 2461)
+            for line in sf_478.lines:
+                if (
+                    line.type == "command"
+                    and len(line.parts) >= 2
+                    and line.parts[0] == "PokePartyFindEx"
+                    and line.parts[1] == 649
+                ):
+                    new_478.append(Line("command", ["WorkSetConst", 32784, 1]))
+                    changed_478 = True
+                    continue
+                new_478.append(line)
+                if line.type == "command" and line.parts == ["RTCallGlobal", 2805] and gift_idx < 2:
+                    new_478.append(Line("command", ["FlagSet", gift_flags[gift_idx]]))
+                    gift_idx += 1
+                    changed_478 = True
+            if changed_478:
+                sf_478.lines = new_478
+                scripts_narc.files[478] = bytes(assemble(sf_478))
+                modified_scripts = True
+    except Exception:
+        pass
+
+    # Driftveil City Grand Hotel (Script 202): remove 70+ Seen requirement from Old Man gift
+    try:
+        raw_202 = scripts_narc.files[202]
+        if raw_202:
+            sf_202 = disassemble(raw_202)
+            changed_202 = False
+            for i, line in enumerate(sf_202.lines):
+                if line.type == "command" and line.parts == ["PokeDexGetCount", 0, 32800]:
+                    sf_202.lines[i] = Line("command", ["WorkSetConst", 32800, 70])
+                    changed_202 = True
+                    break
+            if changed_202:
+                scripts_narc.files[202] = bytes(assemble(sf_202))
+                modified_scripts = True
+    except Exception:
+        pass
+
+    # Driftveil City Market (Script 210): remove Lv 30+ Pokemon requirement from Man in black gift (flag 324)
+    try:
+        raw_210 = scripts_narc.files[210]
+        if raw_210:
+            sf_210 = disassemble(raw_210)
+            changed_210 = False
+            for i, line in enumerate(sf_210.lines):
+                if (
+                    line.type == "command"
+                    and line.parts == ["StackPush", 32808]
+                    and i + 2 < len(sf_210.lines)
+                    and sf_210.lines[i + 1].parts == ["StackPushConst", 1]
+                    and sf_210.lines[i + 2].parts == ["StackCmp", 4]
+                ):
+                    sf_210.lines[i] = Line("command", ["StackPushConst", 1])
+                    changed_210 = True
+                    break
+            if changed_210:
+                scripts_narc.files[210] = bytes(assemble(sf_210))
+                modified_scripts = True
+    except Exception:
+        pass
+
+    # Accumula Town (Script 794): remove <=20cm (flag 2766) and >=5m (flag 2767) Pokemon requirements
+    try:
+        raw_794 = scripts_narc.files[794]
+        if raw_794:
+            sf_794 = disassemble(raw_794)
+            changed_794 = False
+            for i, line in enumerate(sf_794.lines):
+                if (
+                    line.type == "command"
+                    and line.parts in (["StackPush", 32804], ["StackPush", 32805])
+                    and i + 2 < len(sf_794.lines)
+                    and sf_794.lines[i + 1].parts == ["StackPushConst", 1]
+                    and sf_794.lines[i + 2].parts == ["StackCmp", 1]
+                ):
+                    sf_794.lines[i] = Line("command", ["StackPushConst", 1])
+                    changed_794 = True
+            if changed_794:
+                scripts_narc.files[794] = bytes(assemble(sf_794))
+                modified_scripts = True
+    except Exception:
+        pass
+
+    # Accumula Town Pianist (Script 810): remove Kricketot and Whismur party requirements (flag 2335)
+    try:
+        raw_810 = scripts_narc.files[810]
+        if raw_810:
+            sf_810 = disassemble(raw_810)
+            changed_810 = False
+            for i, line in enumerate(sf_810.lines):
+                if (
+                    line.type == "command"
+                    and line.parts == ["StackPush", 32806]
+                    and i + 2 < len(sf_810.lines)
+                    and sf_810.lines[i + 1].parts == ["StackPushConst", 1]
+                    and sf_810.lines[i + 2].parts == ["StackCmp", 1]
+                ):
+                    sf_810.lines[i] = Line("command", ["StackPushConst", 1])
+                    changed_810 = True
+            if changed_810:
+                scripts_narc.files[810] = bytes(assemble(sf_810))
+                modified_scripts = True
+    except Exception:
+        pass
+
+    # Humilau City Nurse (Script 938): remove Luvdisc party requirement (flag 342)
+    try:
+        raw_938 = scripts_narc.files[938]
+        if raw_938:
+            sf_938 = disassemble(raw_938)
+            changed_938 = False
+            for i, line in enumerate(sf_938.lines):
+                if (
+                    line.type == "command"
+                    and line.parts == ["StackPush", 32803]
+                    and i + 2 < len(sf_938.lines)
+                    and sf_938.lines[i + 1].parts == ["StackPushConst", 1]
+                    and sf_938.lines[i + 2].parts == ["StackCmp", 1]
+                ):
+                    sf_938.lines[i] = Line("command", ["StackPushConst", 1])
+                    changed_938 = True
+                    break
+            if changed_938:
+                scripts_narc.files[938] = bytes(assemble(sf_938))
+                modified_scripts = True
+    except Exception:
+        pass
+
+    # Bypass restrictive party/stat requirements on gift checks:
+    # - s638 (Route 2 Lady): Solid Rock ability check -> any non-Egg Pokemon
+    # - s514 (Village Bridge Baker): Honey Gather ability check -> any non-Egg Pokemon
+    # - s654 / s1058 (Route 4 Ace Trainer): random 50..200 Speed/Attack check -> >= 0
+    for sid, old_push, nxt_cmd, new_val in (
+        (638, ["StackPush", 32804], ["StackPushConst", 116], 116),
+        (514, ["StackPush", 32802], ["StackPushConst", 118], 118),
+        (654, ["StackPush", 16775], ["StackCmp", 4], 0),
+        (1058, ["StackPush", 16775], ["StackCmp", 4], 0),
+    ):
+        try:
+            if len(scripts_narc.files) > sid and scripts_narc.files[sid]:
+                sf_g = disassemble(scripts_narc.files[sid])
+                changed_g = False
+                for i, line in enumerate(sf_g.lines[:-1]):
+                    if line.type == "command" and line.parts == old_push and sf_g.lines[i + 1].parts == nxt_cmd:
+                        sf_g.lines[i] = Line("command", ["StackPushConst", new_val])
+                        changed_g = True
+                        break
+                if changed_g:
+                    scripts_narc.files[sid] = bytes(assemble(sf_g))
+                    modified_scripts = True
+        except Exception:
+            pass
+
+    # Mistralton Cargo Service Pilot (Script 222 sub63): bypass Flying/Psychic type check (flag 472)
+    try:
+        if len(scripts_narc.files) > 222 and scripts_narc.files[222]:
+            sf_222 = disassemble(scripts_narc.files[222])
+            changed_222 = False
+            for i, line in enumerate(sf_222.lines[:-1]):
+                if (
+                    line.type == "command"
+                    and line.parts == ["VMJumpIf", 255, "lbl10_65"]
+                    and sf_222.lines[i + 1].type == "command"
+                    and sf_222.lines[i + 1].parts == ["StackPush", 32808]
+                ):
+                    sf_222.lines[i] = Line("command", ["VMJumpIf", 255, "lbl_pilot_any_mon"])
+                    sf_222.lines.insert(i + 1, Line("label", ["lbl_pilot_any_mon"]))
+                    changed_222 = True
+                    break
+            if changed_222:
+                scripts_narc.files[222] = bytes(assemble(sf_222))
+                modified_scripts = True
+    except Exception:
+        pass
+
+    # Chargestone Cave Nugget Brothers (Script 392): split Nugget (296) and Big Nugget (2585)
+    try:
+        if len(scripts_narc.files) > 392 and scripts_narc.files[392]:
+            sf_392 = disassemble(scripts_narc.files[392])
+            sub3_idx = sf_392.find_label("sub3")
+            if sub3_idx != -1:
+                new_392: list[Line] = []
+                active_item: int | None = None
+                in_sub3 = False
+                changed_392 = False
+                for line in sf_392.lines:
+                    if line.type == "label" and line.parts == ["sub3"]:
+                        in_sub3 = True
+                    elif in_sub3 and line.type == "command" and line.parts == ["VMReturn"]:
+                        in_sub3 = False
+                    if in_sub3 and line.type == "command":
+                        if line.parts in (["WorkSet", 32768, 92], ["WorkSet", 32768, 581]):
+                            active_item = line.parts[2]
+                        elif line.parts == ["FlagSet", 296]:
+                            changed_392 = True
+                            continue
+                    new_392.append(line)
+                    if in_sub3 and line.type == "command" and line.parts == ["RTCallGlobal", 2805]:
+                        if active_item == 92:
+                            new_392.append(Line("command", ["FlagSet", 296]))
+                            changed_392 = True
+                        elif active_item == 581:
+                            new_392.append(Line("command", ["FlagSet", 2585]))
+                            changed_392 = True
+                if changed_392:
+                    sf_392.lines = new_392
+                    scripts_narc.files[392] = bytes(assemble(sf_392))
+                    modified_scripts = True
+    except Exception:
+        pass
 
     if modified_scripts:
         rom.setFileByName("a/0/5/6", scripts_narc.save())
@@ -822,6 +1218,17 @@ def apply_roadblock_texts(rom: "NintendoDSRom") -> None:
             "To board our passenger flights, you'll[NextLine]need the Jet Badge!"
         )
         story_narc.files[130] = encode(t130)
+        text_modified = True
+    except Exception:
+        pass
+
+    try:
+        t399 = decode(story_narc.files[399])
+        t399[0][0].line = (
+            "Hm![End][NextLine]If you want past here,[NextLine]you have to defeat me,[Scroll][NextLine]"
+            "and my Roggenrola![End][NextLine]Come back once you have[NextLine]the Colress MCHN!"
+        )
+        story_narc.files[399] = encode(t399)
         text_modified = True
     except Exception:
         pass

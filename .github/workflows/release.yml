@@ -23,30 +23,12 @@ jobs:
       - id: v
         shell: python
         run: |
-          import json, os, pathlib, re, subprocess, zipfile
-          mp, ip = "worlds/pokemon_b2w2/archipelago.json", "worlds/pokemon_b2w2/__init__.py"
+          import json, os, pathlib, re, zipfile
+          mp = "worlds/pokemon_b2w2/archipelago.json"
           m = json.load(open(mp, encoding="utf-8"))
           cur = m["world_version"].strip().lstrip("v")
           ovr = "${{ github.event.inputs.version }}".strip().lstrip("v")
-          tags = set(subprocess.check_output(["git", "tag"], text=True).splitlines())
-          try:
-              chg = subprocess.check_output(["git", "diff", "--name-only", "HEAD~1", "HEAD"], text=True) if "${{ github.event_name }}" == "push" else ""
-          except subprocess.CalledProcessError:
-              chg = ""
-          if ovr:
-              ver, bump = ovr, True
-          elif f"v{cur}" not in tags and (cur == "0.0.1" or mp in chg):
-              ver, bump = cur, False
-          else:
-              p = cur.split(".")
-              p[-1] = str(int(p[-1]) + 1)
-              ver, bump = ".".join(p), True
-          if bump:
-              m["world_version"] = ver
-              with open(mp, "w", encoding="utf-8") as f:
-                  json.dump(m, f, indent=4)
-              txt = open(ip, encoding="utf-8").read()
-              open(ip, "w", encoding="utf-8").write(re.sub(r'APWORLD_VERSION\s*=\s*"[^"]+"', f'APWORLD_VERSION = "{ver}"', txt, 1))
+          ver = ovr or cur
           wd = pathlib.Path("worlds/pokemon_b2w2")
           ex_d, ex_e, ex_f = {"__pycache__", ".pytest_cache", ".git", ".idea", ".vscode", "scratch"}, {".pyc", ".pyo", ".nds", ".apb2w2", ".zip"}, {".gitignore", "essay.txt"}
           with zipfile.ZipFile("pokemon_b2w2.apworld", "w", zipfile.ZIP_DEFLATED, compresslevel=9) as zf:
@@ -60,20 +42,15 @@ jobs:
           rx = re.search(rf"^##\s+v?{re.escape(ver)}\b.*?\n(.*?)(?=\n##\s+|\Z)", cl, re.M | re.S)
           notes = rx.group(1).strip() if rx else f"See [changelog.md](https://github.com/${{ github.repository }}/blob/main/worlds/pokemon_b2w2/docs/changelog.md)."
           open("release_notes.md", "w", encoding="utf-8").write(notes + "\n")
-          open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8").write(f"tag=v{ver}\nbump={str(bump).lower()}\n")
+          open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8").write(f"tag=v{ver}\n")
       - env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          T="${{ steps.v.outputs.tag }}"
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          if [ "${{ steps.v.outputs.bump }}" = "true" ]; then
-            git add worlds/pokemon_b2w2/archipelago.json worlds/pokemon_b2w2/__init__.py
-            git commit -m "Bump version to ${{ steps.v.outputs.tag }}"
-            git push origin HEAD:main
-          fi
-          git tag "${{ steps.v.outputs.tag }}"
-          git push origin "${{ steps.v.outputs.tag }}"
-          T="${{ steps.v.outputs.tag }}"
+          git tag -f "$T"
+          git push origin "$T" --force
           if gh release view "$T" >/dev/null 2>&1; then
             gh release edit "$T" --draft=false --title "Pokemon B2W2 Archipelago $T" --notes-file release_notes.md
             gh release upload "$T" pokemon_b2w2.apworld --clobber

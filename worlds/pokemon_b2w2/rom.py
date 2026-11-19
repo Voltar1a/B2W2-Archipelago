@@ -388,7 +388,7 @@ def apply_qol_patches(rom: "NintendoDSRom", options: dict[str, Any]) -> None:
             if battle_scene in ("off", "turned_off", "1") and arm9[cfg_idx + 0x1E : cfg_idx + 0x20] == b"\x80\x21":
                 arm9[cfg_idx + 0x20] = 0x0A  # Battle scene off bit
 
-    hold_a_turbo_enabled = bool(options.get("hold_a_turbo", True))
+    hold_a_turbo_enabled = bool(options.get("hold_a_turbo", False))
     auto_run_enabled = bool(options.get("auto_run", False))
     guaranteed_escape_enabled = bool(options.get("guaranteed_escape", False))
     fast_fishing_enabled = bool(options.get("fast_fishing", True))
@@ -397,8 +397,9 @@ def apply_qol_patches(rom: "NintendoDSRom", options: dict[str, Any]) -> None:
     arm9_base = rom.arm9RamAddress
     delta = 0x2C if is_white2 else 0
     get_repeat_addr = 0x0203DEFC + delta
-    get_cont_addr = 0x0203DF20 + delta
-    dwc_base = 0x0205854C if is_white2 else 0x02058520
+    freespot_pat = b"\xf8\x43\x2d\xe9\x00\x60\xa0\xe1\xba\x30\xd6\xe1\x01\x50\xa0\xe1\x02\x40\xa0\xe1\x20\x00\x53\xe3"
+    freespot_idx = arm9.find(freespot_pat)
+    dwc_base = (arm9_base + freespot_idx) if freespot_idx != -1 else (0x02059178 if is_white2 else 0x0205914C)
 
     # IsQoLEnabled(R0=work_sub_off, R1=default_on) helper at dwc_base + 0x00 (0x34 bytes)
     helper_addr = dwc_base
@@ -413,101 +414,120 @@ def apply_qol_patches(rom: "NintendoDSRom", options: dict[str, Any]) -> None:
     helper_code += b"\x28\x1c\x30\xbd\x01\x20\x30\xbd\x00\x20\x30\xbd"
     assert len(helper_code) == 0x34
 
-    # GetTurboRepeat() at dwc_base + 0x34 (0x24 bytes)
-    turbo_hook_addr = dwc_base + 0x34
-    turbo_code = bytearray()
-    turbo_code += b"\x10\xb5"
-    turbo_code += make_bl(turbo_hook_addr + 0x02, get_repeat_addr)
-    turbo_code += b"\x04\x1c\x36\x20" + (b"\x01\x21" if hold_a_turbo_enabled else b"\x00\x21")
-    turbo_code += make_bl(turbo_hook_addr + 0x0C, helper_addr)
-    turbo_code += b"\x00\x28\x04\xd0"
-    turbo_code += make_bl(turbo_hook_addr + 0x14, get_cont_addr)
-    turbo_code += b"\x01\x21\x08\x40\x20\x43\x20\x1c\x10\xbd\xc0\x46"
-    assert len(turbo_code) == 0x24
-
-    # BikeHook() at dwc_base + 0x58 (0x20 bytes)
-    bike_hook_addr = dwc_base + 0x58
+    # BikeHook() at dwc_base + 0x34 (0x20 bytes)
+    bike_hook_addr = dwc_base + 0x34
     bike_code = bytearray()
     bike_code += b"\x10\xb5\x41\x43\x50\x18\xc0\x7f\x04\x1c"
-    bike_code += b"\x48\x20" + (b"\x01\x21" if bike_everywhere_enabled else b"\x00\x21")
+    bike_code += b"\x54\x20" + (b"\x01\x21" if bike_everywhere_enabled else b"\x00\x21")
     bike_code += make_bl(bike_hook_addr + 0x0E, helper_addr)
     bike_code += b"\x00\x28\x01\xd0\x04\x20\x20\x43\x20\x1c\x10\xbd\xc0\x46"
     assert len(bike_code) == 0x20
 
-    # AutoRunGridHook() at dwc_base + 0x78 (0x20 bytes)
-    autorun_grid_addr = dwc_base + 0x78
+    # AutoRunGridHook() at dwc_base + 0x54 (0x20 bytes)
+    autorun_grid_addr = dwc_base + 0x54
     autorun_grid_code = bytearray()
-    autorun_grid_code += b"\x0d\xb5\x42\x20" + (b"\x01\x21" if auto_run_enabled else b"\x00\x21")
+    autorun_grid_code += b"\x0d\xb5\x4e\x20" + (b"\x01\x21" if auto_run_enabled else b"\x00\x21")
     autorun_grid_code += make_bl(autorun_grid_addr + 0x06, helper_addr)
-    autorun_grid_code += b"\x01\x9a\x02\x21\x0a\x40\x52\x08\x50\x40\x00\x28\x02\xd1\x03\x98\x0a\x30\x03\x90\x0d\xbd"
+    autorun_grid_code += b"\x01\x9a\x02\x21\x0a\x40\x52\x08\x50\x40\x00\x28\x02\xd1\x03\x98\x0c\x30\x03\x90\x0d\xbd"
     assert len(autorun_grid_code) == 0x20
 
-    # AutoRunRailHook() at dwc_base + 0x98 (0x20 bytes)
-    autorun_rail_addr = dwc_base + 0x98
+    # AutoRunRailHook() at dwc_base + 0x74 (0x20 bytes)
+    autorun_rail_addr = dwc_base + 0x74
     autorun_rail_code = bytearray()
-    autorun_rail_code += b"\x0d\xb5\x42\x20" + (b"\x01\x21" if auto_run_enabled else b"\x00\x21")
+    autorun_rail_code += b"\x0d\xb5\x4e\x20" + (b"\x01\x21" if auto_run_enabled else b"\x00\x21")
     autorun_rail_code += make_bl(autorun_rail_addr + 0x06, helper_addr)
-    autorun_rail_code += b"\x02\x9a\x02\x21\x0a\x40\x52\x08\x50\x40\x00\x28\x02\xd1\x03\x98\x04\x30\x03\x90\x0d\xbd"
+    autorun_rail_code += b"\x02\x9a\x02\x21\x0a\x40\x52\x08\x50\x40\x00\x28\x02\xd1\x03\x98\x06\x30\x03\x90\x0d\xbd"
     assert len(autorun_rail_code) == 0x20
 
-    # FishTimerHook() at dwc_base + 0xB8 (0x18 bytes)
-    fish_timer_addr = dwc_base + 0xB8
+    # FishTimerHook() at dwc_base + 0x94 (0x18 bytes)
+    fish_timer_addr = dwc_base + 0x94
     fish_timer_code = bytearray()
-    fish_timer_code += b"\x00\xb5\x46\x20" + (b"\x01\x21" if fast_fishing_enabled else b"\x00\x21")
+    fish_timer_code += b"\x00\xb5\x52\x20" + (b"\x01\x21" if fast_fishing_enabled else b"\x00\x21")
     fish_timer_code += make_bl(fish_timer_addr + 0x06, helper_addr)
     fish_timer_code += b"\x00\x28\x01\xd1\x5a\x20"
     fish_timer_code += make_bl(fish_timer_addr + 0x10, 0x02005784)
     fish_timer_code += b"\x00\xbd\xc0\x46"
     assert len(fish_timer_code) == 0x18
 
-    # FishBiteHook() at dwc_base + 0xD0 (0x1C bytes)
-    fish_bite_addr = dwc_base + 0xD0
+    # FishBiteHook() at dwc_base + 0xAC (0x1C bytes)
+    fish_bite_addr = dwc_base + 0xAC
     fish_bite_code = bytearray()
-    fish_bite_code += b"\x0f\xb5\x46\x20" + (b"\x01\x21" if fast_fishing_enabled else b"\x00\x21")
+    fish_bite_code += b"\x0f\xb5\x52\x20" + (b"\x01\x21" if fast_fishing_enabled else b"\x00\x21")
     fish_bite_code += make_bl(fish_bite_addr + 0x06, helper_addr)
     fish_bite_code += b"\x00\x28\x03\xd1\x00\x98\xa0\x42\x02\xd9\x04\x98\x06\x30\x04\x90\x0f\xbd"
     assert len(fish_bite_code) == 0x1C
 
-    # EscapeHook() at dwc_base + 0xEC (0x1C bytes)
-    escape_hook_addr = dwc_base + 0xEC
+    # EscapeHook() at dwc_base + 0xC8 (0x1C bytes)
+    escape_hook_addr = dwc_base + 0xC8
     escape_code = bytearray()
-    escape_code += b"\x0f\xb5\x44\x20" + (b"\x01\x21" if guaranteed_escape_enabled else b"\x00\x21")
+    escape_code += b"\x0f\xb5\x50\x20" + (b"\x01\x21" if guaranteed_escape_enabled else b"\x00\x21")
     escape_code += make_bl(escape_hook_addr + 0x06, helper_addr)
     escape_code += b"\x00\x28\x05\xd1\x01\x99\x8c\x42\x02\xd9\x04\x98\x22\x30\x04\x90\x0f\xbd"
     assert len(escape_code) == 0x1C
 
-    qol_blob = helper_code + turbo_code + bike_code + autorun_grid_code + autorun_rail_code + fish_timer_code + fish_bite_code + escape_code
-    assert len(qol_blob) == 0x108
+    # Debounces 30vs60 a press problems
+    turbo_keypad_addr = dwc_base + 0xE4
+    copy_p30_addr = dwc_base + 0x10C
+    raw_pressed_addr = dwc_base + 0x120
+    raw_p60_addr = raw_pressed_addr + 0x1C
+
+    turbo_keypad_code = bytearray()
+    turbo_keypad_code += b"\xe0\x60\x0d\xb5\x21\x69\x07\x4a\x11\x60\x53\x68\x0b\x43\x53\x60\x36\x20"
+    turbo_keypad_code += (b"\x01\x21" if hold_a_turbo_enabled else b"\x00\x21")
+    turbo_keypad_code += make_bl(turbo_keypad_addr + 0x14, helper_addr)
+    turbo_keypad_code += b"\x00\x28\x01\xd0\x61\x69\x00\xe0\x21\x69\x0d\xbd"
+    turbo_keypad_code += struct.pack("<I", raw_p60_addr)
+    assert len(turbo_keypad_code) == 0x28
+
+    copy_p30_code = bytearray()
+    copy_p30_code += b"\x60\x6b\xa0\x62\x02\x48\x41\x68\x81\x60\x00\x21\x41\x60\x70\x47"
+    copy_p30_code += struct.pack("<I", raw_p60_addr)
+    assert len(copy_p30_code) == 0x14
+
+    get_mgr_addr = 0x0203D2D8 + delta
+    raw_pressed_code = bytearray()
+    raw_pressed_code += b"\x10\xb5"
+    raw_pressed_code += make_bl(raw_pressed_addr + 0x02, get_mgr_addr)
+    raw_pressed_code += b"\x3d\x30\x04\x78\x03\x48\x1e\x2c\x01\xd1\x80\x68\x10\xbd\x00\x68\x10\xbd"
+    raw_pressed_code += struct.pack("<I", raw_p60_addr)
+    raw_pressed_code += b"\x00" * 12
+    assert len(raw_pressed_code) == 0x28
+
+    qol_blob = (
+        helper_code + bike_code + autorun_grid_code + autorun_rail_code
+        + fish_timer_code + fish_bite_code + escape_code
+        + turbo_keypad_code + copy_p30_code + raw_pressed_code
+    )
+    assert len(qol_blob) == 0x148
     dwc_off = dwc_base - arm9_base
     arm9[dwc_off : dwc_off + len(qol_blob)] = qol_blob
 
-    print_wait_off = 0x218AE + delta
-    arm9[print_wait_off : print_wait_off + 4] = make_bl(arm9_base + print_wait_off, turbo_hook_addr)
+    keypad_pat = bytes.fromhex("e0602169e161a06160692062201c")
+    keypad_idx = arm9.find(keypad_pat)
+    if keypad_idx != -1:
+        arm9[keypad_idx : keypad_idx + 4] = make_bl(arm9_base + keypad_idx, turbo_keypad_addr)
+        if arm9[keypad_idx + 0x3C : keypad_idx + 0x40] == b"\x60\x6b\xa0\x62":
+            arm9[keypad_idx + 0x3C : keypad_idx + 0x40] = make_bl(
+                arm9_base + keypad_idx + 0x3C, copy_p30_addr
+            )
+
+    # Stop Turbo A at choices
+    for menu_off in (
+        0x218A8, 0x276D2, 0x276EC, 0x27700, 0x27714, 0x27738,
+        0x2774C, 0x277F4, 0x27808, 0x27952, 0x27964, 0x27976, 0x29F44,
+    ):
+        site_off = menu_off + delta
+        arm9[site_off : site_off + 4] = make_bl(arm9_base + site_off, raw_pressed_addr)
+
     zone_flags_off = 0x0204587E + delta - arm9_base
     arm9[zone_flags_off : zone_flags_off + 8] = b"\x00\xb5" + make_bl(arm9_base + zone_flags_off + 2, bike_hook_addr) + b"\x00\xbd"
 
     ov_table = rom.loadArm9Overlays()
-    for oid, turbo_sites in (
-        (12, (0x044E2, 0x04506, 0x11B80, 0x13A56, 0x13A62, 0x13C56, 0x15D1C, 0x16190)),
-        (168, (0x02FCE, 0x1126C, 0x11E2A)),
-    ):
-        if oid in ov_table:
-            ov = ov_table[oid]
-            ov_data = bytearray(ov.data)
-            for site in turbo_sites:
-                ov_data[site : site + 4] = make_bl(ov.ramAddress + site, turbo_hook_addr)
-            ov.data = bytes(ov_data)
-            rom.files[ov.fileID] = ov.save(compress=ov.compressed)
-            rom.arm9OverlayTable = saveOverlayTable(ov_table)
 
     if 167 in ov_table:
         ov167 = ov_table[167]
         ov167_data = bytearray(ov167.data)
         modified_ov167 = False
-
-        for site in (0x05480, 0x1E6F0, 0x1E72C, 0x1E752, 0x39732):
-            ov167_data[site : site + 4] = make_bl(ov167.ramAddress + site, turbo_hook_addr)
-            modified_ov167 = True
 
         # Dynamic catch rate (var 16792) and EXP (var 16793) multiplier hooks
         if len(ov167_data) >= 0x20600:
@@ -549,13 +569,6 @@ def apply_qol_patches(rom: "NintendoDSRom", options: dict[str, Any]) -> None:
             ov167_data[hook_cap_off : hook_cap_off + len(cap_code)] = cap_code
             ov167_data[0x15f26 : 0x15f2a] = make_bl(ov167.ramAddress + 0x15f26, hook_cap_ram)
             modified_ov167 = True
-
-        if options.get("guaranteed_catch", False):
-            catch_pat = b"\xFF\x20\x00\x03\x87\x42"
-            catch_pos = ov167_data.find(catch_pat)
-            if catch_pos != -1:
-                ov167_data[catch_pos + 8 : catch_pos + 10] = b"\xc0\x46"  # guaranteed catch
-                modified_ov167 = True
 
         esc_pat = b"\x8C\x42\x11\xD8"
         esc_pos = ov167_data.find(esc_pat)
@@ -636,6 +649,21 @@ def apply_qol_patches(rom: "NintendoDSRom", options: dict[str, Any]) -> None:
     if rail_pos != -1:
         ov36_data[rail_pos : rail_pos + 6] = make_bl(ov36.ramAddress + rail_pos, autorun_rail_addr) + b"\xc0\x46"
         modified_ov36 = True
+
+    # Turbo A debouncer for cutscene starts
+    fep_pat = b"\x70\xb5\x0e\x1c\x14\x1c\x00\x21\x40\x22\x05\x1c"
+    fep_search = 0
+    while True:
+        fep_pos = ov36_data.find(fep_pat, fep_search)
+        if fep_pos == -1 or fep_pos + 0x3C > len(ov36_data):
+            break
+        if ov36_data[fep_pos + 0x34 : fep_pos + 0x36] == b"\xa8\x62":
+            ov36_data[fep_pos + 0x30 : fep_pos + 0x34] = make_bl(
+                ov36.ramAddress + fep_pos + 0x30, raw_pressed_addr
+            )
+            modified_ov36 = True
+            break
+        fep_search = fep_pos + 2
 
     # Skip HM field move cutscenes
     is_fast_hm = True

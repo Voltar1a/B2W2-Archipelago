@@ -1131,6 +1131,10 @@ class Rom:
     This is the alignment used starting each block when converting the ROM to bytes.
     It should be a power of two.
     """
+    raw_twl_section: Optional[bytes] = None
+    """
+    Preserved raw TWL (DSi) section bytes when loaded without decrypting modcrypt.
+    """
 
     @staticmethod
     def from_bytes(rom: bytes, decrypt_modcrypt: bool = True) -> "Rom":
@@ -1187,6 +1191,13 @@ class Rom:
         else:
             arm9i = arm7i = None
 
+        raw_twl_section: Optional[bytes] = None
+        if not decrypt_modcrypt and header.get_le(HeaderField.UNITCODE) != 0:
+            twl_start = header.get_le(HeaderField.TWL_ROM_REGION_START) << 19
+            total_size = header.get_le(HeaderField.TOTAL_ROMSIZE)
+            if 0 < twl_start < total_size <= len(rom):
+                raw_twl_section = rom[twl_start:total_size]
+
         return Rom(
             header,
             arm9,
@@ -1197,7 +1208,8 @@ class Rom:
             arm7i,
             {name:file_seq[id] for name, id in filename_id_map.items()},
             file_order,
-            banner
+            banner,
+            raw_twl_section=raw_twl_section,
         )
 
     def to_bytes(self, fill_tail: bool = True, fill_with: bytes = b'\xFF') -> bytes:
@@ -1317,47 +1329,57 @@ class Rom:
 
         ntr_rom_size = cur_off()
 
-        has_twl_section = header.get_le(HeaderField.UNITCODE) != 0 \
-            and (self.arm9i is not None or self.arm7i is not None)
+        preserved_twl = False
+        if self.raw_twl_section is not None and header.get_le(HeaderField.UNITCODE) != 0:
+            orig_twl_start = header.get_le(HeaderField.TWL_ROM_REGION_START) << 19
+            if cur_off() <= orig_twl_start:
+                post_header_bytes += fill_with * (orig_twl_start - cur_off())
+                post_header_bytes += self.raw_twl_section
+                last_padding = 0
+                preserved_twl = True
 
-        if header.get_le(HeaderField.UNITCODE) != 0:
-            # twl section should be padded to 0x80000
-            post_header_bytes += fill_with * (-len(post_header_bytes) & 0x7FFFF)
-            header[HeaderField.NTR_ROM_REGION_END] = header[HeaderField.TWL_ROM_REGION_START] = cur_off() >> 0x13
-            sio = get_start_info_offset(self.arm9, header.get_le(HeaderField.ARM9_LOADADDR), header.get_le(HeaderField.ARM9_ENTRYPOINT))
-            if sio is not None:
-                header[HeaderField.NDS_UNK_DSI_ARM9_PARAMS_TABLE_OFFSET] = sio
-            sio = get_start_info_offset(self.arm7, header.get_le(HeaderField.ARM7_LOADADDR), header.get_le(HeaderField.ARM7_ENTRYPOINT))
-            if sio is not None:
-                header[HeaderField.ARM7_PARAMS_TABLE_OFFSET] = sio
+        if not preserved_twl:
+            has_twl_section = header.get_le(HeaderField.UNITCODE) != 0 \
+                and (self.arm9i is not None or self.arm7i is not None)
 
-        # we clear the modcrypt areas (assuming that they were decrypted when loading... no need to re-encrypt,
-        # and they might have moved... if people complain then I'll implement this again in the future.
-        header[HeaderField.DSI_FLAGS] = header.get_le(HeaderField.DSI_FLAGS) & ~2
-        for i in [1, 2]:
-            for sfx in ["START", "SIZE"]:
-                header[getattr(HeaderField, f"MODCRYPT{i}_{sfx}")] = 0
+            if header.get_le(HeaderField.UNITCODE) != 0:
+                # twl section should be padded to 0x80000
+                post_header_bytes += fill_with * (-len(post_header_bytes) & 0x7FFFF)
+                header[HeaderField.NTR_ROM_REGION_END] = header[HeaderField.TWL_ROM_REGION_START] = cur_off() >> 0x13
+                sio = get_start_info_offset(self.arm9, header.get_le(HeaderField.ARM9_LOADADDR), header.get_le(HeaderField.ARM9_ENTRYPOINT))
+                if sio is not None:
+                    header[HeaderField.NDS_UNK_DSI_ARM9_PARAMS_TABLE_OFFSET] = sio
+                sio = get_start_info_offset(self.arm7, header.get_le(HeaderField.ARM7_LOADADDR), header.get_le(HeaderField.ARM7_ENTRYPOINT))
+                if sio is not None:
+                    header[HeaderField.ARM7_PARAMS_TABLE_OFFSET] = sio
 
-        if has_twl_section:
-            align_post_header_bytes()
-            if self.arm9i is not None:
-                # there is some cryptographic stuff before the arm9i...
-                # leave it zero for now
-                post_header_bytes += bytes(0x3000)
+            # we clear the modcrypt areas (assuming that they were decrypted when loading... no need to re-encrypt,
+            # and they might have moved... if people complain then I'll implement this again in the future.
+            header[HeaderField.DSI_FLAGS] = header.get_le(HeaderField.DSI_FLAGS) & ~2
+            for i in [1, 2]:
+                for sfx in ["START", "SIZE"]:
+                    header[getattr(HeaderField, f"MODCRYPT{i}_{sfx}")] = 0
 
-                header[HeaderField.ARM9I_ROMOFFSET] = cur_off()
-                post_header_bytes += self.arm9i
-                last_padding = align_post_header_bytes()
-                header[HeaderField.ARM9I_LOADSIZE] = len(self.arm9i)
-            else:
-                header[HeaderField.ARM9I_ROMOFFSET] = header[HeaderField.ARM9I_LOADSIZE] = 0
-            if self.arm7i is not None:
-                header[HeaderField.ARM7I_ROMOFFSET] = cur_off()
-                post_header_bytes += self.arm7i
-                last_padding = align_post_header_bytes()
-                header[HeaderField.ARM7I_LOADSIZE] = len(self.arm7i)
-            else:
-                header[HeaderField.ARM7I_ROMOFFSET] = header[HeaderField.ARM7I_LOADSIZE] = 0
+            if has_twl_section:
+                align_post_header_bytes()
+                if self.arm9i is not None:
+                    # there is some cryptographic stuff before the arm9i...
+                    # leave it zero for now
+                    post_header_bytes += bytes(0x3000)
+
+                    header[HeaderField.ARM9I_ROMOFFSET] = cur_off()
+                    post_header_bytes += self.arm9i
+                    last_padding = align_post_header_bytes()
+                    header[HeaderField.ARM9I_LOADSIZE] = len(self.arm9i)
+                else:
+                    header[HeaderField.ARM9I_ROMOFFSET] = header[HeaderField.ARM9I_LOADSIZE] = 0
+                if self.arm7i is not None:
+                    header[HeaderField.ARM7I_ROMOFFSET] = cur_off()
+                    post_header_bytes += self.arm7i
+                    last_padding = align_post_header_bytes()
+                    header[HeaderField.ARM7I_LOADSIZE] = len(self.arm7i)
+                else:
+                    header[HeaderField.ARM7I_ROMOFFSET] = header[HeaderField.ARM7I_LOADSIZE] = 0
 
 
         if last_padding > 0:

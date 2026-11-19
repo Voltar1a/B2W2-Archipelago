@@ -194,7 +194,7 @@ def apply_living_room_starter(rom: "NintendoDSRom", options: dict) -> None:
 
         starting_day = options.get("starting_day", 0)
         starting_season = options.get("starting_season", 0)
-        hold_a_turbo = 1 if options.get("hold_a_turbo", True) else 2
+        hold_a_turbo = 1 if options.get("hold_a_turbo", False) else 2
         blind_trainers = 1 if options.get("blind_trainers", False) else 2
         auto_run = 1 if options.get("auto_run", False) else 2
         guaranteed_escape = 1 if options.get("guaranteed_escape", False) else 2
@@ -217,10 +217,10 @@ def apply_living_room_starter(rom: "NintendoDSRom", options: dict) -> None:
             Line("command", ["WorkSetConst", 16793, exp_mult]),
             Line("command", ["WorkSetConst", 16794, blind_trainers]),
             Line("command", ["WorkSetConst", 16795, hold_a_turbo]),
-            Line("command", ["WorkSetConst", 16801, auto_run]),
-            Line("command", ["WorkSetConst", 16802, guaranteed_escape]),
-            Line("command", ["WorkSetConst", 16803, fast_fishing]),
-            Line("command", ["WorkSetConst", 16804, bike_everywhere]),
+            Line("command", ["WorkSetConst", 16807, auto_run]),
+            Line("command", ["WorkSetConst", 16808, guaranteed_escape]),
+            Line("command", ["WorkSetConst", 16809, fast_fishing]),
+            Line("command", ["WorkSetConst", 16810, bike_everywhere]),
             Line("command", ["WorkSetConst", 16799, starting_day]),
             Line("command", ["WorkSetConst", 16800, starting_season]),
             Line("command", ["FlagSet", 3040]),
@@ -247,10 +247,10 @@ def apply_living_room_starter(rom: "NintendoDSRom", options: dict) -> None:
             Line("command", ["FlagSet", 2488]),
             Line("command", ["WorkSetConst", 16794, blind_trainers]),
             Line("command", ["WorkSetConst", 16795, hold_a_turbo]),
-            Line("command", ["WorkSetConst", 16801, auto_run]),
-            Line("command", ["WorkSetConst", 16802, guaranteed_escape]),
-            Line("command", ["WorkSetConst", 16803, fast_fishing]),
-            Line("command", ["WorkSetConst", 16804, bike_everywhere]),
+            Line("command", ["WorkSetConst", 16807, auto_run]),
+            Line("command", ["WorkSetConst", 16808, guaranteed_escape]),
+            Line("command", ["WorkSetConst", 16809, fast_fishing]),
+            Line("command", ["WorkSetConst", 16810, bike_everywhere]),
             Line("command", ["WorkSetConst", 16799, starting_day]),
             Line("command", ["WorkSetConst", 16800, starting_season]),
             Line("command", ["WorkSetConst", 16791, log_filter]),
@@ -556,10 +556,10 @@ def apply_living_room_starter(rom: "NintendoDSRom", options: dict) -> None:
             Line("command", ["FlagSet", 2488]),
             Line("command", ["WorkSetConst", 16794, blind_trainers]),
             Line("command", ["WorkSetConst", 16795, hold_a_turbo]),
-            Line("command", ["WorkSetConst", 16801, auto_run]),
-            Line("command", ["WorkSetConst", 16802, guaranteed_escape]),
-            Line("command", ["WorkSetConst", 16803, fast_fishing]),
-            Line("command", ["WorkSetConst", 16804, bike_everywhere]),
+            Line("command", ["WorkSetConst", 16807, auto_run]),
+            Line("command", ["WorkSetConst", 16808, guaranteed_escape]),
+            Line("command", ["WorkSetConst", 16809, fast_fishing]),
+            Line("command", ["WorkSetConst", 16810, bike_everywhere]),
             Line("command", ["WorkSetConst", 16799, starting_day]),
             Line("command", ["WorkSetConst", 16800, starting_season]),
             Line("command", ["CMD_262", 4, 1]),

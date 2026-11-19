@@ -68,4 +68,5 @@ PROGRESSION_ITEM_TABLE: dict[str, ItemInfo] = {
     "Card Key":         ItemInfo(100475, 0x01DB, "key_items", ItemClassification.progression),
     "Grubby Hanky":     ItemInfo(100634, 0x027A, "key_items", ItemClassification.progression),
     "Colress MCHN":     ItemInfo(100635, 0x027B, "key_items", ItemClassification.progression),
+    "Permit":           ItemInfo(100630, 0x0276, "key_items", ItemClassification.progression),
 }
