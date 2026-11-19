@@ -1,0 +1,8 @@
+{
+    "game": "Pokemon Black 2 and White 2",
+    "minimum_ap_version": "0.6.7",
+    "authors": ["Voltar1a"],
+    "world_version": "0.0.1",
+    "version": 7,
+    "compatible_version": 7
+}

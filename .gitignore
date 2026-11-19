@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# ROMs, patches & built packages
+*.nds
+*.apbw
+*.apb2
+*.apw2
+*.apworld
+
+# Environments & IDEs
+.venv/
+venv/
+.idea/
+.vscode/
+
+# Local build helper
+build_apworld.py
+
+# OS
+Thumbs.db
+Desktop.ini
+.DS_Store

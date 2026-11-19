@@ -1,0 +1,82 @@
+name: Release
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      version:
+        required: false
+        default: ""
+permissions:
+  contents: write
+jobs:
+  release:
+    if: "!contains(github.event.head_commit.message, '[skip ci]') && github.actor != 'github-actions[bot]'"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - id: v
+        shell: python
+        run: |
+          import json, os, pathlib, re, subprocess, zipfile
+          mp, ip = "worlds/pokemon_b2w2/archipelago.json", "worlds/pokemon_b2w2/__init__.py"
+          m = json.load(open(mp, encoding="utf-8"))
+          cur = m["world_version"].strip().lstrip("v")
+          ovr = "${{ github.event.inputs.version }}".strip().lstrip("v")
+          tags = set(subprocess.check_output(["git", "tag"], text=True).splitlines())
+          try:
+              chg = subprocess.check_output(["git", "diff", "--name-only", "HEAD~1", "HEAD"], text=True) if "${{ github.event_name }}" == "push" else ""
+          except subprocess.CalledProcessError:
+              chg = ""
+          if ovr:
+              ver, bump = ovr, True
+          elif f"v{cur}" not in tags and (cur == "0.0.1" or mp in chg):
+              ver, bump = cur, False
+          else:
+              p = cur.split(".")
+              p[-1] = str(int(p[-1]) + 1)
+              ver, bump = ".".join(p), True
+          if bump:
+              m["world_version"] = ver
+              with open(mp, "w", encoding="utf-8") as f:
+                  json.dump(m, f, indent=4)
+              txt = open(ip, encoding="utf-8").read()
+              open(ip, "w", encoding="utf-8").write(re.sub(r'APWORLD_VERSION\s*=\s*"[^"]+"', f'APWORLD_VERSION = "{ver}"', txt, 1))
+          wd = pathlib.Path("worlds/pokemon_b2w2")
+          ex_d, ex_e, ex_f = {"__pycache__", ".pytest_cache", ".git", ".idea", ".vscode", "scratch"}, {".pyc", ".pyo", ".nds", ".apb2w2", ".zip"}, {".gitignore", "essay.txt"}
+          with zipfile.ZipFile("pokemon_b2w2.apworld", "w", zipfile.ZIP_DEFLATED, compresslevel=9) as zf:
+              for r, ds, fs in os.walk(wd):
+                  ds[:] = [d for d in ds if d not in ex_d and not d.startswith("_temp")]
+                  for fn in fs:
+                      if os.path.splitext(fn)[1].lower() not in ex_e and fn not in ex_f and "_temp" not in fn:
+                          fp = pathlib.Path(r) / fn
+                          zf.write(fp, f"pokemon_b2w2/{fp.relative_to(wd).as_posix()}")
+          cl = open("worlds/pokemon_b2w2/docs/changelog.md", encoding="utf-8").read()
+          rx = re.search(rf"^##\s+v?{re.escape(ver)}\b.*?\n(.*?)(?=\n##\s+|\Z)", cl, re.M | re.S)
+          notes = rx.group(1).strip() if rx else f"See [changelog.md](https://github.com/${{ github.repository }}/blob/main/worlds/pokemon_b2w2/docs/changelog.md)."
+          open("release_notes.md", "w", encoding="utf-8").write(notes + "\n")
+          open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8").write(f"tag=v{ver}\nbump={str(bump).lower()}\n")
+      - env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if [ "${{ steps.v.outputs.bump }}" = "true" ]; then
+            git add worlds/pokemon_b2w2/archipelago.json worlds/pokemon_b2w2/__init__.py
+            git commit -m "Bump version to ${{ steps.v.outputs.tag }}"
+            git push origin HEAD:main
+          fi
+          git tag "${{ steps.v.outputs.tag }}"
+          git push origin "${{ steps.v.outputs.tag }}"
+          T="${{ steps.v.outputs.tag }}"
+          if gh release view "$T" >/dev/null 2>&1; then
+            gh release edit "$T" --draft=false --title "Pokemon B2W2 Archipelago $T" --notes-file release_notes.md
+            gh release upload "$T" pokemon_b2w2.apworld --clobber
+          else
+            gh release create "$T" pokemon_b2w2.apworld --title "Pokemon B2W2 Archipelago $T" --notes-file release_notes.md
+          fi
