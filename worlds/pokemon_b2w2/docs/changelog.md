@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.0.3
+- Location overhaul part 1
+
 ## 0.0.2
 - Logic check, updated locations with incorrect mappings
 - Fixed some NPC gift script injections and altered some gift requirements

@@ -7,7 +7,7 @@ NPC_GIFT_LOCATIONS: dict[str, tuple[int, int | None, str | None, tuple[int, int]
     'Abundant Shrine - Gift: Elder near Landorus shrine': (300215, 1710, 'Abundant Shrine', None),
 
     # Abyssal Ruins
-    'Abyssal Ruins - Gift: 4F Central altar chamber crown': (300164, 1469, 'Abyssal Ruins', None),
+    'Abyssal Ruins - Gift: 4F, central altar chamber crown': (300164, 1469, 'Abyssal Ruins', None),
 
     # Accumula Town
     'Accumula Town - Gift: Youngster in northwest building 1F': (300220, 2766, 'Accumula Town', None),
@@ -58,15 +58,19 @@ NPC_GIFT_LOCATIONS: dict[str, tuple[int, int | None, str | None, tuple[int, int]
     'Castelia Gym - Gift: Clyde': (300049, 109, 'Castelia Gym', None),
 
     # Castelia Sewers
-    'Castelia Sewers - Gift: Scientist in northern room (Spring/Summer, Surf)': (300281, 2781, 'Castelia Sewers', None),
+    'Castelia Sewers - Gift: Scientist in northern room (Spring/Summer, Surf)': (300281, 2781, 'Castelia Sewers - Water', None),
+
+
     'Castelia Sewers - Gift: Scientist in room near Doctor': (300284, 2782, 'Castelia Sewers', None),
 
     # Celestial Tower
-    'Celestial Tower - Gift: Professor Juniper on 1F': (300192, 766, 'Celestial Tower', None),
+    'Celestial Tower - Gift: 1F, Professor Juniper': (300192, 766, 'Celestial Tower', None),
 
     # Chargestone Cave
-    'Chargestone Cave - Gift: Nugget Brothers on B1F 1': (300153, 296, 'Chargestone Cave', None),
-    'Chargestone Cave - Gift: Nugget Brothers on B1F 2': (300359, 2585, 'Chargestone Cave', None),
+    'Chargestone Cave - Gift: B1F, Nugget Brothers 1': (300153, 296, 'Chargestone Cave - Past Bridge', None),
+
+    'Chargestone Cave - Gift: B1F, Nugget Brothers 2': (300359, 2585, 'Chargestone Cave - Past Bridge', None),
+
 
     # Desert Resort
     'Desert Resort - Gift: Man in black in sand pit': (300149, 216, 'Desert Resort', None),
@@ -75,7 +79,9 @@ NPC_GIFT_LOCATIONS: dict[str, tuple[int, int | None, str | None, tuple[int, int]
     'Dragonspiral Tower - Gift: Cedric at tower entrance': (300162, 2341, 'Dragonspiral Tower', None),
 
     # Dreamyard
-    'Dreamyard - Gift: Soul Dew after battling Latios/Latias': (300365, 497, 'Dreamyard', None),
+    'Dreamyard - Gift: Soul Dew after battling Latios/Latias': (300365, 497, 'Dreamyard - Cut Area', None),
+
+
 
     # Driftveil City
     'Driftveil City - Gift: Clyde': (300108, 111, 'Driftveil City', None),
@@ -102,7 +108,9 @@ NPC_GIFT_LOCATIONS: dict[str, tuple[int, int | None, str | None, tuple[int, int]
 
     # Giant Chasm
     'Giant Chasm - Gift: Rood after defeating Plasma Grunt': (300163, 2346, 'Giant Chasm', None),
-    'Giant Chasm - Gift: DNA Splicers after defeating Ghetsis': (300310, 481, 'Giant Chasm', None),
+    'Giant Chasm - Gift: DNA Splicers after defeating Ghetsis': (300310, 481, 'Giant Chasm - Post-Frigate', None),
+
+
 
     # Humilau City
     'Humilau City - Gift: Couple after Celestial Tower bell': (300271, 2347, 'Humilau City', None),
@@ -180,7 +188,8 @@ NPC_GIFT_LOCATIONS: dict[str, tuple[int, int | None, str | None, tuple[int, int]
     'Pinwheel Forest - Gift: Scientist after Habitat List': (300148, 470, 'Pinwheel Forest', None),
 
     # Plasma Frigate
-    'Plasma Frigate - Gift: Colress in bridge chamber': (300306, 429, 'Plasma Frigate', None),
+    'Plasma Frigate - Gift: Colress in bridge chamber': (300306, 429, 'Plasma Frigate (P2 Laboratory)', None),
+
 
     # Pokémon League
 
@@ -212,19 +221,31 @@ NPC_GIFT_LOCATIONS: dict[str, tuple[int, int | None, str | None, tuple[int, int]
     'Route 2 - Gift: Lady east of Youngster Mikey': (300179, 2362, 'Route 2', None),
 
     # Route 20
-    'Route 20 - Gift: Cheren near dark grass': (300012, 2363, 'Route 20', None),
+    'Route 20 - Gift: Cheren near dark grass': (300012, 2363, 'Route 20 - North', None),
+
+
 
     # Route 22
     'Route 22 - Gift: Colress at Terrakion plateau': (300279, 2364, 'Route 22', None),
 
     # Route 3
-    'Route 3 - Gift: School Kid after Habitat List': (300180, 471, 'Route 3', None),
+    'Route 3 - Gift: School Kid after Habitat List': (300180, 471, 'Route 3 - Water', None),
+
+
 
     # Route 4
-    'Route 4 - Gift: Colress after battle': (300181, 1705, 'Route 4', None),
-    'Route 4 - Gift: Ace Trainer in house': (300182, 2772, 'Route 4', None),
-    'Route 4 - Gift: Black Belt in first left house': (300288, 386, 'Route 4', None),
-    'Route 4 - Gift: Maid in house (Guess Pokémon cry)': (300289, 363, 'Route 4', None),
+    'Route 4 - Gift: Colress after battle': (300181, 1705, 'Route 4 - North', None),
+
+
+    'Route 4 - Gift: Ace Trainer in house': (300182, 2772, 'Route 4 - North', None),
+
+
+    'Route 4 - Gift: Black Belt in first left house': (300288, 386, 'Route 4 - North', None),
+
+
+    'Route 4 - Gift: Maid in house (Guess Pokémon cry)': (300289, 363, 'Route 4 - North', None),
+
+
 
     # Route 5
     'Route 5 - Gift: Item bought from Breeder': (300186, 2751, 'Route 5', None),
@@ -282,15 +303,23 @@ NPC_GIFT_LOCATIONS: dict[str, tuple[int, int | None, str | None, tuple[int, int]
     'Virbank Gym - Gift: Clyde': (300022, 116, 'Virbank Gym', None),
 
     # Pokemon Ranger post-battle Berry gifts
-    'Chargestone Cave - Gift: Ranger Briana (B1F, southeast)': (300323, 2467, 'Chargestone Cave', None),
-    'Chargestone Cave - Gift: Ranger Louis (1F, south)': (300324, 2469, 'Chargestone Cave', None),
-    'Clay Tunnel - Gift: Ranger Katie in Room 3 north (Surf)': (300325, 2471, 'Clay Tunnel', None),
+    'Chargestone Cave - Gift: B1F, Ranger Briana': (300323, 2467, 'Chargestone Cave - Past Bridge', None),
+
+
+    'Chargestone Cave - Gift: 1F, Ranger Louis': (300324, 2469, 'Chargestone Cave - Past Bridge', None),
+
+
+    'Clay Tunnel - Gift: Ranger Katie in Room 3 north (Surf)': (300325, 2471, 'Clay Tunnel - Surf', None),
+
+
     'Clay Tunnel - Gift: Ranger Maxwell in Room 3 south': (300326, 2472, 'Clay Tunnel', None),
     'Desert Resort - Gift: Ranger Anja in east': (300327, 2473, 'Desert Resort', None),
     'Desert Resort - Gift: Ranger Jaden near entrance': (300328, 2475, 'Desert Resort', None),
     'Lostlorn Forest - Gift: Ranger Forrest in north': (300329, 2479, 'Lostlorn Forest', None),
     'Lostlorn Forest - Gift: Ranger Serenity in west': (300330, 2483, 'Lostlorn Forest', None),
-    'Moor of Icirrus - Gift: Ranger Elaine': (300331, 2484, 'Moor of Icirrus', None),
+    'Moor of Icirrus - Gift: Ranger Elaine': (300331, 2484, 'Moor of Icirrus - Strength', None),
+
+
     'Moor of Icirrus - Gift: Ranger Parker': (300332, 2488, 'Moor of Icirrus', None),
     'Pinwheel Forest - Gift: Ranger Dwayne': (300333, 2491, 'Pinwheel Forest', None),
     'Pinwheel Forest - Gift: Ranger Hillary': (300334, 2492, 'Pinwheel Forest', None),
@@ -298,24 +327,42 @@ NPC_GIFT_LOCATIONS: dict[str, tuple[int, int | None, str | None, tuple[int, int]
     'Pinwheel Forest - Gift: Ranger Ralph': (300336, 2501, 'Pinwheel Forest', None),
     'Reversal Mountain - Gift: Ranger Eliza (1F B2 / 2F W2)': (300337, 2507, 'Reversal Mountain', None),
     'Reversal Mountain - Gift: Ranger Lewis (2F B2 / 1F W2)': (300338, 2511, 'Reversal Mountain', None),
-    'Route 1 - Gift: Ranger Audra': (300339, 2515, 'Route 1', None),
-    'Route 1 - Gift: Ranger Rick': (300340, 2516, 'Route 1', None),
+    'Route 1 - Gift: Ranger Audra': (300339, 2515, 'Route 1 - Water', None),
+
+
+    'Route 1 - Gift: Ranger Rick': (300340, 2516, 'Route 1 - Water', None),
+
+
     'Route 11 - Gift: Ranger Crofton': (300341, 2517, 'Route 11', None),
-    'Route 11 - Gift: Ranger Thalia (Surf, Waterfall)': (300342, 2519, 'Route 11', None),
+    'Route 11 - Gift: Ranger Thalia (Surf, Waterfall)': (300342, 2519, 'Route 11 - Waterfall', None),
+
+
     'Route 13 - Gift: Ranger Daryl': (300343, 2520, 'Route 13', None),
     'Route 13 - Gift: Ranger Dianne': (300344, 2523, 'Route 13', None),
-    'Route 20 - Gift: Pokemon Ranger Bret on central island (Basic Badge, Autumn, Surf)': (300345, 2529, 'Route 20', None),
-    'Route 20 - Gift: Pokemon Ranger Leaf on southeast island (Basic Badge, Autumn, Surf)': (300346, 2535, 'Route 20', None),
-    'Route 20 - Gift: Pokemon Ranger Malory on eastern island (Basic Badge, Autumn, Surf)': (300347, 2536, 'Route 20', None),
-    'Route 20 - Gift: Pokemon Ranger Naoko above waterfall (Basic Badge, Autumn, Surf, Waterfall)': (300348, 2537, 'Route 20', None),
+    'Route 20 - Gift: Pokemon Ranger Bret on central island (Autumn, Surf)': (300345, 2529, 'Route 20 - Autumn Islands', None),
+
+
+    'Route 20 - Gift: Pokemon Ranger Leaf on southeast island (Autumn, Surf)': (300346, 2535, 'Route 20 - Autumn Islands', None),
+
+
+    'Route 20 - Gift: Pokemon Ranger Malory on eastern island (Autumn, Surf)': (300347, 2536, 'Route 20 - Autumn Islands', None),
+
+
+    'Route 20 - Gift: Pokemon Ranger Naoko above waterfall (Autumn, Surf, Waterfall)': (300348, 2537, 'Route 20 - Waterfall', None),
+
+
     'Route 23 - Gift: Ranger Lena': (300349, 2540, 'Route 23', None),
     'Route 23 - Gift: Ranger Steve': (300350, 2544, 'Route 23', None),
     'Route 5 - Gift: Ranger Lois above road': (300351, 2549, 'Route 5', None),
     'Route 6 - Gift: Ranger Richard (Behind Season Research Lab)': (300352, 2551, 'Route 6', None),
     'Seaside Cave - Gift: Ranger Johan': (300353, 2567, 'Seaside Cave', None),
     'Seaside Cave - Gift: Ranger Mikiko': (300354, 2568, 'Seaside Cave', None),
-    'Victory Road - Gift: Ranger Eddie (2F)': (300355, 2572, 'Victory Road', None),
-    'Victory Road - Gift: Ranger Elle (2F)': (300356, 2577, 'Victory Road', None),
+    'Victory Road - Gift: 2F, Ranger Eddie': (300355, 2572, 'Victory Road - Strength', None),
+
+
+    'Victory Road - Gift: 2F, Ranger Elle': (300356, 2577, 'Victory Road - Strength', None),
+
+
 
 }
 
@@ -415,7 +462,8 @@ TM_REWARD_LOCATIONS: dict[str, tuple[int, int | None, str | None, tuple[int, int
 
     # Victory road
     'Victory Road - Gift: N at badge check gates': (500005, 2374, 'Victory Road', None),
-    'Victory Road - Gift: Hugh': (500024, 2375, 'Victory Road', None),
+    'Victory Road - Gift: Hugh': (500024, 2375, 'Victory Road - Strength', None),
+
 
     # Virbank City
     'Virbank City - Gift: Roxie after defeating Team Plasma Grunt': (500001, 1704, 'Virbank City', None),

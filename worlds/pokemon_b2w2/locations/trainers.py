@@ -32,51 +32,68 @@ TRAINER_LOCATIONS: dict[str, tuple[int, int | None, str | None, tuple[int, int] 
     'Castelia City - Trainer: Castelia Street - GAME FREAK Morimoto at Game Freak (Post-HoF)': (810592, 2112, 'Castelia City', None, ()),
     'Castelia City - Trainer: Castelia Street - Clerk (F) Britney at Battle Company 47F': (810691, 2211, 'Castelia City', None),
     'Castelia City - Trainer: Castelia Street - Clerk (M) Gilligan at Battle Company 47F': (810692, 2212, 'Castelia City', None),
-    'Castelia City - Trainer: Back alley accessible from sewers - Roughneck Ricky (Spring/Summer, Surf)': (810754, 2274, 'Castelia City', None),
-    'Castelia City - Trainer: Back alley accessible from sewers - Dancer Jean-Paul (Spring/Summer, Surf)': (810755, 2275, 'Castelia City', None),
-    'Castelia City - Trainer: Back alley accessible from sewers - Guitarist Tina (Spring/Summer, Surf)': (810756, 2276, 'Castelia City', None),
+    'Castelia City - Trainer: Back alley accessible from sewers - Roughneck Ricky (Spring/Summer, Surf)': (810754, 2274, 'Castelia City - Back Alley', None),
+    'Castelia City - Trainer: Back alley accessible from sewers - Dancer Jean-Paul (Spring/Summer, Surf)': (810755, 2275, 'Castelia City - Back Alley', None),
+    'Castelia City - Trainer: Back alley accessible from sewers - Guitarist Tina (Spring/Summer, Surf)': (810756, 2276, 'Castelia City - Back Alley', None),
 
     # Castelia Sewers
     'Castelia Sewers - Trainer: Team Plasma Grunt 1 near Relic Passage': (810342, 1862, 'Castelia Sewers', None),
     'Castelia Sewers - Trainer: Team Plasma Grunt 2 near Relic Passage': (810356, 1876, 'Castelia Sewers', None),
     'Castelia Sewers - Trainer: Janitor Felix in east': (810461, 1981, 'Castelia Sewers', None),
-    'Castelia Sewers - Trainer: Janitor Brady in north (Spring/Summer, Surf)': (810462, 1982, 'Castelia Sewers', None),
-    'Castelia Sewers - Trainer: Scientist Clarke in southeast (Spring/Summer, Surf)': (810463, 1983, 'Castelia Sewers', None),
-    'Castelia Sewers - Trainer: Scientist Caroline in centre-northeast (Autumn/Winter)': (810464, 1984, 'Castelia Sewers', None),
+    'Castelia Sewers - Trainer: Janitor Brady in north (Spring/Summer, Surf)': (810462, 1982, 'Castelia Sewers - Water', None),
+
+
+    'Castelia Sewers - Trainer: Scientist Clarke in southeast (Spring/Summer, Surf)': (810463, 1983, 'Castelia Sewers - Water', None),
+
+
+    'Castelia Sewers - Trainer: Scientist Caroline in centre-northeast (Autumn/Winter)': (810464, 1984, 'Castelia Sewers - Dry (Autumn/Winter)', None),
+
+
     'Castelia Sewers - Trainer: Worker Zack in centre': (810465, 1985, 'Castelia Sewers', None),
     'Castelia Sewers - Trainer: Worker Scott in west (Autumn/Winter or Spring/Summer, Surf)': (810466, 1986, 'Castelia Sewers', None),
     'Castelia Sewers - Trainer: Doctor Heath in centre-north': (810679, 2199, 'Castelia Sewers', None),
 
     # Celestial Tower
-    'Celestial Tower - Trainer: School Kid Alberta 2F': (810455, 1975, 'Celestial Tower', None),
-    'Celestial Tower - Trainer: Waitress Jan 1F after starting quest in Humilau': (810457, 1977, 'Celestial Tower', None),
-    'Celestial Tower - Trainer: Nursery Aide Ilse 2F after starting quest in Humilau': (810458, 1978, 'Celestial Tower', None),
-    'Celestial Tower - Trainer: Clerk (F) Lana 3F after starting quest in Humilau': (810459, 1979, 'Celestial Tower', None),
-    'Celestial Tower - Trainer: Maid Tammy 4F after starting quest in Humilau': (810460, 1980, 'Celestial Tower', None),
-    'Celestial Tower - Trainer: Pokéfan Jude 2F, northeast': (810549, 2069, 'Celestial Tower', None),
-    'Celestial Tower - Trainer: Pokéfan Georgia 3F northwest': (810550, 2070, 'Celestial Tower', None),
-    'Celestial Tower - Trainer: Gentleman Daniel 4F, centre': (810551, 2071, 'Celestial Tower', None),
-    'Celestial Tower - Trainer: Socialite Grace 4F, southwest': (810552, 2072, 'Celestial Tower', None),
-    'Celestial Tower - Trainer: Psychic Micki 3F centre': (810553, 2073, 'Celestial Tower', None),
-    'Celestial Tower - Trainer: Psychic Joyce 2F southwest': (810554, 2074, 'Celestial Tower', None),
-    'Celestial Tower - Trainer: Psychic Bryce 3F east': (810555, 2075, 'Celestial Tower', None),
-    'Celestial Tower - Trainer: Psychic Sarah 4F east': (810556, 2076, 'Celestial Tower', None),
-    'Celestial Tower - Trainer: Nurse Dixie 3F southeast': (810673, 2193, 'Celestial Tower', None),
+    'Celestial Tower - Trainer: 2F, School Kid Alberta': (810455, 1975, 'Celestial Tower', None),
+    'Celestial Tower - Trainer: 1F, Waitress Jan after starting quest in Humilau': (810457, 1977, 'Celestial Tower', None),
+    'Celestial Tower - Trainer: 2F, Nursery Aide Ilse after starting quest in Humilau': (810458, 1978, 'Celestial Tower', None),
+    'Celestial Tower - Trainer: 3F, Clerk (F) Lana after starting quest in Humilau': (810459, 1979, 'Celestial Tower', None),
+    'Celestial Tower - Trainer: 4F, Maid Tammy after starting quest in Humilau': (810460, 1980, 'Celestial Tower', None),
+    'Celestial Tower - Trainer: 2F, Pokéfan Jude northeast': (810549, 2069, 'Celestial Tower', None),
+    'Celestial Tower - Trainer: 3F, Pokéfan Georgia northwest': (810550, 2070, 'Celestial Tower', None),
+    'Celestial Tower - Trainer: 4F, Gentleman Daniel centre': (810551, 2071, 'Celestial Tower', None),
+    'Celestial Tower - Trainer: 4F, Socialite Grace southwest': (810552, 2072, 'Celestial Tower', None),
+    'Celestial Tower - Trainer: 3F, Psychic Micki centre': (810553, 2073, 'Celestial Tower', None),
+    'Celestial Tower - Trainer: 2F, Psychic Joyce southwest': (810554, 2074, 'Celestial Tower', None),
+    'Celestial Tower - Trainer: 3F, Psychic Bryce east': (810555, 2075, 'Celestial Tower', None),
+    'Celestial Tower - Trainer: 4F, Psychic Sarah east': (810556, 2076, 'Celestial Tower', None),
+    'Celestial Tower - Trainer: 3F, Nurse Dixie southeast': (810673, 2193, 'Celestial Tower', None),
 
     # Chargestone Cave
-    'Chargestone Cave - Trainer: Guitarist Anna 1F northwest': (810537, 2057, 'Chargestone Cave', None),
-    'Chargestone Cave - Trainer: Guitarist Beverly B2F northwest': (810538, 2058, 'Chargestone Cave', None),
-    'Chargestone Cave - Trainer: Hiker Otto 1F northeast': (810539, 2059, 'Chargestone Cave', None),
-    'Chargestone Cave - Trainer: Hiker Jeremy B2F west': (810540, 2060, 'Chargestone Cave', None),
-    'Chargestone Cave - Trainer: Scientist Ronald 1F west': (810541, 2061, 'Chargestone Cave', None),
-    'Chargestone Cave - Trainer: Scientist Lumi B1F northeast': (810542, 2062, 'Chargestone Cave', None),
-    'Chargestone Cave - Trainer: Ranger Briana B1F southeast': (810543, 2063, 'Chargestone Cave', None),
-    'Chargestone Cave - Trainer: Ranger Louis 1F south': (810544, 2064, 'Chargestone Cave', None),
-    'Chargestone Cave - Trainer: Ace Trainer Vicki B2F south': (810545, 2065, 'Chargestone Cave', None),
-    'Chargestone Cave - Trainer: Ace Trainer Corky 1F, southeast': (810546, 2066, 'Chargestone Cave', None),
-    'Chargestone Cave - Trainer: Ace Trainer Shaye B2F, north': (810547, 2067, 'Chargestone Cave', None),
-    'Chargestone Cave - Trainer: Ace Trainer Mary 1F, north': (810548, 2068, 'Chargestone Cave', None),
-    'Chargestone Cave - Trainer: Doctor Kit B1F centre-east': (810671, 2191, 'Chargestone Cave', None),
+    'Chargestone Cave - Trainer: 1F, Guitarist Anna northwest': (810537, 2057, 'Chargestone Cave', None),
+    'Chargestone Cave - Trainer: B2F, Guitarist Beverly northwest': (810538, 2058, 'Chargestone Cave - Past Bridge', None),
+
+    'Chargestone Cave - Trainer: 1F, Hiker Otto northeast': (810539, 2059, 'Chargestone Cave - Past Bridge', None),
+
+    'Chargestone Cave - Trainer: B2F, Hiker Jeremy west': (810540, 2060, 'Chargestone Cave - Past Bridge', None),
+
+    'Chargestone Cave - Trainer: 1F, Scientist Ronald west': (810541, 2061, 'Chargestone Cave', None),
+    'Chargestone Cave - Trainer: B1F, Scientist Lumi northeast': (810542, 2062, 'Chargestone Cave - Past Bridge', None),
+
+    'Chargestone Cave - Trainer: B1F, Ranger Briana southeast': (810543, 2063, 'Chargestone Cave - Past Bridge', None),
+
+    'Chargestone Cave - Trainer: 1F, Ranger Louis south': (810544, 2064, 'Chargestone Cave - Past Bridge', None),
+
+    'Chargestone Cave - Trainer: B2F, Ace Trainer Vicki south': (810545, 2065, 'Chargestone Cave - Past Bridge', None),
+
+    'Chargestone Cave - Trainer: 1F, Ace Trainer Corky southeast': (810546, 2066, 'Chargestone Cave - Past Bridge', None),
+
+    'Chargestone Cave - Trainer: B2F, Ace Trainer Shaye north': (810547, 2067, 'Chargestone Cave - Past Bridge', None),
+
+    'Chargestone Cave - Trainer: 1F, Ace Trainer Mary north': (810548, 2068, 'Chargestone Cave - Past Bridge', None),
+
+    'Chargestone Cave - Trainer: B1F, Doctor Kit centre-east': (810671, 2191, 'Chargestone Cave - Past Bridge', None),
+
 
     # Clay Tunnel
     'Clay Tunnel - Trainer: Hiker Teppei in Room 1 south': (810487, 2007, 'Clay Tunnel', None),
@@ -87,7 +104,9 @@ TRAINER_LOCATIONS: dict[str, tuple[int, int | None, str | None, tuple[int, int] 
     'Clay Tunnel - Trainer: Worker Leo in Room 3 central': (810506, 2026, 'Clay Tunnel', None),
     'Clay Tunnel - Trainer: Worker Brand in Room 3 central-north': (810507, 2027, 'Clay Tunnel', None),
     'Clay Tunnel - Trainer: Ranger Maxwell in Room 3 south': (810508, 2028, 'Clay Tunnel', None),
-    'Clay Tunnel - Trainer: Ranger Katie in Room 3 north (Surf)': (810509, 2029, 'Clay Tunnel', None),
+    'Clay Tunnel - Trainer: Ranger Katie in Room 3 north (Surf)': (810509, 2029, 'Clay Tunnel - Surf', None),
+
+
 
     # Desert Resort
     'Desert Resort - Trainer: Backpacker Walt in central-north': (810662, 2182, 'Desert Resort', None),
@@ -136,7 +155,9 @@ TRAINER_LOCATIONS: dict[str, tuple[int, int | None, str | None, tuple[int, int] 
     'Floccesy Town - Trainer: PkMn Trainer Alder': (810582, 2102, 'Floccesy Town', None),
 
     # Giant Chasm
-    'Giant Chasm - Trainer: Team Plasma Ghetsis in far cave': (810345, 1865, 'Giant Chasm', None),
+    'Giant Chasm - Trainer: Team Plasma Ghetsis in far cave': (810345, 1865, 'Giant Chasm - Post-Frigate', None),
+
+
     'Giant Chasm - Trainer: Team Plasma Grunt in crater': (810724, 2244, 'Giant Chasm', None),
 
     # Humilau Gym
@@ -158,16 +179,18 @@ TRAINER_LOCATIONS: dict[str, tuple[int, int | None, str | None, tuple[int, int] 
     'Lacunosa Town - Trainer: Team Plasma Grunt': (810705, 2225, 'Lacunosa Town', None),
 
     # Lostlorn Forest
-    'Lostlorn Forest - Trainer: Veteran Murphy on cliff (Surf, Waterfall)': (810142, 1662, 'Lostlorn Forest', None),
+    'Lostlorn Forest - Trainer: Veteran Murphy on cliff (Surf, Waterfall)': (810142, 1662, 'Lostlorn Forest - Waterfall', None),
+
+
     'Lostlorn Forest - Trainer: Ranger Serenity in west': (810297, 1817, 'Lostlorn Forest', None),
     'Lostlorn Forest - Trainer: Ranger Forrest in north': (810298, 1818, 'Lostlorn Forest', None),
     'Lostlorn Forest - Trainer: Breeder Galen in south': (810299, 1819, 'Lostlorn Forest', None),
 
     # Mistralton Cave
-    'Mistralton Cave - Trainer: Hiker Jebediah 1F north': (810680, 2200, 'Mistralton Cave', None),
-    'Mistralton Cave - Trainer: Hiker Shelby 1F south': (810681, 2201, 'Mistralton Cave', None),
-    'Mistralton Cave - Trainer: Ace Trainer Geoff 2F west': (810682, 2202, 'Mistralton Cave', None),
-    'Mistralton Cave - Trainer: Ace Trainer Belle 2F east': (810683, 2203, 'Mistralton Cave', None),
+    'Mistralton Cave - Trainer: 1F, Hiker Jebediah north': (810680, 2200, 'Mistralton Cave', None),
+    'Mistralton Cave - Trainer: 1F, Hiker Shelby south': (810681, 2201, 'Mistralton Cave', None),
+    'Mistralton Cave - Trainer: 2F, Ace Trainer Geoff west': (810682, 2202, 'Mistralton Cave', None),
+    'Mistralton Cave - Trainer: 2F, Ace Trainer Belle east': (810683, 2203, 'Mistralton Cave', None),
 
     # Mistralton Gym
     'Mistralton Gym - Trainer: Gym Leader Skyla': (810155, 1675, 'Mistralton Gym', None, (2289,)),
@@ -181,7 +204,9 @@ TRAINER_LOCATIONS: dict[str, tuple[int, int | None, str | None, tuple[int, int] 
     'Moor of Icirrus - Trainer: Fisherman Eustace in east': (810576, 2096, 'Moor of Icirrus', None),
     'Moor of Icirrus - Trainer: Fisherman Arnold in north': (810577, 2097, 'Moor of Icirrus', None),
     'Moor of Icirrus - Trainer: Ranger Parker in south-east': (810578, 2098, 'Moor of Icirrus', None),
-    'Moor of Icirrus - Trainer: Ranger Elaine in west (Strength)': (810579, 2099, 'Moor of Icirrus', None),
+    'Moor of Icirrus - Trainer: Ranger Elaine in west (Strength)': (810579, 2099, 'Moor of Icirrus - Strength', None),
+
+
 
     # N's Castle
     "N's Castle - Trainer: Trainer N": (810005, 1525, "N's Castle", None, (1526,)),
@@ -218,37 +243,49 @@ TRAINER_LOCATIONS: dict[str, tuple[int, int | None, str | None, tuple[int, int] 
     'P2 Laboratory - Trainer: Scientist Dudley': (810135, 1655, 'P2 Laboratory', None),
 
     # Pinwheel Forest
-    'Pinwheel Forest - Trainer: School Kid Keston': (810633, 2153, 'Pinwheel Forest', None),
-    'Pinwheel Forest - Trainer: School Kid Millie': (810634, 2154, 'Pinwheel Forest', None),
-    'Pinwheel Forest - Trainer: Ace Trainer Kelsey': (810635, 2155, 'Pinwheel Forest', None),
-    'Pinwheel Forest - Trainer: Ace Trainer Kathrine': (810636, 2156, 'Pinwheel Forest', None),
-    'Pinwheel Forest - Trainer: Black Belt Kentaro': (810637, 2157, 'Pinwheel Forest', None),
-    'Pinwheel Forest - Trainer: Battle Girl Lee': (810638, 2158, 'Pinwheel Forest', None),
-    'Pinwheel Forest - Trainer: Ranger Ralph': (810639, 2159, 'Pinwheel Forest', None),
-    'Pinwheel Forest - Trainer: Ranger Dwayne': (810640, 2160, 'Pinwheel Forest', None),
-    'Pinwheel Forest - Trainer: Ranger Melita': (810641, 2161, 'Pinwheel Forest', None),
-    'Pinwheel Forest - Trainer: Ranger Hillary': (810642, 2162, 'Pinwheel Forest', None),
-    'Pinwheel Forest - Trainer: Veteran Sinan': (810643, 2163, 'Pinwheel Forest', None),
-    'Pinwheel Forest - Trainer: Veteran Rosaline': (810644, 2164, 'Pinwheel Forest', None),
-    'Pinwheel Forest - Trainer: Youngster Keita': (810645, 2165, 'Pinwheel Forest', None),
-    'Pinwheel Forest - Trainer: Youngster Nicholas': (810646, 2166, 'Pinwheel Forest', None),
-    'Pinwheel Forest - Trainer: Nursery Aide Ethel': (810647, 2167, 'Pinwheel Forest', None),
-    'Pinwheel Forest - Trainer: Preschooler Jojo': (810648, 2168, 'Pinwheel Forest', None),
-    'Pinwheel Forest - Trainer: Preschooler José': (810649, 2169, 'Pinwheel Forest', None),
-    'Pinwheel Forest - Trainer: Preschooler Samantha': (810650, 2170, 'Pinwheel Forest', None),
-    'Pinwheel Forest - Trainer: Twins Ally & Amy': (810651, 2171, 'Pinwheel Forest', None),
-    'Pinwheel Forest - Trainer: Nursery Aide Rosalyn': (810790, 2310, 'Pinwheel Forest', None),
-    'Pinwheel Forest - Trainer: Preschooler Ike': (810791, 2311, 'Pinwheel Forest', None),
-    'Pinwheel Forest - Trainer: Youngster Henley': (810792, 2312, 'Pinwheel Forest', None),
-    'Pinwheel Forest - Trainer: Lass Helia': (810793, 2313, 'Pinwheel Forest', None),
+    'Pinwheel Forest - Trainer: School Kid Keston outer forest northwest': (810633, 2153, 'Pinwheel Forest', None),
+    'Pinwheel Forest - Trainer: School Kid Millie outer forest northwest': (810634, 2154, 'Pinwheel Forest', None),
+    'Pinwheel Forest - Trainer: Ace Trainer Kelsey outer forest southwest': (810635, 2155, 'Pinwheel Forest', None),
+    'Pinwheel Forest - Trainer: Ace Trainer Kathrine outer forest south': (810636, 2156, 'Pinwheel Forest', None),
+    'Pinwheel Forest - Trainer: Black Belt Kentaro outer forest southeast': (810637, 2157, 'Pinwheel Forest', None),
+    'Pinwheel Forest - Trainer: Battle Girl Lee outer forest southeast': (810638, 2158, 'Pinwheel Forest', None),
+    'Pinwheel Forest - Trainer: Ranger Ralph inner forest west': (810639, 2159, 'Pinwheel Forest', None),
+    'Pinwheel Forest - Trainer: Ranger Dwayne inner forest southwest': (810640, 2160, 'Pinwheel Forest', None),
+    'Pinwheel Forest - Trainer: Ranger Melita inner forest northwest': (810641, 2161, 'Pinwheel Forest', None),
+    'Pinwheel Forest - Trainer: Ranger Hillary inner forest south': (810642, 2162, 'Pinwheel Forest', None),
+    'Pinwheel Forest - Trainer: Veteran Sinan inner forest northwest': (810643, 2163, 'Pinwheel Forest', None),
+    'Pinwheel Forest - Trainer: Veteran Rosaline inner forest northwest': (810644, 2164, 'Pinwheel Forest', None),
+    'Pinwheel Forest - Trainer: Youngster Keita inner forest southwest': (810645, 2165, 'Pinwheel Forest', None),
+    'Pinwheel Forest - Trainer: Youngster Nicholas inner forest east': (810646, 2166, 'Pinwheel Forest', None),
+    'Pinwheel Forest - Trainer: Nursery Aide Ethel inner forest center': (810647, 2167, 'Pinwheel Forest', None),
+    'Pinwheel Forest - Trainer: Preschooler Jojo inner forest north': (810648, 2168, 'Pinwheel Forest', None),
+    'Pinwheel Forest - Trainer: Preschooler José inner forest center': (810649, 2169, 'Pinwheel Forest', None),
+    'Pinwheel Forest - Trainer: Preschooler Samantha inner forest center': (810650, 2170, 'Pinwheel Forest', None),
+    'Pinwheel Forest - Trainer: Twins Ally & Amy inner forest south': (810651, 2171, 'Pinwheel Forest', None),
+    'Pinwheel Forest - Trainer: Nursery Aide Rosalyn inner forest south': (810790, 2310, 'Pinwheel Forest', None),
+    'Pinwheel Forest - Trainer: Preschooler Ike inner forest south': (810791, 2311, 'Pinwheel Forest', None),
+    'Pinwheel Forest - Trainer: Youngster Henley inner forest center': (810792, 2312, 'Pinwheel Forest', None),
+    'Pinwheel Forest - Trainer: Lass Helia inner forest center': (810793, 2313, 'Pinwheel Forest', None),
 
     # PWT (Plasma Frigate incident)
-    'PWT - Trainer: Team Plasma Grunt 1 (Plasma Frigate)': (810372, 1892, 'PWT', None),
-    'PWT - Trainer: Team Plasma Grunt 2 (Plasma Frigate)': (810373, 1893, 'PWT', None),
-    'PWT - Trainer: Team Plasma Grunt 3 (Plasma Frigate)': (810374, 1894, 'PWT', None),
-    'PWT - Trainer: Team Plasma Grunt 4 (Plasma Frigate)': (810375, 1895, 'PWT', None),
-    'PWT - Trainer: Team Plasma Grunt 5 (Plasma Frigate)': (810376, 1896, 'PWT', None),
-    'PWT - Trainer: Team Plasma Grunt 6 (Plasma Frigate)': (810377, 1897, 'PWT', None),
+    'PWT - Trainer: Team Plasma Grunt 1 (Plasma Frigate)': (810372, 1892, 'Plasma Frigate (PWT)', None),
+
+
+    'PWT - Trainer: Team Plasma Grunt 2 (Plasma Frigate)': (810373, 1893, 'Plasma Frigate (PWT)', None),
+
+
+    'PWT - Trainer: Team Plasma Grunt 3 (Plasma Frigate)': (810374, 1894, 'Plasma Frigate (PWT)', None),
+
+
+    'PWT - Trainer: Team Plasma Grunt 4 (Plasma Frigate)': (810375, 1895, 'Plasma Frigate (PWT)', None),
+
+
+    'PWT - Trainer: Team Plasma Grunt 5 (Plasma Frigate)': (810376, 1896, 'Plasma Frigate (PWT)', None),
+
+
+    'PWT - Trainer: Team Plasma Grunt 6 (Plasma Frigate)': (810377, 1897, 'Plasma Frigate (PWT)', None),
+
+
 
     # Plasma Frigate (Route 21)
     'Plasma Frigate - Trainer: Team Plasma Grunt 4 (from Route 21)': (810426, 1946, 'Plasma Frigate (Route 21)', None),
@@ -259,11 +296,11 @@ TRAINER_LOCATIONS: dict[str, tuple[int, int | None, str | None, tuple[int, int] 
     'Plasma Frigate - Trainer: Team Plasma Grunt 23 (from Route 21)': (810807, 2327, 'Plasma Frigate (Route 21)', None),
     'Plasma Frigate - Trainer: Team Plasma Grunt 25 (from Route 21)': (810809, 2329, 'Plasma Frigate (Route 21)', None),
     'Plasma Frigate - Trainer: Team Plasma Grunt 27 (from Route 21)': (810812, 2332, 'Plasma Frigate (Route 21)', None),
+    'Plasma Frigate - Trainer: Team Plasma Zinzolin (from Route 21)': (810347, 1867, 'Plasma Frigate (Route 21)', None),
 
     # Plasma Frigate (Giant Chasm & P2 Lab)
     'Plasma Frigate - Trainer: Team Plasma Grunt 1 (from Giant Chasm)': (810343, 1863, 'Plasma Frigate', None),
     'Plasma Frigate - Trainer: Team Plasma Colress (from Giant Chasm)': (810344, 1864, 'Plasma Frigate', None),
-    'Plasma Frigate - Trainer: Team Plasma Zinzolin (from Giant Chasm)': (810347, 1867, 'Plasma Frigate', None),
     'Plasma Frigate - Trainer: Team Plasma Shadow 1 (from Giant Chasm)': (810348, 1868, 'Plasma Frigate', None),
     'Plasma Frigate - Trainer: Team Plasma Grunt 6 (from Giant Chasm)': (810428, 1948, 'Plasma Frigate', None),
     'Plasma Frigate - Trainer: Team Plasma Grunt 7 (from Giant Chasm)': (810429, 1949, 'Plasma Frigate', None),
@@ -288,7 +325,8 @@ TRAINER_LOCATIONS: dict[str, tuple[int, int | None, str | None, tuple[int, int] 
     'Plasma Frigate - Trainer: Team Plasma Grunt 24 (from Giant Chasm)': (810808, 2328, 'Plasma Frigate', None),
     'Plasma Frigate - Trainer: Team Plasma Grunt 26 (from Giant Chasm)': (810810, 2330, 'Plasma Frigate', None),
     'Plasma Frigate - Trainer: Doctor Julius (from Giant Chasm)': (810811, 2331, 'Plasma Frigate', None),
-    'Plasma Frigate - Trainer: Colress (Post-Game at P2 Lab)': (810813, 2333, 'Plasma Frigate', None),
+    'Plasma Frigate - Trainer: Colress (Post-Game at P2 Lab)': (810813, 2333, 'Plasma Frigate (P2 Laboratory)', None),
+
 
     # Pokémon League
     'Pokemon League - Trainer: Elite Four Shauntal': (810143, 1663, 'Pokemon League', None, (2292,)),
@@ -303,9 +341,9 @@ TRAINER_LOCATIONS: dict[str, tuple[int, int | None, str | None, tuple[int, int] 
     'Pokemon League - Trainer: Rematch Champion Iris': (810781, 2301, 'Pokemon League', None, ()),
 
     # Relic Castle
-    'Relic Castle - Trainer: Psychic Dua in B1F southeast': (810510, 2030, 'Relic Castle', None),
-    'Relic Castle - Trainer: Psychic Perry in 1F southwest': (810511, 2031, 'Relic Castle', None),
-    'Relic Castle - Trainer: Psychic Low in B1F north': (810512, 2032, 'Relic Castle', None),
+    'Relic Castle - Trainer: B1F, Psychic Dua southeast': (810510, 2030, 'Relic Castle', None),
+    'Relic Castle - Trainer: 1F, Psychic Perry southwest': (810511, 2031, 'Relic Castle', None),
+    'Relic Castle - Trainer: B1F, Psychic Low north': (810512, 2032, 'Relic Castle', None),
 
     # Relic Passage
     'Relic Passage - Trainer: Hiker Tobias in middle section northwest': (810561, 2081, 'Relic Passage', None),
@@ -320,41 +358,51 @@ TRAINER_LOCATIONS: dict[str, tuple[int, int | None, str | None, tuple[int, int] 
     'Relic Passage - Trainer: Psychic Ena in middle section northeast': (810570, 2090, 'Relic Passage', None),
 
     # Reversal Mountain
-    'Reversal Mountain - Trainer: Cyclist Adelaide Exterior': (810467, 1987, 'Reversal Mountain', None),
-    'Reversal Mountain - Trainer: Cyclist Jeremiah Exterior': (810468, 1988, 'Reversal Mountain', None),
-    'Reversal Mountain - Trainer: Backpacker Kiyo 1F': (810513, 2033, 'Reversal Mountain', None, (2308,)),
-    'Reversal Mountain - Trainer: Backpacker Kumiko 1F': (810514, 2034, 'Reversal Mountain', None, (2309,)),
+    'Reversal Mountain - Trainer: Cyclist Adelaide exterior center': (810467, 1987, 'Reversal Mountain', None),
+    'Reversal Mountain - Trainer: Cyclist Jeremiah exterior south': (810468, 1988, 'Reversal Mountain', None),
+    'Reversal Mountain - Trainer: 1F, Backpacker Kiyo': (810513, 2033, 'Reversal Mountain', None, (2308,)),
+    'Reversal Mountain - Trainer: 1F, Backpacker Kumiko': (810514, 2034, 'Reversal Mountain', None, (2309,)),
     'Reversal Mountain - Trainer: Ranger Lewis 2F B2 / 1F W2': (810515, 2035, 'Reversal Mountain', None, (2036,)),
     'Reversal Mountain - Trainer: Ranger Eliza 1F B2 / 2F W2': (810517, 2037, 'Reversal Mountain', None, (2038,)),
-    'Reversal Mountain - Trainer: Ace Trainer Ray 1F': (810519, 2039, 'Reversal Mountain', None, (2306,)),
-    'Reversal Mountain - Trainer: Ace Trainer Cora 1F': (810520, 2040, 'Reversal Mountain', None, (2307,)),
-    'Reversal Mountain - Trainer: Hiker Jared 1F': (810521, 2041, 'Reversal Mountain', None),
-    'Reversal Mountain - Trainer: Hiker Markus 1F': (810522, 2042, 'Reversal Mountain', None),
-    'Reversal Mountain - Trainer: Black Belt Corey 1F': (810523, 2043, 'Reversal Mountain', None),
-    'Reversal Mountain - Trainer: Battle Girl Chan 1F': (810524, 2044, 'Reversal Mountain', None),
-    'Reversal Mountain - Trainer: Doctor Derek 1F': (810672, 2192, 'Reversal Mountain', None),
+    'Reversal Mountain - Trainer: 1F, Ace Trainer Ray': (810519, 2039, 'Reversal Mountain', None, (2306,)),
+    'Reversal Mountain - Trainer: 1F, Ace Trainer Cora': (810520, 2040, 'Reversal Mountain', None, (2307,)),
+    'Reversal Mountain - Trainer: 1F, Hiker Jared': (810521, 2041, 'Reversal Mountain', None),
+    'Reversal Mountain - Trainer: 1F, Hiker Markus': (810522, 2042, 'Reversal Mountain', None),
+    'Reversal Mountain - Trainer: 1F, Black Belt Corey': (810523, 2043, 'Reversal Mountain', None),
+    'Reversal Mountain - Trainer: 1F, Battle Girl Chan': (810524, 2044, 'Reversal Mountain', None),
+    'Reversal Mountain - Trainer: 1F, Doctor Derek': (810672, 2192, 'Reversal Mountain', None),
 
     # Route 1
-    'Route 1 - Trainer: Backpacker Shane': (810405, 1925, 'Route 1', None),
-    'Route 1 - Trainer: Backpacker Jill': (810406, 1926, 'Route 1', None),
-    'Route 1 - Trainer: Ranger Rick': (810409, 1929, 'Route 1', None),
-    'Route 1 - Trainer: Ranger Audra': (810410, 1930, 'Route 1', None),
-    'Route 1 - Trainer: Ace Trainer Sean': (810411, 1931, 'Route 1', None),
-    'Route 1 - Trainer: Ace Trainer Cheyenne': (810412, 1932, 'Route 1', None),
+    'Route 1 - Trainer: Backpacker Shane northeast': (810405, 1925, 'Route 1', None),
+    'Route 1 - Trainer: Backpacker Jill northeast': (810406, 1926, 'Route 1', None),
+    'Route 1 - Trainer: Ranger Rick southwest': (810409, 1929, 'Route 1 - Water', None),
+
+
+    'Route 1 - Trainer: Ranger Audra southwest': (810410, 1930, 'Route 1 - Water', None),
+
+
+    'Route 1 - Trainer: Ace Trainer Sean west': (810411, 1931, 'Route 1 - Water', None),
+
+
+    'Route 1 - Trainer: Ace Trainer Cheyenne west': (810412, 1932, 'Route 1 - Water', None),
+
+
 
     # Route 11
-    'Route 11 - Trainer: Breeder Magnolia': (810303, 1823, 'Route 11', None),
-    'Route 11 - Trainer: Ranger Thalia (Surf, Waterfall)': (810304, 1824, 'Route 11', None),
-    'Route 11 - Trainer: Ranger Crofton': (810305, 1825, 'Route 11', None),
+    'Route 11 - Trainer: Breeder Magnolia east': (810303, 1823, 'Route 11', None),
+    'Route 11 - Trainer: Ranger Thalia (Surf, Waterfall)': (810304, 1824, 'Route 11 - Waterfall', None),
+
+
+    'Route 11 - Trainer: Ranger Crofton south': (810305, 1825, 'Route 11', None),
 
     # Route 12
-    'Route 12 - Trainer: Backers Cleo & Rio': (810291, 1811, 'Route 12', None),
-    'Route 12 - Trainer: Black Belt Jeriel': (810300, 1820, 'Route 12', None),
-    'Route 12 - Trainer: Battle Girl Azra': (810301, 1821, 'Route 12', None),
+    'Route 12 - Trainer: Backers Cleo & Rio southwest': (810291, 1811, 'Route 12', None),
+    'Route 12 - Trainer: Black Belt Jeriel north': (810300, 1820, 'Route 12', None),
+    'Route 12 - Trainer: Battle Girl Azra northeast': (810301, 1821, 'Route 12', None),
 
     # Route 13
-    'Route 13 - Trainer: Ace Trainer Angi': (810133, 1653, 'Route 13', None),
-    'Route 13 - Trainer: Ace Trainer Miguel': (810134, 1654, 'Route 13', None),
+    'Route 13 - Trainer: Ace Trainer Angi west': (810133, 1653, 'Route 13', None),
+    'Route 13 - Trainer: Ace Trainer Miguel south': (810134, 1654, 'Route 13', None),
     'Route 13 - Trainer: Fisherman Jones on sand bar': (810286, 1806, 'Route 13', None),
     'Route 13 - Trainer: Fisherman Damon on sand bar': (810287, 1807, 'Route 13', None),
     'Route 13 - Trainer: Fisherman Leroy in south-east': (810288, 1808, 'Route 13', None),
@@ -362,25 +410,27 @@ TRAINER_LOCATIONS: dict[str, tuple[int, int | None, str | None, tuple[int, int] 
     'Route 13 - Trainer: Parasol Lady Laura south of sand bar': (810290, 1810, 'Route 13', None),
     'Route 13 - Trainer: Ranger Daryl east of house': (810294, 1814, 'Route 13', None),
     'Route 13 - Trainer: Ranger Dianne east of Cobalion in north': (810295, 1815, 'Route 13', None),
-    'Route 13 - Trainer: Black Belt Wesley': (810730, 2250, 'Route 13', None),
-    'Route 13 - Trainer: Battle Girl Alize': (810731, 2251, 'Route 13', None),
+    'Route 13 - Trainer: Black Belt Wesley southeast': (810730, 2250, 'Route 13', None),
+    'Route 13 - Trainer: Battle Girl Alize south': (810731, 2251, 'Route 13', None),
 
     # Route 14
-    'Route 14 - Trainer: Gentleman Sheldon': (810277, 1797, 'Route 14', None),
-    'Route 14 - Trainer: Socialite Marian': (810278, 1798, 'Route 14', None),
-    'Route 14 - Trainer: Ace Trainer Kipp': (810279, 1799, 'Route 14', None),
-    'Route 14 - Trainer: Ace Trainer Junko': (810280, 1800, 'Route 14', None),
-    'Route 14 - Trainer: Black Belt Jay (Surf, Waterfall)': (810281, 1801, 'Route 14', None),
-    'Route 14 - Trainer: Battle Girl Glinda': (810282, 1802, 'Route 14', None),
-    'Route 14 - Trainer: Fisherman Sid': (810283, 1803, 'Route 14', None),
+    'Route 14 - Trainer: Gentleman Sheldon northeast': (810277, 1797, 'Route 14', None),
+    'Route 14 - Trainer: Socialite Marian northeast': (810278, 1798, 'Route 14', None),
+    'Route 14 - Trainer: Ace Trainer Kipp southwest': (810279, 1799, 'Route 14', None),
+    'Route 14 - Trainer: Ace Trainer Junko center': (810280, 1800, 'Route 14', None),
+    'Route 14 - Trainer: Black Belt Jay (Surf, Waterfall)': (810281, 1801, 'Route 14 - Waterfall', None),
+
+
+    'Route 14 - Trainer: Battle Girl Glinda center': (810282, 1802, 'Route 14', None),
+    'Route 14 - Trainer: Fisherman Sid southwest': (810283, 1803, 'Route 14', None),
     'Route 14 - Trainer: Backpacker Reece (Surf)': (810285, 1805, 'Route 14', None),
 
     # Route 15
-    'Route 15 - Trainer: Pokéfan Elliot': (810652, 2172, 'Route 15', None),
-    'Route 15 - Trainer: Pokéfan Lydia': (810653, 2173, 'Route 15', None),
-    'Route 15 - Trainer: Scientist Marie': (810654, 2174, 'Route 15', None),
-    'Route 15 - Trainer: Backpacker Talon': (810655, 2175, 'Route 15', None),
-    'Route 15 - Trainer: Backpacker Corin': (810656, 2176, 'Route 15', None),
+    'Route 15 - Trainer: Pokéfan Elliot southwest': (810652, 2172, 'Route 15', None),
+    'Route 15 - Trainer: Pokéfan Lydia east': (810653, 2173, 'Route 15', None),
+    'Route 15 - Trainer: Scientist Marie center': (810654, 2174, 'Route 15', None),
+    'Route 15 - Trainer: Backpacker Talon southwest': (810655, 2175, 'Route 15', None),
+    'Route 15 - Trainer: Backpacker Corin south': (810656, 2176, 'Route 15', None),
 
     # Route 16
     'Route 16 - Trainer: Backers Stu & Art on south path': (810257, 1777, 'Route 16', None),
@@ -391,109 +441,177 @@ TRAINER_LOCATIONS: dict[str, tuple[int, int | None, str | None, tuple[int, int] 
     'Route 16 - Trainer: Depot Agent Hank in west': (810262, 1782, 'Route 16', None),
 
     # Route 17
-    'Route 17 - Trainer: Fisherman Lydon': (810413, 1933, 'Route 17', None),
-    'Route 17 - Trainer: Fisherman Bucky': (810414, 1934, 'Route 17', None),
-    'Route 17 - Trainer: Swimmer (M) Wright': (810415, 1935, 'Route 17', None),
-    'Route 17 - Trainer: Swimmer (M) Jeffery': (810416, 1936, 'Route 17', None),
-    'Route 17 - Trainer: Swimmer (F) Ruth': (810417, 1937, 'Route 17', None),
-    'Route 17 - Trainer: Swimmer (F) Dara': (810418, 1938, 'Route 17', None),
+    'Route 17 - Trainer: Fisherman Lydon southeast': (810413, 1933, 'Route 17', None),
+    'Route 17 - Trainer: Fisherman Bucky southwest': (810414, 1934, 'Route 17', None),
+    'Route 17 - Trainer: Swimmer (M) Wright northwest': (810415, 1935, 'Route 17', None),
+    'Route 17 - Trainer: Swimmer (M) Jeffery south': (810416, 1936, 'Route 17', None),
+    'Route 17 - Trainer: Swimmer (F) Ruth southwest': (810417, 1937, 'Route 17', None),
+    'Route 17 - Trainer: Swimmer (F) Dara northwest': (810418, 1938, 'Route 17', None),
 
     # Route 18
-    'Route 18 - Trainer: Hiker Stephen': (810419, 1939, 'Route 18', None),
-    'Route 18 - Trainer: Veteran Vincent': (810420, 1940, 'Route 18', None),
-    'Route 18 - Trainer: Veteran Chester': (810421, 1941, 'Route 18', None),
-    'Route 18 - Trainer: Veteran Maya': (810422, 1942, 'Route 18', None),
-    'Route 18 - Trainer: Veteran Gina': (810423, 1943, 'Route 18', None),
-    'Route 18 - Trainer: Black Belt Zachary': (810424, 1944, 'Route 18', None),
-    'Route 18 - Trainer: Battle Girl Wendy': (810425, 1945, 'Route 18', None),
+    'Route 18 - Trainer: Hiker Stephen west': (810419, 1939, 'Route 18', None),
+    'Route 18 - Trainer: Veteran Vincent southeast': (810420, 1940, 'Route 18 - Strength Area', None),
+
+
+    'Route 18 - Trainer: Veteran Chester north': (810421, 1941, 'Route 18', None),
+    'Route 18 - Trainer: Veteran Maya southwest': (810422, 1942, 'Route 18', None),
+    'Route 18 - Trainer: Veteran Gina east': (810423, 1943, 'Route 18', None),
+    'Route 18 - Trainer: Black Belt Zachary south': (810424, 1944, 'Route 18 - Strength Area', None),
+
+
+    'Route 18 - Trainer: Battle Girl Wendy northeast': (810425, 1945, 'Route 18', None),
 
     # Route 2
-    'Route 2 - Trainer: Youngster Jimmy': (810401, 1921, 'Route 2', None),
-    'Route 2 - Trainer: Lass Mali': (810402, 1922, 'Route 2', None),
-    'Route 2 - Trainer: Veteran Oriana': (810403, 1923, 'Route 2', None),
-    'Route 2 - Trainer: Veteran Rayne': (810404, 1924, 'Route 2', None),
-    'Route 2 - Trainer: Youngster Mikey': (810407, 1927, 'Route 2', None),
-    'Route 2 - Trainer: Lass Henrietta': (810408, 1928, 'Route 2', None),
+    'Route 2 - Trainer: Youngster Jimmy northeast': (810401, 1921, 'Route 2', None),
+    'Route 2 - Trainer: Lass Mali west': (810402, 1922, 'Route 2', None),
+    'Route 2 - Trainer: Veteran Oriana west': (810403, 1923, 'Route 2', None),
+    'Route 2 - Trainer: Veteran Rayne center': (810404, 1924, 'Route 2', None),
+    'Route 2 - Trainer: Youngster Mikey northeast': (810407, 1927, 'Route 2', None),
+    'Route 2 - Trainer: Lass Henrietta north': (810408, 1928, 'Route 2', None),
 
     # Route 20
     'Route 20 - Trainer: Youngster Terrell in northwest near Floccesy': (810164, 1684, 'Route 20', None),
     'Route 20 - Trainer: Lass Isabel in western grass patch': (810165, 1685, 'Route 20', None),
-    'Route 20 - Trainer: Preschooler Albert east of bridge': (810173, 1693, 'Route 20', None),
-    'Route 20 - Trainer: Preschooler Lin east of Nursery Aide': (810174, 1694, 'Route 20', None),
-    'Route 20 - Trainer: Twins Lia & Lily near dark grass': (810175, 1695, 'Route 20', None),
-    'Route 20 - Trainer: Nursery Aide Kimya in central clearing': (810176, 1696, 'Route 20', None),
-    'Route 20 - Trainer: Hiker Jerome on eastern path': (810206, 1726, 'Route 20', None),
-    'Route 20 - Trainer: Pokemon Ranger Leaf on southeast island (Basic Badge, Autumn, Surf)': (810386, 1906, 'Route 20', None),
-    'Route 20 - Trainer: Pokemon Ranger Naoko above waterfall (Basic Badge, Autumn, Surf, Waterfall)': (810387, 1907, 'Route 20', None),
-    'Route 20 - Trainer: Pokemon Ranger Bret on central island (Basic Badge, Autumn, Surf)': (810388, 1908, 'Route 20', None),
-    'Route 20 - Trainer: Pokemon Ranger Malory on eastern island (Basic Badge, Autumn, Surf)': (810389, 1909, 'Route 20', None),
+    'Route 20 - Trainer: Preschooler Albert east of bridge': (810173, 1693, 'Route 20 - North', None),
+
+
+    'Route 20 - Trainer: Preschooler Lin east of Nursery Aide': (810174, 1694, 'Route 20 - North', None),
+
+
+    'Route 20 - Trainer: Twins Lia & Lily near dark grass': (810175, 1695, 'Route 20 - North', None),
+
+
+    'Route 20 - Trainer: Nursery Aide Kimya in central clearing': (810176, 1696, 'Route 20 - North', None),
+
+
+    'Route 20 - Trainer: Hiker Jerome on eastern path': (810206, 1726, 'Route 20 - North', None),
+
+
+    'Route 20 - Trainer: Pokemon Ranger Leaf on southeast island (Basic Badge, Autumn, Surf)': (810386, 1906, 'Route 20 - Autumn Islands', None),
+
+
+    'Route 20 - Trainer: Pokemon Ranger Naoko above waterfall (Basic Badge, Autumn, Surf, Waterfall)': (810387, 1907, 'Route 20 - Waterfall', None),
+
+
+    'Route 20 - Trainer: Pokemon Ranger Bret on central island (Basic Badge, Autumn, Surf)': (810388, 1908, 'Route 20 - Autumn Islands', None),
+
+
+    'Route 20 - Trainer: Pokemon Ranger Malory on eastern island (Basic Badge, Autumn, Surf)': (810389, 1909, 'Route 20 - Autumn Islands', None),
+
+
     'Route 20 - Trainer: Youngster Petey on western path': (810392, 1912, 'Route 20', None),
-    'Route 20 - Trainer: Team Plasma Grunt near dark grass': (810763, 2283, 'Route 20', None),
+    'Route 20 - Trainer: Team Plasma Grunt near dark grass': (810763, 2283, 'Route 20 - North', None),
+
+
 
     # Route 21
-    'Route 21 - Trainer: Swimmer (M) Kyle': (810308, 1828, 'Route 21', None),
-    'Route 21 - Trainer: Swimmer (F) Kaoru': (810309, 1829, 'Route 21', None),
-    'Route 21 - Trainer: Swimmer (M) Harold': (810310, 1830, 'Route 21', None),
-    'Route 21 - Trainer: Swimmer (F) Desiree': (810311, 1831, 'Route 21', None),
-    'Route 21 - Trainer: Fisherman Kenzo': (810312, 1832, 'Route 21', None),
-    'Route 21 - Trainer: Black Belt Kenneth': (810326, 1846, 'Route 21', None),
-    'Route 21 - Trainer: Doctor Braid': (810327, 1847, 'Route 21', None),
+    'Route 21 - Trainer: Swimmer (M) Kyle center': (810308, 1828, 'Route 21', None),
+    'Route 21 - Trainer: Swimmer (F) Kaoru north': (810309, 1829, 'Route 21', None),
+    'Route 21 - Trainer: Swimmer (M) Harold northwest': (810310, 1830, 'Route 21', None),
+    'Route 21 - Trainer: Swimmer (F) Desiree northwest': (810311, 1831, 'Route 21', None),
+    'Route 21 - Trainer: Fisherman Kenzo southwest': (810312, 1832, 'Route 21', None),
+    'Route 21 - Trainer: Black Belt Kenneth southwest': (810326, 1846, 'Route 21', None),
+    'Route 21 - Trainer: Doctor Braid southwest': (810327, 1847, 'Route 21', None),
 
     # Route 22
-    'Route 22 - Trainer: Ace Trainer Lucca': (810043, 1563, 'Route 22', None),
-    'Route 22 - Trainer: Ace Trainer Shel': (810044, 1564, 'Route 22', None),
-    'Route 22 - Trainer: Backpacker Myra': (810306, 1826, 'Route 22', None),
-    'Route 22 - Trainer: Backpacker Lowell': (810307, 1827, 'Route 22', None),
-    'Route 22 - Trainer: Breeder Addison': (810333, 1853, 'Route 22', None),
-    'Route 22 - Trainer: Hiker Justin': (810334, 1854, 'Route 22', None),
+    'Route 22 - Trainer: Ace Trainer Lucca southwest': (810043, 1563, 'Route 22', None),
+    'Route 22 - Trainer: Ace Trainer Shel east': (810044, 1564, 'Route 22', None),
+    'Route 22 - Trainer: Backpacker Myra north': (810306, 1826, 'Route 22', None),
+    'Route 22 - Trainer: Backpacker Lowell northwest': (810307, 1827, 'Route 22', None),
+    'Route 22 - Trainer: Breeder Addison southeast': (810333, 1853, 'Route 22', None),
+    'Route 22 - Trainer: Hiker Justin center': (810334, 1854, 'Route 22', None),
 
     # Route 23
-    'Route 23 - Trainer: Hiker Don': (810475, 1995, 'Route 23', None),
-    'Route 23 - Trainer: Hiker Doug (Cut)': (810476, 1996, 'Route 23', None),
-    'Route 23 - Trainer: Black Belt Luke': (810477, 1997, 'Route 23', None),
-    'Route 23 - Trainer: Battle Girl Brenda': (810478, 1998, 'Route 23', None),
-    'Route 23 - Trainer: Ace Trainer Juliet': (810479, 1999, 'Route 23', None),
-    'Route 23 - Trainer: Ace Trainer Grant': (810480, 2000, 'Route 23', None),
-    'Route 23 - Trainer: Black Belt Benjamin (Cut)': (810481, 2001, 'Route 23', None),
-    'Route 23 - Trainer: Battle Girl Tiffany (Cut, Strength)': (810482, 2002, 'Route 23', None),
-    'Route 23 - Trainer: Ranger Lena': (810483, 2003, 'Route 23', None),
-    'Route 23 - Trainer: Ranger Steve': (810484, 2004, 'Route 23', None),
-    'Route 23 - Trainer: Ace Trainer Tom (Cut)': (810485, 2005, 'Route 23', None),
-    'Route 23 - Trainer: Ace Trainer Miki (Cut)': (810486, 2006, 'Route 23', None),
+    'Route 23 - Trainer: Hiker Don northeast': (810475, 1995, 'Route 23', None),
+    'Route 23 - Trainer: Hiker Doug (Cut)': (810476, 1996, 'Route 23 - Cut Area', None),
+
+
+    'Route 23 - Trainer: Black Belt Luke east': (810477, 1997, 'Route 23', None),
+    'Route 23 - Trainer: Battle Girl Brenda southeast': (810478, 1998, 'Route 23', None),
+    'Route 23 - Trainer: Ace Trainer Juliet northeast': (810479, 1999, 'Route 23', None),
+    'Route 23 - Trainer: Ace Trainer Grant east': (810480, 2000, 'Route 23', None),
+    'Route 23 - Trainer: Black Belt Benjamin (Cut)': (810481, 2001, 'Route 23 - Cut Area', None),
+
+
+    'Route 23 - Trainer: Battle Girl Tiffany (Cut, Strength)': (810482, 2002, 'Route 23 - Strength Area', None),
+
+
+    'Route 23 - Trainer: Ranger Lena north': (810483, 2003, 'Route 23', None),
+    'Route 23 - Trainer: Ranger Steve east': (810484, 2004, 'Route 23', None),
+    'Route 23 - Trainer: Ace Trainer Tom (Cut)': (810485, 2005, 'Route 23 - Cut Area', None),
+
+
+    'Route 23 - Trainer: Ace Trainer Miki (Cut)': (810486, 2006, 'Route 23 - Cut Area', None),
+
+
 
     # Route 3
-    'Route 3 - Trainer: Lass Shannon': (810337, 1857, 'Route 3', None),
-    'Route 3 - Trainer: School Kid Edgar': (810393, 1913, 'Route 3', None),
-    'Route 3 - Trainer: School Kid Marsha': (810394, 1914, 'Route 3', None),
-    'Route 3 - Trainer: Nursery Aide Autumn': (810395, 1915, 'Route 3', None),
-    'Route 3 - Trainer: Preschooler Buster': (810396, 1916, 'Route 3', None),
-    'Route 3 - Trainer: Preschooler Eva': (810397, 1917, 'Route 3', None),
-    'Route 3 - Trainer: Preschooler Tyrone': (810398, 1918, 'Route 3', None),
-    'Route 3 - Trainer: Fisherman Bruce': (810399, 1919, 'Route 3', None),
-    'Route 3 - Trainer: Fisherman Mack (Surf)': (810400, 1920, 'Route 3', None),
-    'Route 3 - Trainer: Backers May & Mal': (810753, 2273, 'Route 3', None),
+    'Route 3 - Trainer: Lass Shannon northwest': (810337, 1857, 'Route 3', None),
+    'Route 3 - Trainer: School Kid Edgar south': (810393, 1913, 'Route 3', None),
+    'Route 3 - Trainer: School Kid Marsha southwest': (810394, 1914, 'Route 3', None),
+    'Route 3 - Trainer: Nursery Aide Autumn northeast': (810395, 1915, 'Route 3', None),
+    'Route 3 - Trainer: Preschooler Buster northeast': (810396, 1916, 'Route 3', None),
+    'Route 3 - Trainer: Preschooler Eva northeast': (810397, 1917, 'Route 3', None),
+    'Route 3 - Trainer: Preschooler Tyrone north': (810398, 1918, 'Route 3', None),
+    'Route 3 - Trainer: Fisherman Bruce south': (810399, 1919, 'Route 3', None),
+    'Route 3 - Trainer: Fisherman Mack (Surf)': (810400, 1920, 'Route 3 - Water', None),
+
+
+    'Route 3 - Trainer: Backers May & Mal center': (810753, 2273, 'Route 3', None),
 
     # Route 4
-    'Route 4 - Trainer: Lady Lina in central ruins': (810147, 1667, 'Route 4', None),
+    'Route 4 - Trainer: Lady Lina in central ruins': (810147, 1667, 'Route 4 - North', None),
+
+
     'Route 4 - Trainer: Fisherman Hubert at south water': (810210, 1730, 'Route 4', None),
     'Route 4 - Trainer: Fisherman Andrew at south water': (810211, 1731, 'Route 4', None),
     'Route 4 - Trainer: Policeman Braven in south near Castelia Gate': (810212, 1732, 'Route 4', None),
-    'Route 4 - Trainer: Backpacker Clifford in southeast': (810213, 1733, 'Route 4', None),
-    'Route 4 - Trainer: Policeman Dell in north near Nimbasa Gate': (810214, 1734, 'Route 4', None),
-    'Route 4 - Trainer: Policeman Neagle on central road': (810215, 1735, 'Route 4', None),
-    'Route 4 - Trainer: Roughneck Joey in western fenced area': (810216, 1736, 'Route 4', None),
-    'Route 4 - Trainer: Roughneck Silvester in northwest fenced area': (810217, 1737, 'Route 4', None),
-    'Route 4 - Trainer: Biker Stanley in western fenced area': (810218, 1738, 'Route 4', None),
-    'Route 4 - Trainer: Hooligans Rob & Sal on western street': (810220, 1740, 'Route 4', None),
-    'Route 4 - Trainer: Rich Boy Keenan in west ruins': (810221, 1741, 'Route 4', None),
-    'Route 4 - Trainer: Backpacker Roland in north near Nimbasa Gate': (810222, 1742, 'Route 4', None),
-    'Route 4 - Trainer: Backpacker Rachel in east ruins': (810223, 1743, 'Route 4', None),
-    'Route 4 - Trainer: Pokéfan Norbert in east': (810224, 1744, 'Route 4', None),
-    'Route 4 - Trainer: Pokéfan Sachiko in northeast ruins': (810225, 1745, 'Route 4', None),
-    'Route 4 - Trainer: Twins Tara & Val in central ruins': (810226, 1746, 'Route 4', None),
-    'Route 4 - Trainer: Youngster Sinclair in western fenced area': (810284, 1804, 'Route 4', None),
+    'Route 4 - Trainer: Backpacker Clifford in southeast': (810213, 1733, 'Route 4 - North', None),
+
+
+    'Route 4 - Trainer: Policeman Dell in north near Nimbasa Gate': (810214, 1734, 'Route 4 - North', None),
+
+
+    'Route 4 - Trainer: Policeman Neagle on central road': (810215, 1735, 'Route 4 - North', None),
+
+
+    'Route 4 - Trainer: Roughneck Joey in western fenced area': (810216, 1736, 'Route 4 - North', None),
+
+
+    'Route 4 - Trainer: Roughneck Silvester in northwest fenced area': (810217, 1737, 'Route 4 - North', None),
+
+
+    'Route 4 - Trainer: Biker Stanley in western fenced area': (810218, 1738, 'Route 4 - North', None),
+
+
+    'Route 4 - Trainer: Hooligans Rob & Sal on western street': (810220, 1740, 'Route 4 - North', None),
+
+
+    'Route 4 - Trainer: Rich Boy Keenan in west ruins': (810221, 1741, 'Route 4 - North', None),
+
+
+    'Route 4 - Trainer: Backpacker Roland in north near Nimbasa Gate': (810222, 1742, 'Route 4 - North', None),
+
+
+    'Route 4 - Trainer: Backpacker Rachel in east ruins': (810223, 1743, 'Route 4 - North', None),
+
+
+    'Route 4 - Trainer: Pokéfan Norbert in east': (810224, 1744, 'Route 4 - North', None),
+
+
+    'Route 4 - Trainer: Pokéfan Sachiko in northeast ruins': (810225, 1745, 'Route 4 - North', None),
+
+
+    'Route 4 - Trainer: Twins Tara & Val in central ruins': (810226, 1746, 'Route 4 - North', None),
+
+
+    'Route 4 - Trainer: Youngster Sinclair in western fenced area': (810284, 1804, 'Route 4 - North', None),
+
+
     'Route 4 - Trainer: Breeder Irene in southern area': (810296, 1816, 'Route 4', None),
-    'Route 4 - Trainer: Trainer Colress blocking north road': (810358, 1878, 'Route 4', None),
+    'Route 4 - Trainer: Trainer Colress blocking north road': (810358, 1878, 'Route 4 - North', None),
+
+
 
     # Route 5
     'Route 5 - Trainer: Backers Ava & Aya on road': (810252, 1772, 'Route 5', None),
@@ -526,35 +644,35 @@ TRAINER_LOCATIONS: dict[str, tuple[int, int | None, str | None, tuple[int, int] 
     'Route 7 - Trainer: Breeder Marcus (Southwest corner)': (810302, 1822, 'Route 7', None),
 
     # Route 8
-    'Route 8 - Trainer: Youngster Astor': (810571, 2091, 'Route 8', None),
-    'Route 8 - Trainer: Lass Mai': (810572, 2092, 'Route 8', None),
-    'Route 8 - Trainer: Parasol Lady Ingrid': (810573, 2093, 'Route 8', None),
-    'Route 8 - Trainer: Parasol Lady Tyra': (810574, 2094, 'Route 8', None),
-    'Route 8 - Trainer: Fisherman Ryder': (810575, 2095, 'Route 8', None),
+    'Route 8 - Trainer: Youngster Astor north': (810571, 2091, 'Route 8', None),
+    'Route 8 - Trainer: Lass Mai center': (810572, 2092, 'Route 8', None),
+    'Route 8 - Trainer: Parasol Lady Ingrid south': (810573, 2093, 'Route 8', None),
+    'Route 8 - Trainer: Parasol Lady Tyra northeast': (810574, 2094, 'Route 8', None),
+    'Route 8 - Trainer: Fisherman Ryder north': (810575, 2095, 'Route 8', None),
 
     # Route 9
-    'Route 9 - Trainer: Biker Zeke': (810219, 1739, 'Route 9', None),
-    'Route 9 - Trainer: Hooligans Jim & Cas': (810328, 1848, 'Route 9', None),
-    'Route 9 - Trainer: Roughneck Chance': (810329, 1849, 'Route 9', None),
-    'Route 9 - Trainer: Roughneck Reese': (810330, 1850, 'Route 9', None),
-    'Route 9 - Trainer: Biker Phillip': (810331, 1851, 'Route 9', None),
+    'Route 9 - Trainer: Biker Zeke east': (810219, 1739, 'Route 9', None),
+    'Route 9 - Trainer: Hooligans Jim & Cas northwest': (810328, 1848, 'Route 9', None),
+    'Route 9 - Trainer: Roughneck Chance northeast': (810329, 1849, 'Route 9', None),
+    'Route 9 - Trainer: Roughneck Reese southwest': (810330, 1850, 'Route 9', None),
+    'Route 9 - Trainer: Biker Phillip northwest': (810331, 1851, 'Route 9', None),
 
     # Seaside Cave
-    'Seaside Cave - Trainer: Black Belt Drago': (810469, 1989, 'Seaside Cave', None),
-    'Seaside Cave - Trainer: Battle Girl Tia': (810470, 1990, 'Seaside Cave', None),
-    'Seaside Cave - Trainer: Black Belt Rich': (810471, 1991, 'Seaside Cave', None),
+    'Seaside Cave - Trainer: 1F, Black Belt Drago south': (810469, 1989, 'Seaside Cave', None),
+    'Seaside Cave - Trainer: 1F, Battle Girl Tia west': (810470, 1990, 'Seaside Cave', None),
+    'Seaside Cave - Trainer: B1F, Black Belt Rich north': (810471, 1991, 'Seaside Cave', None),
     'Seaside Cave - Trainer: Battle Girl Maki (Strength)': (810472, 1992, 'Seaside Cave', None),
-    'Seaside Cave - Trainer: Ranger Johan': (810473, 1993, 'Seaside Cave', None),
-    'Seaside Cave - Trainer: Ranger Mikiko': (810474, 1994, 'Seaside Cave', None),
+    'Seaside Cave - Trainer: 1F, Ranger Johan southwest': (810473, 1993, 'Seaside Cave', None),
+    'Seaside Cave - Trainer: 1F, Ranger Mikiko west': (810474, 1994, 'Seaside Cave', None),
     'Seaside Cave - Trainer: Black Belt Rocky': (810580, 2100, 'Seaside Cave', None),
 
     # Shopping Mall
-    'Shopping Mall - Trainer: Waiter Lou': (810011, 1531, 'Shopping Mall', None),
-    'Shopping Mall - Trainer: Waitress Olwen': (810012, 1532, 'Shopping Mall', None),
+    'Shopping Mall - Trainer: Waiter Lou R9 entrance north': (810011, 1531, 'Shopping Mall', None),
+    'Shopping Mall - Trainer: Waitress Olwen R9 entrance center': (810012, 1532, 'Shopping Mall', None),
 
     # Strange House
-    'Strange House - Trainer: Backpacker Boone (1F)': (810390, 1910, 'Strange House', None),
-    'Strange House - Trainer: Psychic Lynette (2F)': (810391, 1911, 'Strange House', None),
+    'Strange House - Trainer: 1F, Backpacker Boone': (810390, 1910, 'Strange House', None),
+    'Strange House - Trainer: 2F, Psychic Lynette': (810391, 1911, 'Strange House', None),
 
     # Striaton City
     'Striaton City - Trainer: Ace Trainer Dusty': (810493, 2013, 'Striaton City', None),
@@ -563,26 +681,34 @@ TRAINER_LOCATIONS: dict[str, tuple[int, int | None, str | None, tuple[int, int] 
 
     # Twist Mountain
     'Twist Mountain - Trainer: Worker Cliff': (810492, 2012, 'Twist Mountain', None),
-    'Twist Mountain - Trainer: Worker Cairn': (810525, 2045, 'Twist Mountain', None),
-    'Twist Mountain - Trainer: Worker Gus': (810526, 2046, 'Twist Mountain', None),
-    'Twist Mountain - Trainer: Worker Victor': (810527, 2047, 'Twist Mountain', None),
-    'Twist Mountain - Trainer: Worker Patton': (810528, 2048, 'Twist Mountain', None),
-    'Twist Mountain - Trainer: Worker Ryan': (810529, 2049, 'Twist Mountain', None),
-    'Twist Mountain - Trainer: Hiker Hunter': (810530, 2050, 'Twist Mountain', None),
-    'Twist Mountain - Trainer: Hiker Wade': (810531, 2051, 'Twist Mountain', None),
-    'Twist Mountain - Trainer: Veteran Zach': (810532, 2052, 'Twist Mountain', None),
-    'Twist Mountain - Trainer: Veteran Julia': (810533, 2053, 'Twist Mountain', None),
-    'Twist Mountain - Trainer: Veteran Carter': (810534, 2054, 'Twist Mountain', None),
-    'Twist Mountain - Trainer: Veteran Chloris': (810535, 2055, 'Twist Mountain', None),
-    'Twist Mountain - Trainer: Nurse Carol': (810725, 2245, 'Twist Mountain', None),
+    'Twist Mountain - Trainer: Worker Cairn upper cave southwest': (810525, 2045, 'Twist Mountain', None),
+    'Twist Mountain - Trainer: Worker Gus upper cave north': (810526, 2046, 'Twist Mountain', None),
+    'Twist Mountain - Trainer: Worker Victor lower cave northwest': (810527, 2047, 'Twist Mountain - Non-Winter', None),
+
+
+    'Twist Mountain - Trainer: Worker Patton middle cave southeast': (810528, 2048, 'Twist Mountain', None),
+    'Twist Mountain - Trainer: Worker Ryan middle cave northeast': (810529, 2049, 'Twist Mountain - Winter', None),
+
+
+    'Twist Mountain - Trainer: Hiker Hunter middle cave northwest': (810530, 2050, 'Twist Mountain - Non-Winter', None),
+
+
+    'Twist Mountain - Trainer: Hiker Wade central pit northeast': (810531, 2051, 'Twist Mountain', None),
+    'Twist Mountain - Trainer: Veteran Zach lower cave southeast': (810532, 2052, 'Twist Mountain - Winter', None),
+
+
+    'Twist Mountain - Trainer: Veteran Julia upper cave southeast': (810533, 2053, 'Twist Mountain', None),
+    'Twist Mountain - Trainer: Veteran Carter central pit southeast': (810534, 2054, 'Twist Mountain', None),
+    'Twist Mountain - Trainer: Veteran Chloris middle cave southwest': (810535, 2055, 'Twist Mountain', None),
+    'Twist Mountain - Trainer: Nurse Carol central pit southeast': (810725, 2245, 'Twist Mountain', None),
 
     # Undella Bay
-    'Undella Bay - Trainer: Ace Trainer Summer': (810313, 1833, 'Undella Bay', None),
-    'Undella Bay - Trainer: Swimmer (M) Matt': (810314, 1834, 'Undella Bay', None),
-    'Undella Bay - Trainer: Swimmer (M) Bart': (810315, 1835, 'Undella Bay', None),
-    'Undella Bay - Trainer: Swimmer (M) Tim': (810316, 1836, 'Undella Bay', None),
-    'Undella Bay - Trainer: Swimmer (F) Arissa': (810317, 1837, 'Undella Bay', None),
-    'Undella Bay - Trainer: Swimmer (F) Mitzi': (810318, 1838, 'Undella Bay', None),
+    'Undella Bay - Trainer: Ace Trainer Summer south': (810313, 1833, 'Undella Bay', None),
+    'Undella Bay - Trainer: Swimmer (M) Matt north': (810314, 1834, 'Undella Bay', None),
+    'Undella Bay - Trainer: Swimmer (M) Bart east': (810315, 1835, 'Undella Bay', None),
+    'Undella Bay - Trainer: Swimmer (M) Tim southeast': (810316, 1836, 'Undella Bay', None),
+    'Undella Bay - Trainer: Swimmer (F) Arissa north': (810317, 1837, 'Undella Bay', None),
+    'Undella Bay - Trainer: Swimmer (F) Mitzi east': (810318, 1838, 'Undella Bay', None),
 
     # Undella Town
     'Undella Town - Trainer: PkMn Trainer Hugh (Post-Game)': (810378, 1898, 'Undella Town', None, (1899, 1900)),
@@ -590,43 +716,70 @@ TRAINER_LOCATIONS: dict[str, tuple[int, int | None, str | None, tuple[int, int] 
     'Undella Town - Trainer: PkMn Trainer Hugh': (810693, 2213, 'Undella Town', None, (2214, 2215)),
 
     # Victory road
-    'Victory Road - Trainer: Ace Trainer Billy': (810594, 2114, 'Victory Road', None),
-    'Victory Road - Trainer: Psychic Alia': (810595, 2115, 'Victory Road', None),
-    'Victory Road - Trainer: Ace Trainer Jamie': (810596, 2116, 'Victory Road', None),
-    'Victory Road - Trainer: Psychic Al': (810597, 2117, 'Victory Road', None),
-    'Victory Road - Trainer: Ace Trainer Beckett (Outside 1 B2 / Grove W2)': (810598, 2118, 'Victory Road', None),
-    'Victory Road - Trainer: Ace Trainer Shelly (Outside 1 B2 / Grove W2)': (810599, 2119, 'Victory Road', None),
-    'Victory Road - Trainer: Veteran Cathy': (810600, 2120, 'Victory Road', None),
-    'Victory Road - Trainer: Doctor Logan': (810601, 2121, 'Victory Road', None),
-    'Victory Road - Trainer: Ace Trainer Webster (2F)': (810602, 2122, 'Victory Road', None),
-    'Victory Road - Trainer: Ace Trainer Shanta (2F)': (810603, 2123, 'Victory Road', None),
-    'Victory Road - Trainer: Veteran Sterling (Outside 2)': (810604, 2124, 'Victory Road', None),
-    'Victory Road - Trainer: Veteran Portia (Outside 2)': (810605, 2125, 'Victory Road', None),
-    'Victory Road - Trainer: Ace Trainer Caroll (Outside 2)': (810606, 2126, 'Victory Road', None),
-    'Victory Road - Trainer: Black Belt Martell (Outside 2)': (810607, 2127, 'Victory Road', None),
-    'Victory Road - Trainer: Ace Trainer Elmer (Outside 2)': (810608, 2128, 'Victory Road', None),
-    'Victory Road - Trainer: Battle Girl Chalina (Outside 2)': (810609, 2129, 'Victory Road', None),
-    'Victory Road - Trainer: Ace Trainer Pierce': (810610, 2130, 'Victory Road', None),
-    'Victory Road - Trainer: Ace Trainer Chandra (Grove B2 / Outside 1 W2)': (810611, 2131, 'Victory Road', None),
-    'Victory Road - Trainer: Veteran Hugo (3F)': (810612, 2132, 'Victory Road', None),
-    'Victory Road - Trainer: Backpacker Mae': (810613, 2133, 'Victory Road', None),
-    'Victory Road - Trainer: Veteran Claude (1F, Surf, Waterfall)': (810614, 2134, 'Victory Road', None),
-    'Victory Road - Trainer: Veteran Cecile (1F, Surf, Waterfall)': (810615, 2135, 'Victory Road', None),
-    'Victory Road - Trainer: Veteran Abraham (2F)': (810657, 2177, 'Victory Road', None),
-    'Victory Road - Trainer: Ranger Eddie (2F)': (810658, 2178, 'Victory Road', None),
-    'Victory Road - Trainer: Ranger Elle (2F)': (810659, 2179, 'Victory Road', None),
-    'Victory Road - Trainer: PkMn Trainer Hugh (4F)': (810684, 2204, 'Victory Road', None, (2205, 2206)),
+    'Victory Road - Trainer: 1F, Ace Trainer Billy east': (810594, 2114, 'Victory Road', None),
+    'Victory Road - Trainer: 1F, Psychic Alia north': (810595, 2115, 'Victory Road - Strength', None),
+
+    'Victory Road - Trainer: 1F, Ace Trainer Jamie center': (810596, 2116, 'Victory Road - Strength', None),
+
+    'Victory Road - Trainer: 1F, Psychic Al south': (810597, 2117, 'Victory Road - Strength', None),
+
+    'Victory Road - Trainer: Ace Trainer Beckett (Outside 1 B2 / Grove W2)': (810598, 2118, 'Victory Road - Strength', None),
+
+    'Victory Road - Trainer: Ace Trainer Shelly (Outside 1 B2 / Grove W2)': (810599, 2119, 'Victory Road - Strength', None),
+
+    'Victory Road - Trainer: 2F, Veteran Cathy east': (810600, 2120, 'Victory Road - Strength', None),
+
+    'Victory Road - Trainer: 2F, Doctor Logan north': (810601, 2121, 'Victory Road - Strength', None),
+
+    'Victory Road - Trainer: 2F, Ace Trainer Webster': (810602, 2122, 'Victory Road - Strength', None),
+
+    'Victory Road - Trainer: 2F, Ace Trainer Shanta': (810603, 2123, 'Victory Road - Strength', None),
+
+    'Victory Road - Trainer: Veteran Sterling (Outside 2)': (810604, 2124, 'Victory Road - Strength', None),
+
+    'Victory Road - Trainer: Veteran Portia (Outside 2)': (810605, 2125, 'Victory Road - Strength', None),
+
+    'Victory Road - Trainer: Ace Trainer Caroll (Outside 2)': (810606, 2126, 'Victory Road - Strength', None),
+
+    'Victory Road - Trainer: Black Belt Martell (Outside 2)': (810607, 2127, 'Victory Road - Strength', None),
+
+    'Victory Road - Trainer: Ace Trainer Elmer (Outside 2)': (810608, 2128, 'Victory Road - Strength', None),
+
+    'Victory Road - Trainer: Battle Girl Chalina (Outside 2)': (810609, 2129, 'Victory Road - Strength', None),
+
+    'Victory Road - Trainer: 2F, Ace Trainer Pierce northwest': (810610, 2130, 'Victory Road - Strength', None),
+
+    'Victory Road - Trainer: Ace Trainer Chandra (Grove B2 / Outside 1 W2)': (810611, 2131, 'Victory Road - Strength', None),
+
+    'Victory Road - Trainer: 3F, Veteran Hugo': (810612, 2132, 'Victory Road - Strength', None),
+
+    'Victory Road - Trainer: 2F, Backpacker Mae west': (810613, 2133, 'Victory Road - Strength', None),
+
+    'Victory Road - Trainer: 1F, Veteran Claude (Surf, Waterfall)': (810614, 2134, 'Victory Road - Waterfall', None),
+
+
+    'Victory Road - Trainer: 1F, Veteran Cecile (Surf, Waterfall)': (810615, 2135, 'Victory Road - Waterfall', None),
+
+
+    'Victory Road - Trainer: 2F, Veteran Abraham': (810657, 2177, 'Victory Road - Strength', None),
+
+    'Victory Road - Trainer: 2F, Ranger Eddie': (810658, 2178, 'Victory Road - Strength', None),
+
+    'Victory Road - Trainer: 2F, Ranger Elle': (810659, 2179, 'Victory Road - Strength', None),
+
+    'Victory Road - Trainer: 4F, PkMn Trainer Hugh': (810684, 2204, 'Victory Road - Strength', None, (2205, 2206)),
+
 
     # Village Bridge
     'Village Bridge - Trainer: Gentleman Stonewall': (810177, 1697, 'Village Bridge', None),
     'Village Bridge - Trainer: Baker Chris': (810335, 1855, 'Village Bridge', None),
-    'Village Bridge - Trainer: Youngster Karl': (810336, 1856, 'Village Bridge', None),
-    'Village Bridge - Trainer: Artist Gough': (810338, 1858, 'Village Bridge', None),
+    'Village Bridge - Trainer: Youngster Karl southwest': (810336, 1856, 'Village Bridge', None),
+    'Village Bridge - Trainer: Artist Gough northeast': (810338, 1858, 'Village Bridge', None),
     'Village Bridge - Trainer: Fisherman Dean (Surf)': (810349, 1869, 'Village Bridge', None),
-    'Village Bridge - Trainer: Hoopster Derrick': (810726, 2246, 'Village Bridge', None),
-    'Village Bridge - Trainer: Smasher Lizzy': (810727, 2247, 'Village Bridge', None),
-    'Village Bridge - Trainer: Smasher Amy': (810728, 2248, 'Village Bridge', None),
-    'Village Bridge - Trainer: Hoopster Nicolas': (810729, 2249, 'Village Bridge', None),
+    'Village Bridge - Trainer: Hoopster Derrick northwest': (810726, 2246, 'Village Bridge', None),
+    'Village Bridge - Trainer: Smasher Lizzy southeast': (810727, 2247, 'Village Bridge', None),
+    'Village Bridge - Trainer: Smasher Amy southeast': (810728, 2248, 'Village Bridge', None),
+    'Village Bridge - Trainer: Hoopster Nicolas northwest': (810729, 2249, 'Village Bridge', None),
 
     # Virbank City
     'Virbank City - Trainer: Team Plasma Grunt at harbour': (810690, 2210, 'Virbank City', None),
@@ -646,8 +799,8 @@ TRAINER_LOCATIONS: dict[str, tuple[int, int | None, str | None, tuple[int, int] 
 
     # Wellspring Cave
     'Wellspring Cave - Trainer: Veteran Shaun (Surf, Flash)': (810042, 1562, 'Wellspring Cave', None),
-    'Wellspring Cave - Trainer: Hiker Zaiem': (810674, 2194, 'Wellspring Cave', None),
-    'Wellspring Cave - Trainer: Battle Girl Maggie': (810675, 2195, 'Wellspring Cave', None),
+    'Wellspring Cave - Trainer: 1F, Hiker Zaiem southeast': (810674, 2194, 'Wellspring Cave', None),
+    'Wellspring Cave - Trainer: 1F, Battle Girl Maggie southwest': (810675, 2195, 'Wellspring Cave', None),
     'Wellspring Cave - Trainer: Battle Girl Xiao (Surf, Flash)': (810676, 2196, 'Wellspring Cave', None),
     'Wellspring Cave - Trainer: Black Belt Edward (Surf, Flash)': (810677, 2197, 'Wellspring Cave', None),
     'Wellspring Cave - Trainer: Black Belt Thomas (Surf, Flash)': (810678, 2198, 'Wellspring Cave', None),
