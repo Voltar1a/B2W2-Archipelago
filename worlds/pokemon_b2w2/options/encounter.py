@@ -27,12 +27,12 @@ class RandomiseWildPokemon(ToggleSet):
         "Type themed areas",
     ]
     auto_add_if_any = "Randomise"
-    default = {
+    default = [
         "Randomise",
         "Global 1 to 1",
         "Level appropriate evolutions",
         "Type themed areas",
-    }
+    ]
 
 
 class RandomiseTrainerPokemon(ToggleSet):
@@ -53,12 +53,12 @@ class RandomiseTrainerPokemon(ToggleSet):
         "Type themed",
     ]
     auto_add_if_any = "Randomise"
-    default = {
+    default = [
         "Randomise",
         "Consistent enemy teams",
         "Level appropriate evolutions",
         "Type themed",
-    }
+    ]
 
 
 class RandomiseStarterPokemon(ToggleSet):

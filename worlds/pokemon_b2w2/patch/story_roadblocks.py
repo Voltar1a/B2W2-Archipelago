@@ -75,6 +75,26 @@ def apply_story_roadblocks(rom: "NintendoDSRom", is_white2: bool, options: dict[
 
     skip_cinematics = bool(options.get("skip_cinematic_movies", True))
 
+    def _skip_demo_with_fade(lines: list[Any], demo_ids: set[int]) -> tuple[list[Any], bool]:
+        out: list[Any] = []
+        changed = False
+        i = 0
+        while i < len(lines):
+            if (
+                i + 2 < len(lines)
+                and lines[i].type == "command" and lines[i].parts == ["FieldClose"]
+                and lines[i + 1].type == "command" and lines[i + 1].parts[0] == "Call3DDemo"
+                and lines[i + 1].parts[1] in demo_ids
+                and lines[i + 2].type == "command" and lines[i + 2].parts == ["FieldOpen"]
+            ):
+                out.append(Line("command", ["FadeIntoBlack"]))
+                changed = True
+                i += 3
+                continue
+            out.append(lines[i])
+            i += 1
+        return out, changed
+
     try:
         if a126 is not None and len(a126.files) > 181:
             f181 = bytearray(a126.files[181])
@@ -319,22 +339,125 @@ def apply_story_roadblocks(rom: "NintendoDSRom", is_white2: bool, options: dict[
                 Line("command", ["StackPushConst", 1]),
                 Line("command", ["StackCmp", 1]),
                 Line("command", ["VMJumpIf", 255, "lbl_no_quake"]),
-                Line("command", ["FlagSet", 788]),
-                Line("command", ["FlagSet", 962]),
                 Line("command", ["WorkSetConst", 16594, 1]),
                 Line("command", ["VMHalt"]),
                 Line("label", ["lbl_no_quake"]),
                 Line("command", ["FlagReset", 788]),
                 Line("command", ["FlagReset", 962]),
+                Line("command", ["WorkSetConst", 16594, 1]),
                 Line("command", ["VMHalt"]),
             ]
+            # Disperse Bianca (13) across bridge and Workers (12, 14) offscreen when talking with Quake Badge
+            msg_b1 = 14
+            msg_b2 = 15
+            a003_cc = rom.getFileByName("a/0/0/3")
+            if a003_cc is not None:
+                from .text import decode, encode, insert_line
+                cc_narc = NARC(a003_cc)
+                cc_t = decode(cc_narc.files[253])
+                msg_b1 = len(cc_t[0])
+                msg_b2 = msg_b1 + 1
+                insert_line(cc_t, 0, msg_b1, "Thanks for waiting - looks like the[NextLine]bridge is finished being repaired now![End]")
+                insert_line(cc_t, 0, msg_b2, "I'm going further in - see you later![End]")
+                cc_narc.files[253] = encode(cc_t)
+                rom.setFileByName("a/0/0/3", cc_narc.save())
+
+            for talk_lbl in ("scr4", "scr5"):
+                t_idx = sf_390.find_label(talk_lbl)
+                if t_idx != -1:
+                    sf_390.lines[t_idx + 1 : t_idx + 1] = [
+                        Line("command", ["StoreBadge", 32804, 4]),
+                        Line("command", ["WorkCmpConst", 32804, 1]),
+                        Line("command", ["VMJumpIf", 1, "lbl_disp_390"]),
+                    ]
+            sf_390.lines.extend([
+                Line("label", ["lbl_disp_390"]),
+                Line("command", ["ActorPauseAll"]),
+                Line("command", ["ActorSetEyeToEye"]),
+                Line("command", ["PlayerGetGPos", 32801, 32802]),
+                Line("command", ["WorkCmpConst", 32801, 38]),
+                Line("command", ["VMJumpIf", 5, "lbl_390_aligned"]),
+                Line("command", ["ActorCmdExec", 255, "act_390_p_left"]),
+                Line("command", ["VMSleep", 10]),
+                Line("label", ["lbl_390_aligned"]),
+                Line("command", ["MsgActorEx", 1024, msg_b1, 13, 0, 0]),
+                Line("command", ["MsgActorEx", 1024, msg_b2, 13, 0, 0]),
+                Line("command", ["MsgWinCloseAll"]),
+                Line("command", ["ActorCmdExec", 255, "act_390_p_step_look"]),
+                Line("command", ["ActorCmdExec", 13, "act_390_bianca"]),
+                Line("command", ["ActorCmdExec", 12, "act_390_w12"]),
+                Line("command", ["ActorCmdExec", 14, "act_390_w14"]),
+                Line("command", ["VMSleep", 115]),
+                Line("command", ["ActorDelete", 13]),
+                Line("command", ["ActorDelete", 12]),
+                Line("command", ["ActorDelete", 14]),
+                Line("command", ["FlagSet", 788]),
+                Line("command", ["FlagSet", 962]),
+                Line("command", ["WorkSetConst", 16594, 1]),
+                Line("command", ["RTFinishSubEvents"]),
+                Line("command", ["ActorUnlockAll"]),
+                Line("command", ["VMHalt"]),
+                Line("label", ["act_390_p_left"]),
+                Line("action", ["WalkW8F", 1]),
+                Line("action", ["TurnS8F", 1]),
+                Line("action", ["EndAction", 0]),
+                Line("label", ["act_390_p_step_look"]),
+                Line("action", ["WalkW8F", 1]),
+                Line("action", ["TurnE8F", 1]),
+                Line("action", ["EndAction", 0]),
+                Line("label", ["act_390_bianca"]),
+                Line("action", ["WalkS8F", 4]),
+                Line("action", ["WalkE8F", 10]),
+                Line("action", ["EndAction", 0]),
+                Line("label", ["act_390_w12"]),
+                Line("action", ["WalkN8F", 7]),
+                Line("action", ["WalkW8F", 1]),
+                Line("action", ["WalkN8F", 4]),
+                Line("action", ["EndAction", 0]),
+                Line("label", ["act_390_w14"]),
+                Line("action", ["WalkS8F", 1]),
+                Line("action", ["WalkE8F", 10]),
+                Line("action", ["EndAction", 0]),
+            ])
             scripts_narc.files[390] = bytes(assemble(sf_390))
             modified_scripts = True
+            if a126 is not None and len(a126.files) > 244:
+                f244 = bytearray(a126.files[244])
+                nf244 = f244[4]
+                nn244 = f244[5]
+                if nn244 > 14:
+                    npc14_off = 8 + 20 * nf244 + 36 * 14
+                    f244[npc14_off + 4 : npc14_off + 6] = (0).to_bytes(2, "little")
+                    a126.files[244] = bytes(f244)
+                    modified_entities = True
     except Exception:
         pass
 
     try:
         sf_222 = disassemble(scripts_narc.files[222])
+        # Remove Skyla/Juniper/Bianca Cargo Service cutscene (scr2) so it never flies without Jet Badge
+        scr2_idx = sf_222.find_label("scr2")
+        if scr2_idx != -1 and sf_222.find_label("lbl3_25") != -1:
+            sf_222.lines[scr2_idx + 1 : scr2_idx + 1] = [
+                Line("command", ["ActorPauseAll"]),
+                Line("command", ["FlagSet", 767]),
+                Line("command", ["FlagSet", 768]),
+                Line("command", ["FlagSet", 769]),
+                Line("command", ["VMJump", "lbl3_25"]),
+            ]
+        # Skip Lentimas arrival cutscene state when flying via Pilot (sub52)
+        sub52_idx = sf_222.find_label("sub52")
+        if sub52_idx != -1:
+            for i in range(sub52_idx, min(sub52_idx + 12, len(sf_222.lines))):
+                if sf_222.lines[i].type == "command" and sf_222.lines[i].parts[0] == "MapChangeCore":
+                    sf_222.lines[i:i] = [
+                        Line("command", ["FlagSet", 777]),
+                        Line("command", ["WorkSetConst", 16587, 2]),
+                        Line("command", ["WorkSetConst", 16672, 1]),
+                        Line("command", ["HollowRivalSetValue", 3, 4]),
+                        Line("command", ["HollowRivalSetValue", 0, 4]),
+                    ]
+                    break
         scr5_idx = sf_222.find_label("scr5")
         if scr5_idx != -1:
             for i in range(scr5_idx, scr5_idx + 10):
@@ -354,6 +477,123 @@ def apply_story_roadblocks(rom: "NintendoDSRom", is_white2: bool, options: dict[
         modified_scripts = True
     except Exception:
         pass
+
+    # Keep Skyla (767) and Juniper (768) out of Cargo Service after Mistralton runway (Script 214 scr5)
+    # and gate Juniper's runway gift (scr4, flag 1707) on defeating Skyla's Gym (flag 1675)
+    try:
+        sf_214 = disassemble(scripts_narc.files[214])
+        changed_214 = False
+        scr4_214 = sf_214.find_label("scr4")
+        if scr4_214 != -1:
+            sf_214.lines[scr4_214 + 1 : scr4_214 + 1] = [
+                Line("command", ["StackPushFlag", 1675]),
+                Line("command", ["StackPushConst", 1]),
+                Line("command", ["StackCmp", 1]),
+                Line("command", ["VMJumpIf", 1, "lbl_214_scr4_ok"]),
+                Line("command", ["VMHalt"]),
+                Line("label", ["lbl_214_scr4_ok"]),
+            ]
+            changed_214 = True
+        scr5_214 = sf_214.find_label("scr5")
+        if scr5_214 != -1:
+            for i in range(scr5_214, min(scr5_214 + 65, len(sf_214.lines))):
+                if sf_214.lines[i].type == "command" and sf_214.lines[i].parts in (["FlagReset", 767], ["FlagReset", 768]):
+                    sf_214.lines[i] = Line("command", ["FlagSet", sf_214.lines[i].parts[1]])
+                    changed_214 = True
+        if changed_214:
+            scripts_narc.files[214] = bytes(assemble(sf_214))
+            modified_scripts = True
+    except Exception:
+        pass
+
+    # Skip Lentimas Town arrival cutscene (Script 916 scr0) & init Reversal Mountain Bianca state (scr8)
+    try:
+        sf_916 = disassemble(scripts_narc.files[916])
+        scr8_916 = sf_916.find_label("scr8")
+        if scr8_916 != -1:
+            sf_916.lines[scr8_916 + 1 : scr8_916 + 1] = [
+                Line("command", ["StackPush", 16672]),
+                Line("command", ["StackPushConst", 0]),
+                Line("command", ["StackCmp", 1]),
+                Line("command", ["VMJumpIf", 255, "lbl_916_bianca_ok"]),
+                Line("command", ["FlagSet", 777]),
+                Line("command", ["WorkSetConst", 16587, 2]),
+                Line("command", ["WorkSetConst", 16672, 1]),
+                Line("command", ["FlagReset", 959]),
+                Line("label", ["lbl_916_bianca_ok"]),
+            ]
+        scr0_916 = sf_916.find_label("scr0")
+        if scr0_916 != -1:
+            sf_916.lines[scr0_916 + 1 : scr0_916 + 1] = [
+                Line("command", ["ActorPauseAll"]),
+                Line("command", ["FlagSet", 777]),
+                Line("command", ["WorkSetConst", 16587, 2]),
+                Line("command", ["WorkSetConst", 16672, 1]),
+                Line("command", ["FlagReset", 959]),
+                Line("command", ["HollowRivalSetValue", 3, 4]),
+                Line("command", ["HollowRivalSetValue", 0, 4]),
+                Line("command", ["RTFinishSubEvents"]),
+                Line("command", ["ActorUnlockAll"]),
+                Line("command", ["VMHalt"]),
+            ]
+            if skip_cinematics:
+                sf_916.lines, _ = _skip_demo_with_fade(sf_916.lines, {25})
+            scripts_narc.files[916] = bytes(assemble(sf_916))
+            modified_scripts = True
+    except Exception:
+        pass
+
+    # Ensure Reversal Mountain (B2 s1066 / W2 s1078) initializes Bianca follower state (16672=1, reset 959) if 16672==0
+    for rev_sid in (1066, 1078):
+        try:
+            if len(scripts_narc.files) > rev_sid and scripts_narc.files[rev_sid]:
+                sf_rev = disassemble(scripts_narc.files[rev_sid])
+                scr0_rev = sf_rev.find_label("scr0")
+                if scr0_rev != -1:
+                    sf_rev.lines[scr0_rev + 1 : scr0_rev + 1] = [
+                        Line("command", ["StackPush", 16672]),
+                        Line("command", ["StackPushConst", 0]),
+                        Line("command", ["StackCmp", 1]),
+                        Line("command", ["VMJumpIf", 255, f"lbl_rev_{rev_sid}_ok"]),
+                        Line("command", ["WorkSetConst", 16672, 1]),
+                        Line("command", ["FlagReset", 959]),
+                        Line("label", [f"lbl_rev_{rev_sid}_ok"]),
+                    ]
+                    scripts_narc.files[rev_sid] = bytes(assemble(sf_rev))
+                    modified_scripts = True
+        except Exception:
+            pass
+
+    # Humilau Gym (s946 scr3): never block the player if they bypassed the Humilau bridge splash (var 16671 == 0)
+    try:
+        if len(scripts_narc.files) > 946 and scripts_narc.files[946]:
+            sf_946 = disassemble(scripts_narc.files[946])
+            scr3_946 = sf_946.find_label("scr3")
+            if scr3_946 != -1:
+                sf_946.lines[scr3_946 + 1 : scr3_946 + 1] = [
+                    Line("command", ["ActorPauseAll"]),
+                    Line("command", ["WorkSetConst", 16671, 1]),
+                    Line("command", ["RTFinishSubEvents"]),
+                    Line("command", ["ActorUnlockAll"]),
+                    Line("command", ["VMHalt"]),
+                ]
+                scripts_narc.files[946] = bytes(assemble(sf_946))
+                modified_scripts = True
+    except Exception:
+        pass
+
+    # Skip Castelia/Virbank boat, Royal Unova, and Route 21 Frigate departure 3D demos when skip_cinematics is enabled
+    if skip_cinematics:
+        for demo_sid, demo_ids in ((72, {10}), (74, {4}), (904, {23}), (1112, {13})):
+            try:
+                if len(scripts_narc.files) > demo_sid and scripts_narc.files[demo_sid]:
+                    sf_demo = disassemble(scripts_narc.files[demo_sid])
+                    sf_demo.lines, changed_demo = _skip_demo_with_fade(sf_demo.lines, demo_ids)
+                    if changed_demo:
+                        scripts_narc.files[demo_sid] = bytes(assemble(sf_demo))
+                        modified_scripts = True
+            except Exception:
+                pass
 
     try:
         sf_828 = disassemble(scripts_narc.files[828])
@@ -391,6 +631,60 @@ def apply_story_roadblocks(rom: "NintendoDSRom", is_white2: bool, options: dict[
     except Exception:
         pass
 
+    # Keep Marine Tube gated on Legend Badge even after beating Drayden (prevent s240 from setting var 16670 = 1)
+    # Also skip Opelucid Plasma Frigate freeze 3D demos (Call3DDemo 14/15) with FadeIntoBlack before MapChangeCore
+    try:
+        if len(scripts_narc.files) > 240 and scripts_narc.files[240]:
+            sf_240 = disassemble(scripts_narc.files[240])
+            mod_240 = False
+            new_240 = [
+                l for l in sf_240.lines
+                if not (l.type == "command" and l.parts == ["WorkSetConst", 16670, 1])
+            ]
+            if len(new_240) != len(sf_240.lines):
+                mod_240 = True
+            if skip_cinematics:
+                new_240, changed_240_demo = _skip_demo_with_fade(new_240, {14, 15})
+                if changed_240_demo:
+                    mod_240 = True
+            if mod_240:
+                sf_240.lines = new_240
+                scripts_narc.files[240] = bytes(assemble(sf_240))
+                modified_scripts = True
+    except Exception:
+        pass
+
+    if skip_cinematics:
+        try:
+            if len(scripts_narc.files) > 1208 and scripts_narc.files[1208]:
+                sf_1208 = disassemble(scripts_narc.files[1208])
+                new_1208, changed_1208 = _skip_demo_with_fade(sf_1208.lines, {16, 17, 18, 19, 20, 21, 22})
+                if changed_1208:
+                    sf_1208.lines = new_1208
+                    scripts_narc.files[1208] = bytes(assemble(sf_1208))
+                    modified_scripts = True
+        except Exception:
+            pass
+
+    # Autocollect missable Opelucid City gifts (flags 236, 240, 241) after Drayden's Kyurem talk in his house (s246 scr2)
+    try:
+        if len(scripts_narc.files) > 246 and scripts_narc.files[246]:
+            sf_246 = disassemble(scripts_narc.files[246])
+            scr2_246 = sf_246.find_label("scr2")
+            if scr2_246 != -1:
+                for i in range(scr2_246, min(scr2_246 + 80, len(sf_246.lines))):
+                    if sf_246.lines[i].type == "command" and sf_246.lines[i].parts == ["FlagSet", 800]:
+                        sf_246.lines[i + 1 : i + 1] = [
+                            Line("command", ["FlagSet", 236]),
+                            Line("command", ["FlagSet", 240]),
+                            Line("command", ["FlagSet", 241]),
+                        ]
+                        scripts_narc.files[246] = bytes(assemble(sf_246))
+                        modified_scripts = True
+                        break
+    except Exception:
+        pass
+
     try:
         sf_462 = disassemble(scripts_narc.files[462])
         sub1_idx = sf_462.find_label("sub1")
@@ -415,28 +709,120 @@ def apply_story_roadblocks(rom: "NintendoDSRom", is_white2: bool, options: dict[
         if scr0_idx != -1 and scr7_idx != -1:
             sf_462.lines[scr0_idx + 1 : scr7_idx] = [
                 Line("command", ["VMCall", "sub1"]),
-                Line("command", ["CheckItemBagNumber", 475, 1, 32804]),
+                Line("command", ["CheckItemBagNumber", 633, 1, 32804]),
                 Line("command", ["StackPush", 32804]),
                 Line("command", ["StackPushConst", 1]),
                 Line("command", ["StackCmp", 1]),
-                Line("command", ["VMJumpIf", 255, "lbl_no_card_key"]),
-                Line("command", ["FlagSet", 876]),
-                Line("command", ["VMJump", "lbl_check_splicers"]),
-                Line("label", ["lbl_no_card_key"]),
+                Line("command", ["VMJumpIf", 1, "lbl_check_splicers"]),
                 Line("command", ["FlagReset", 876]),
                 Line("label", ["lbl_check_splicers"]),
                 Line("command", ["CheckItemBagNumber", 628, 1, 32804]),
                 Line("command", ["StackPush", 32804]),
                 Line("command", ["StackPushConst", 1]),
                 Line("command", ["StackCmp", 1]),
-                Line("command", ["VMJumpIf", 255, "lbl_no_splicers"]),
-                Line("command", ["FlagSet", 879]),
-                Line("command", ["VMJump", "lbl_chasm_done"]),
-                Line("label", ["lbl_no_splicers"]),
+                Line("command", ["VMJumpIf", 1, "lbl_chasm_done"]),
                 Line("command", ["FlagReset", 879]),
                 Line("label", ["lbl_chasm_done"]),
                 Line("command", ["VMHalt"]),
             ]
+        # Disperse Route 22 Grunts (scr2) with Plasma Card (633) and Left Grunts (scr4/scr5) with Splicers (628) or Ghetsis (885)
+        scr2_462 = sf_462.find_label("scr2")
+        if scr2_462 != -1:
+            sf_462.lines[scr2_462 + 1 : scr2_462 + 1] = [
+                Line("command", ["CheckItemBagNumber", 633, 1, 32804]),
+                Line("command", ["WorkCmpConst", 32804, 1]),
+                Line("command", ["VMJumpIf", 1, "lbl_disp_r22_grunts"]),
+            ]
+        # Disable Giant Chasm Hugh cutscene (scr6) after Route 21 Frigate so it never bypasses the Plasma Card check (Flag 876)
+        _replace_scr_block(sf_462, "scr6", [
+            Line("label", ["scr6"]),
+            Line("command", ["ActorPauseAll"]),
+            Line("command", ["WorkSetConst", 16496, 2]),
+            Line("command", ["RTFinishSubEvents"]),
+            Line("command", ["ActorUnlockAll"]),
+            Line("command", ["VMHalt"]),
+        ])
+        for left_lbl in ("scr4", "scr5"):
+            l_idx = sf_462.find_label(left_lbl)
+            if l_idx != -1:
+                sf_462.lines[l_idx + 1 : l_idx + 1] = [
+                    Line("command", ["CheckItemBagNumber", 628, 1, 32804]),
+                    Line("command", ["WorkCmpConst", 32804, 1]),
+                    Line("command", ["VMJumpIf", 1, "lbl_disp_left_grunts"]),
+                ]
+        msg_r22_panic = 14
+        msg_left_1 = 15
+        msg_left_2 = 16
+        a003_gc = rom.getFileByName("a/0/0/3")
+        if a003_gc is not None:
+            from .text import decode, encode, insert_line
+            gc_narc = NARC(a003_gc)
+            gc_t = decode(gc_narc.files[290])
+            msg_r22_panic = len(gc_t[0])
+            msg_left_1 = msg_r22_panic + 1
+            msg_left_2 = msg_r22_panic + 2
+            insert_line(gc_t, 0, msg_r22_panic, "W-what?! You have a Plasma Card?![NextLine]Run for it!![End]")
+            insert_line(gc_t, 0, msg_left_1, "W-wait! You have the DNA Splicers![End]")
+            insert_line(gc_t, 0, msg_left_2, "I guess it's all over now...[NextLine]Let's get out of here![End]")
+            gc_narc.files[290] = encode(gc_t)
+            rom.setFileByName("a/0/0/3", gc_narc.save())
+
+        sf_462.lines.extend([
+            Line("label", ["lbl_disp_r22_grunts"]),
+            Line("command", ["ActorPauseAll"]),
+            Line("command", ["ActorSetEyeToEye"]),
+            Line("command", ["MsgActor", 1024, msg_r22_panic, 0, 0]),
+            Line("command", ["MsgWinCloseAll"]),
+            Line("command", ["ActorCmdExec", 6, "act_462_s8"]),
+            Line("command", ["ActorCmdExec", 11, "act_462_s8"]),
+            Line("command", ["VMSleep", 36]),
+            Line("command", ["ActorDelete", 6]),
+            Line("command", ["ActorDelete", 11]),
+            Line("command", ["FlagSet", 876]),
+            Line("command", ["RTFinishSubEvents"]),
+            Line("command", ["ActorUnlockAll"]),
+            Line("command", ["VMHalt"]),
+
+            Line("label", ["lbl_disp_left_grunts"]),
+            Line("command", ["ActorPauseAll"]),
+            Line("command", ["ActorSetEyeToEye"]),
+            Line("command", ["MsgActorEx", 1024, msg_left_1, 7, 0, 0]),
+            Line("command", ["MsgActorEx", 1024, msg_left_2, 8, 0, 0]),
+            Line("command", ["MsgWinCloseAll"]),
+            Line("command", ["PlayerGetGPos", 32801, 32802]),
+            Line("command", ["WorkCmpConst", 32801, 2]),
+            Line("command", ["VMJumpIf", 5, "lbl_left_aligned"]),
+            Line("command", ["ActorCmdExec", 255, "act_462_p_east"]),
+            Line("command", ["VMSleep", 10]),
+            Line("label", ["lbl_left_aligned"]),
+            Line("command", ["ActorCmdExec", 8, "act_462_bot_line"]),
+            Line("command", ["ActorCmdExec", 7, "act_462_top_line"]),
+            Line("command", ["VMSleep", 48]),
+            Line("command", ["ActorDelete", 7]),
+            Line("command", ["ActorDelete", 8]),
+            Line("command", ["FlagSet", 879]),
+            Line("command", ["RTFinishSubEvents"]),
+            Line("command", ["ActorUnlockAll"]),
+            Line("command", ["VMHalt"]),
+
+            Line("label", ["act_462_s8"]),
+            Line("action", ["WalkS4F", 8]),
+            Line("action", ["EndAction", 0]),
+            Line("label", ["act_462_p_east"]),
+            Line("action", ["WalkE8F", 1]),
+            Line("action", ["TurnW8F", 1]),
+            Line("action", ["EndAction", 0]),
+            Line("label", ["act_462_bot_line"]),
+            Line("action", ["WalkS4F", 2]),
+            Line("action", ["WalkE4F", 2]),
+            Line("action", ["WalkS4F", 6]),
+            Line("action", ["EndAction", 0]),
+            Line("label", ["act_462_top_line"]),
+            Line("action", ["WalkS4F", 3]),
+            Line("action", ["WalkE4F", 2]),
+            Line("action", ["WalkS4F", 6]),
+            Line("action", ["EndAction", 0]),
+        ])
         scripts_narc.files[462] = bytes(assemble(sf_462))
         modified_scripts = True
     except Exception:
@@ -495,7 +881,7 @@ def apply_story_roadblocks(rom: "NintendoDSRom", is_white2: bool, options: dict[
     blind_trainers_enabled = bool(options.get("blind_trainers", False)) if options else False
     gym_sight_scripts = {
         194: ["scr17", "scr18", "scr19", "scr20", "scr21", "scr22", "scr23"],
-        126: ["scr3", "scr4", "scr5"],
+        678: ["scr3"],
     }
     for gym_sid, scr_names in gym_sight_scripts.items():
         if len(scripts_narc.files) <= gym_sid:
@@ -713,6 +1099,11 @@ def apply_story_roadblocks(rom: "NintendoDSRom", is_white2: bool, options: dict[
                         Line("command", ["StackPush", 32800]),
                         Line("command", ["StackPushConst", 1]),
                         Line("command", ["StackCmp", 1]),
+                        Line("command", ["StoreBadge", 32800, 6]),
+                        Line("command", ["StackPush", 32800]),
+                        Line("command", ["StackPushConst", 1]),
+                        Line("command", ["StackCmp", 1]),
+                        Line("command", ["StackCmp", 6]),
                     ])
                     changed_1030 = True
                     i += 3
@@ -722,6 +1113,388 @@ def apply_story_roadblocks(rom: "NintendoDSRom", is_white2: bool, options: dict[
             if changed_1030:
                 sf_1030.lines = new_1030
                 scripts_narc.files[1030] = bytes(assemble(sf_1030))
+                modified_scripts = True
+    except Exception:
+        pass
+
+    # s1122 (B2 Giant Chasm barrier) & s1126 (W2 Route 21 barrier): do not require Plasma Card (Flag 356)
+    for barrier_sid in (1122, 1126):
+        try:
+            if len(scripts_narc.files) > barrier_sid and scripts_narc.files[barrier_sid]:
+                sf_b = disassemble(scripts_narc.files[barrier_sid])
+                changed_b = False
+                for i in range(len(sf_b.lines) - 2):
+                    if (
+                        sf_b.lines[i].type == "command" and sf_b.lines[i].parts == ["StackPushFlag", 356]
+                        and sf_b.lines[i + 1].type == "command" and sf_b.lines[i + 1].parts == ["StackPushConst", 0]
+                        and sf_b.lines[i + 2].type == "command" and sf_b.lines[i + 2].parts == ["StackCmp", 1]
+                    ):
+                        sf_b.lines[i] = Line("command", ["StackPushConst", 1])
+                        changed_b = True
+                if changed_b:
+                    scripts_narc.files[barrier_sid] = bytes(assemble(sf_b))
+                    modified_scripts = True
+        except Exception:
+            pass
+
+    # z563 (ow 354, s1124): add sleeping grunt blocking south door (warp1 -> z554, Route 21 Hugh multi-battle room) in Giant Chasm
+    try:
+        import struct
+        if a126 is not None and len(a126.files) > 354 and len(scripts_narc.files) > 1124 and scripts_narc.files[1124]:
+            raw_354 = bytearray(a126.files[354])
+            n_furn, n_npc, n_warp, n_trig = raw_354[4], raw_354[5], raw_354[6], raw_354[7]
+            off_npcs = 8 + n_furn * 20
+            if n_npc == 5 and len(raw_354) >= off_npcs + 36:
+                npc5 = bytearray(raw_354[off_npcs : off_npcs + 36])
+                struct.pack_into("<6H", npc5, 0, 5, 293, 0, 0, 2550, 9)
+                struct.pack_into("<H", npc5, 12, 1)  # face south
+                struct.pack_into("<2H", npc5, 28, 32, 15)  # in front of north loading zone (32, 14)
+                tail_off = off_npcs + n_npc * 36
+                new_354 = bytearray(raw_354[:tail_off]) + npc5 + raw_354[tail_off:]
+                new_354[5] = n_npc + 1
+                struct.pack_into("<I", new_354, 0, len(new_354) - 4)
+                a126.files[354] = bytes(new_354)
+                modified_entities = True
+
+                msg_sleep_563 = 6
+                a003_563 = rom.getFileByName("a/0/0/3")
+                if a003_563 is not None:
+                    from .text import decode, encode, insert_line
+                    narc_563 = NARC(a003_563)
+                    t_563 = decode(narc_563.files[363])
+                    msg_sleep_563 = len(t_563[0])
+                    insert_line(t_563, 0, msg_sleep_563, "Zzz...[End]")
+                    narc_563.files[363] = encode(t_563)
+                    rom.setFileByName("a/0/0/3", narc_563.save())
+
+                sf_1124 = disassemble(scripts_narc.files[1124])
+                sub11_idx = sf_1124.find_label("sub11")
+                if sub11_idx != -1:
+                    sf_1124.lines[sub11_idx + 1 : sub11_idx + 1] = [
+                        Line("command", ["WorkCmpConst", 16787, 3]),
+                        Line("command", ["VMJumpIf", 5, "lbl_1124_hide_blocker"]),
+                        Line("command", ["StackPushFlag", 975]),
+                        Line("command", ["StackPushConst", 0]),
+                        Line("command", ["StackCmp", 1]),
+                        Line("command", ["VMJumpIf", 255, "lbl_1124_show_blocker"]),
+                        Line("label", ["lbl_1124_hide_blocker"]),
+                        Line("command", ["FlagSet", 2550]),
+                        Line("command", ["VMJump", "lbl_1124_blocker_done"]),
+                        Line("label", ["lbl_1124_show_blocker"]),
+                        Line("command", ["FlagReset", 2550]),
+                        Line("label", ["lbl_1124_blocker_done"]),
+                    ]
+                    sf_1124.lines.extend([
+                        Line("label", ["scr8"]),
+                        Line("command", ["ActorPauseAll"]),
+                        Line("command", ["PlaySound", 1351]),
+                        Line("command", ["MsgActor", 1024, msg_sleep_563, 0, 0]),
+                        Line("command", ["InputWaitLast"]),
+                        Line("command", ["MsgActorClose"]),
+                        Line("command", ["RTFinishSubEvents"]),
+                        Line("command", ["ActorUnlockAll"]),
+                        Line("command", ["VMHalt"]),
+                    ])
+                    sf_1124.script_links[8] = "scr8"
+                    scripts_narc.files[1124] = bytes(assemble(sf_1124))
+                    modified_scripts = True
+    except Exception:
+        pass
+
+    # Isolate all 4 Plasma Frigate instances (1=PWT, 2=Route 21, 3=Giant Chasm, 4=P2 Lab) via var 16787
+    # and dedicated completion flags (2551=PWT, 2552=Route 21, 2500=R21 Grunt19, 2549=GC, 2548=GC Grunt19)
+    try:
+        def _inj_after_cmd(sf, target_parts: list[Any], extra: list[Any]) -> bool:
+            for idx, ln in enumerate(sf.lines):
+                if ln.type == "command" and ln.parts == target_parts:
+                    sf.lines[idx + 1 : idx + 1] = extra
+                    return True
+            return False
+
+        # 1) PWT (s382): set mode 1 when PWT Frigate starts
+        if len(scripts_narc.files) > 382 and scripts_narc.files[382]:
+            sf_382 = disassemble(scripts_narc.files[382])
+            if _inj_after_cmd(sf_382, ["WorkSetConst", 16624, 1], [
+                Line("command", ["WorkSetConst", 16787, 1]),
+                Line("command", ["WorkSetConst", 16452, 0]),
+                Line("command", ["FlagSet", 1029]),
+                Line("command", ["FlagReset", 829]),
+                Line("command", ["FlagReset", 830]),
+                Line("command", ["FlagReset", 831]),
+                Line("command", ["FlagReset", 975]),
+                Line("command", ["FlagReset", 364]),
+            ]):
+                scripts_narc.files[382] = bytes(assemble(sf_382))
+                modified_scripts = True
+
+        # 2) Route 21 / Seaside Cave (s926): set mode 2 & load Route 21 state on map load / boarding
+        if len(scripts_narc.files) > 926 and scripts_narc.files[926]:
+            sf_926 = disassemble(scripts_narc.files[926])
+            mod_926 = False
+            for lbl in ("scr0", "scr1", "scr2"):
+                idx_l = sf_926.find_label(lbl)
+                if idx_l != -1:
+                    s_tag = f"r21_{lbl}"
+                    sf_926.lines[idx_l + 1 : idx_l + 1] = [
+                        Line("command", ["WorkSetConst", 16787, 2]),
+                        Line("command", ["WorkSetConst", 16452, 1]),
+                        Line("command", ["FlagSet", 1029]),
+                        Line("command", ["FlagReset", 975]),
+                        Line("command", ["FlagSet", 364]),
+                        Line("command", ["StackPushFlag", 2552]),
+                        Line("command", ["StackPushConst", 0]),
+                        Line("command", ["StackCmp", 1]),
+                        Line("command", ["VMJumpIf", 255, f"lbl_{s_tag}_done"]),
+                        Line("command", ["FlagReset", 976]),
+                        Line("command", ["FlagReset", 830]),
+                        Line("command", ["FlagSet", 831]),
+                        Line("command", ["FlagReset", 835]),
+                        Line("command", ["FlagReset", 836]),
+                        Line("command", ["FlagReset", 837]),
+                        Line("command", ["FlagReset", 838]),
+                        Line("command", ["FlagReset", 839]),
+                        Line("command", ["WorkSetConst", 16640, 0]),
+                        Line("command", ["StackPushFlag", 2500]),
+                        Line("command", ["StackPushConst", 0]),
+                        Line("command", ["StackCmp", 1]),
+                        Line("command", ["VMJumpIf", 255, f"lbl_{s_tag}_g19_set"]),
+                        Line("command", ["FlagReset", 832]),
+                        Line("command", ["VMJump", f"lbl_{s_tag}_done"]),
+                        Line("label", [f"lbl_{s_tag}_g19_set"]),
+                        Line("command", ["FlagSet", 832]),
+                        Line("label", [f"lbl_{s_tag}_done"]),
+                    ]
+                    mod_926 = True
+            if mod_926:
+                scripts_narc.files[926] = bytes(assemble(sf_926))
+                modified_scripts = True
+
+        # 3) Giant Chasm (s462, s466): set mode 3 & load Giant Chasm state on map load
+        for gc_sid in (462, 466):
+            if len(scripts_narc.files) > gc_sid and scripts_narc.files[gc_sid]:
+                sf_gc = disassemble(scripts_narc.files[gc_sid])
+                mod_gc = False
+                for lbl in ("scr0", "scr1"):
+                    idx_l = sf_gc.find_label(lbl)
+                    if idx_l != -1:
+                        s_tag = f"gc_{gc_sid}_{lbl}"
+                        sf_gc.lines[idx_l + 1 : idx_l + 1] = [
+                            Line("command", ["WorkSetConst", 16787, 3]),
+                            Line("command", ["WorkSetConst", 16452, 2]),
+                            Line("command", ["FlagSet", 1029]),
+                            Line("command", ["FlagSet", 975]),
+                            Line("command", ["FlagReset", 364]),
+                            Line("command", ["StackPushFlag", 2549]),
+                            Line("command", ["StackPushConst", 0]),
+                            Line("command", ["StackCmp", 1]),
+                            Line("command", ["VMJumpIf", 255, f"lbl_{s_tag}_done"]),
+                            Line("command", ["FlagReset", 976]),
+                            Line("command", ["FlagReset", 977]),
+                            Line("command", ["FlagReset", 833]),
+                            Line("command", ["FlagReset", 834]),
+                            Line("command", ["FlagSet", 830]),
+                            Line("command", ["FlagSet", 831]),
+                            Line("command", ["FlagReset", 835]),
+                            Line("command", ["WorkSetConst", 16640, 0]),
+                            Line("command", ["StackPushFlag", 2548]),
+                            Line("command", ["StackPushConst", 0]),
+                            Line("command", ["StackCmp", 1]),
+                            Line("command", ["VMJumpIf", 255, f"lbl_{s_tag}_g19_set"]),
+                            Line("command", ["FlagReset", 832]),
+                            Line("command", ["VMJump", f"lbl_{s_tag}_done"]),
+                            Line("label", [f"lbl_{s_tag}_g19_set"]),
+                            Line("command", ["FlagSet", 832]),
+                            Line("label", [f"lbl_{s_tag}_done"]),
+                        ]
+                        mod_gc = True
+                if mod_gc:
+                    scripts_narc.files[gc_sid] = bytes(assemble(sf_gc))
+                    modified_scripts = True
+
+        # 4) Postgame P2 Lab (s474): set mode 4 on map load without clobbering Route 21 / Giant Chasm story flags
+        if len(scripts_narc.files) > 474 and scripts_narc.files[474]:
+            sf_474 = disassemble(scripts_narc.files[474])
+            mod_474 = False
+            for lbl in ("scr0", "scr1"):
+                idx_l = sf_474.find_label(lbl)
+                if idx_l != -1:
+                    sf_474.lines[idx_l + 1 : idx_l + 1] = [
+                        Line("command", ["WorkSetConst", 16787, 4]),
+                        Line("command", ["WorkSetConst", 16452, 3]),
+                        Line("command", ["FlagReset", 364]),
+                        Line("command", ["FlagSet", 835]),
+                        Line("command", ["FlagSet", 976]),
+                        Line("command", ["FlagSet", 1029]),
+                    ]
+                    mod_474 = True
+            if mod_474:
+                scripts_narc.files[474] = bytes(assemble(sf_474))
+                modified_scripts = True
+
+        # 4b) s1110 (Bridge Chamber): allow P2 Lab Colress battle/gift (scr5 -> lbl6_13) before Hall of Fame when in mode 4
+        if len(scripts_narc.files) > 1110 and scripts_narc.files[1110]:
+            sf_1110 = disassemble(scripts_narc.files[1110])
+            scr5_1110 = sf_1110.find_label("scr5")
+            if scr5_1110 != -1 and sf_1110.find_label("lbl6_13") != -1:
+                sf_1110.lines[scr5_1110 + 2 : scr5_1110 + 2] = [
+                    Line("command", ["WorkCmpConst", 16787, 4]),
+                    Line("command", ["VMJumpIf", 1, "lbl6_13"]),
+                ]
+                scripts_narc.files[1110] = bytes(assemble(sf_1110))
+                modified_scripts = True
+
+        # 5) s1104 (1F Deck): guard Postgame Colress (1029) to mode 4, set PWT done (2551), track Grunt 19 per-instance
+        if len(scripts_narc.files) > 1104 and scripts_narc.files[1104]:
+            sf_1104 = disassemble(scripts_narc.files[1104])
+            mod_1104 = False
+            if _inj_after_cmd(sf_1104, ["WorkSetConst", 16624, 4], [Line("command", ["FlagSet", 2551])]):
+                mod_1104 = True
+            if _inj_after_cmd(sf_1104, ["FlagSet", 832], [
+                Line("command", ["WorkCmpConst", 16787, 2]),
+                Line("command", ["VMJumpIf", 5, "lbl_1104_not_r21"]),
+                Line("command", ["FlagSet", 2500]),
+                Line("label", ["lbl_1104_not_r21"]),
+                Line("command", ["WorkCmpConst", 16787, 3]),
+                Line("command", ["VMJumpIf", 5, "lbl_1104_not_gc"]),
+                Line("command", ["FlagSet", 2548]),
+                Line("label", ["lbl_1104_not_gc"]),
+            ]):
+                mod_1104 = True
+            scr2_1104 = sf_1104.find_label("scr2")
+            if scr2_1104 != -1:
+                sf_1104.lines[scr2_1104 + 1 : scr2_1104 + 1] = [
+                    Line("command", ["WorkCmpConst", 16787, 4]),
+                    Line("command", ["VMJumpIf", 1, "lbl_1104_allow_p2"]),
+                    Line("command", ["FlagSet", 1029]),
+                    Line("command", ["VMHalt"]),
+                    Line("label", ["lbl_1104_allow_p2"]),
+                ]
+                mod_1104 = True
+            lbl1_8_1104 = sf_1104.find_label("lbl1_8")
+            lbl1_10_1104 = sf_1104.find_label("lbl1_10")
+            lbl1_11_1104 = sf_1104.find_label("lbl1_11")
+            if lbl1_8_1104 != -1 and lbl1_10_1104 != -1 and lbl1_11_1104 != -1:
+                # Insert lbl_1104_p2_warps before ObjInitWarpGPos 6, 0, 0, 0 under lbl1_10 and dispatch all 4 modes on 16787
+                for k in range(lbl1_10_1104 + 1, min(len(sf_1104.lines), lbl1_10_1104 + 10)):
+                    if sf_1104.lines[k].type == "command" and sf_1104.lines[k].parts == ["ObjInitWarpGPos", 6, 0, 0, 0]:
+                        sf_1104.lines.insert(k, Line("label", ["lbl_1104_p2_warps"]))
+                        sf_1104.lines[lbl1_8_1104 + 1 : lbl1_8_1104 + 1] = [
+                            Line("command", ["WorkCmpConst", 16787, 1]),
+                            Line("command", ["VMJumpIf", 5, "lbl_1104_chk2"]),
+                            Line("command", ["ObjInitWarpGPos", 6, 0, 0, 0]),
+                            Line("command", ["ObjInitWarpGPos", 7, 0, 0, 0]),
+                            Line("command", ["VMJump", "lbl1_11"]),
+                            Line("label", ["lbl_1104_chk2"]),
+                            Line("command", ["WorkCmpConst", 16787, 2]),
+                            Line("command", ["VMJumpIf", 5, "lbl_1104_chk34"]),
+                            Line("command", ["ObjInitWarpGPos", 4, 0, 0, 0]),
+                            Line("command", ["ObjInitWarpGPos", 7, 0, 0, 0]),
+                            Line("command", ["VMJump", "lbl1_11"]),
+                            Line("label", ["lbl_1104_chk34"]),
+                            Line("command", ["WorkCmpConst", 16787, 3]),
+                            Line("command", ["VMJumpIf", 1, "lbl_1104_p2_warps"]),
+                            Line("command", ["WorkCmpConst", 16787, 4]),
+                            Line("command", ["VMJumpIf", 1, "lbl_1104_p2_warps"]),
+                        ]
+                        mod_1104 = True
+                        break
+            scr0_1104 = sf_1104.find_label("scr0")
+            if scr0_1104 != -1:
+                sf_1104.lines[scr0_1104 + 1 : scr0_1104 + 1] = [
+                    Line("command", ["WorkCmpConst", 16787, 4]),
+                    Line("command", ["VMJumpIf", 5, "lbl_1104_scr0_not_p2"]),
+                    Line("command", ["ActorDelete", 0]),
+                    Line("command", ["ActorDelete", 1]),
+                    Line("label", ["lbl_1104_scr0_not_p2"]),
+                ]
+                mod_1104 = True
+            if mod_1104:
+                scripts_narc.files[1104] = bytes(assemble(sf_1104))
+                modified_scripts = True
+
+        # 5b) Clear all floor items, trainers, and story NPCs in P2 Lab mode (16787 == 4) & open southern barriers in s1116
+        if len(scripts_narc.files) > 1116 and scripts_narc.files[1116]:
+            sf_1116 = disassemble(scripts_narc.files[1116])
+            mod_1116 = False
+            scr1_1116 = sf_1116.find_label("scr1")
+            if scr1_1116 != -1 and sf_1116.find_label("lbl2_7") != -1:
+                sf_1116.lines[scr1_1116 + 2 : scr1_1116 + 2] = [
+                    Line("command", ["WorkCmpConst", 16787, 4]),
+                    Line("command", ["VMJumpIf", 5, "lbl_1116_not_p2"]),
+                    Line("command", ["FlagSet", 837]),
+                    Line("command", ["FlagSet", 997]),
+                    Line("command", ["FlagSet", 998]),
+                    Line("command", ["VMJump", "lbl2_7"]),
+                    Line("label", ["lbl_1116_not_p2"]),
+                ]
+                mod_1116 = True
+            scr2_1116 = sf_1116.find_label("scr2")
+            if scr2_1116 != -1:
+                del_1116 = [Line("command", ["ActorDelete", n]) for n in (*range(25), 26, 27)]
+                sf_1116.lines[scr2_1116 + 1 : scr2_1116 + 1] = [
+                    Line("command", ["WorkCmpConst", 16787, 4]),
+                    Line("command", ["VMJumpIf", 5, "lbl_1116_scr2_not_p2"]),
+                    *del_1116,
+                    Line("command", ["VMHalt"]),
+                    Line("label", ["lbl_1116_scr2_not_p2"]),
+                ]
+                mod_1116 = True
+            if mod_1116:
+                scripts_narc.files[1116] = bytes(assemble(sf_1116))
+                modified_scripts = True
+
+        for p2_sid, p2_lbl, p2_npcs in (
+            (1106, "scr2", list(range(10))),
+            (1108, "scr2", [0, 1]),
+            (1110, "scr2", list(range(2, 9))),
+            (1114, "scr2", [0]),
+            (1122, "scr1", [0]),
+            (1124, "scr5", list(range(5))),
+        ):
+            if len(scripts_narc.files) > p2_sid and scripts_narc.files[p2_sid]:
+                sf_p2 = disassemble(scripts_narc.files[p2_sid])
+                idx_p2 = sf_p2.find_label(p2_lbl)
+                if idx_p2 != -1:
+                    sf_p2.lines[idx_p2 + 1 : idx_p2 + 1] = [
+                        Line("command", ["WorkCmpConst", 16787, 4]),
+                        Line("command", ["VMJumpIf", 5, f"lbl_{p2_sid}_not_p2"]),
+                        *[Line("command", ["ActorDelete", n]) for n in p2_npcs],
+                        Line("label", [f"lbl_{p2_sid}_not_p2"]),
+                    ]
+                    scripts_narc.files[p2_sid] = bytes(assemble(sf_p2))
+                    modified_scripts = True
+
+        # 6) s1112 (Route 21 departure): mark Route 21 Frigate done (2552), keep 16452=1 (Route 21), and hide NPCs in mode 4
+        if len(scripts_narc.files) > 1112 and scripts_narc.files[1112]:
+            sf_1112 = disassemble(scripts_narc.files[1112])
+            mod_1112 = _inj_after_cmd(sf_1112, ["WorkSetConst", 16646, 4], [Line("command", ["FlagSet", 2552])])
+            for idx_12, ln_12 in enumerate(sf_1112.lines):
+                if ln_12.type == "command" and ln_12.parts == ["WorkSetConst", 16452, 2]:
+                    sf_1112.lines[idx_12] = Line("command", ["WorkSetConst", 16452, 1])
+                    mod_1112 = True
+            scr1_1112 = sf_1112.find_label("scr1")
+            if scr1_1112 != -1:
+                sf_1112.lines[scr1_1112 + 1 : scr1_1112 + 1] = [
+                    Line("command", ["WorkCmpConst", 16787, 4]),
+                    Line("command", ["VMJumpIf", 5, "lbl_1112_not_p2"]),
+                    *[Line("command", ["ActorDelete", n]) for n in range(10)],
+                    Line("label", ["lbl_1112_not_p2"]),
+                ]
+                mod_1112 = True
+            if mod_1112:
+                scripts_narc.files[1112] = bytes(assemble(sf_1112))
+                modified_scripts = True
+
+        # 7) s1208 (Giant Chasm Kyurem): mark Giant Chasm Frigate done (2549) and keep western roadblock (879) gated on DNA Splicers
+        if len(scripts_narc.files) > 1208 and scripts_narc.files[1208]:
+            sf_1208 = disassemble(scripts_narc.files[1208])
+            mod_1208 = _inj_after_cmd(sf_1208, ["FlagSet", 885], [Line("command", ["FlagSet", 2549])])
+            new_1208_lines = [l for l in sf_1208.lines if not (l.type == "command" and l.parts == ["FlagSet", 879])]
+            if len(new_1208_lines) != len(sf_1208.lines):
+                sf_1208.lines = new_1208_lines
+                mod_1208 = True
+            if mod_1208:
+                scripts_narc.files[1208] = bytes(assemble(sf_1208))
                 modified_scripts = True
     except Exception:
         pass
@@ -788,6 +1561,25 @@ def apply_story_roadblocks(rom: "NintendoDSRom", is_white2: bool, options: dict[
             if changed_238:
                 sf_238.lines = new_238
                 scripts_narc.files[238] = bytes(assemble(sf_238))
+                modified_scripts = True
+    except Exception:
+        pass
+
+    # Abundant Shrine (Script 752): remove Landorus party + Dream Radar Therian Landorus requirements from Elder gift
+    try:
+        raw_752 = scripts_narc.files[752]
+        if raw_752:
+            sf_752 = disassemble(raw_752)
+            changed_752 = False
+            for i, line in enumerate(sf_752.lines):
+                if line.type == "command" and line.parts == ["PokePartyFindEx", 645, 0, 32803, 32804]:
+                    sf_752.lines[i] = Line("command", ["WorkSetConst", 32804, 1])
+                    changed_752 = True
+                elif line.type == "command" and line.parts == ["IsOneShotDRObtained_02F2", 7, 32805]:
+                    sf_752.lines[i] = Line("command", ["WorkSetConst", 32805, 1])
+                    changed_752 = True
+            if changed_752:
+                scripts_narc.files[752] = bytes(assemble(sf_752))
                 modified_scripts = True
     except Exception:
         pass
@@ -948,6 +1740,39 @@ def apply_story_roadblocks(rom: "NintendoDSRom", is_white2: bool, options: dict[
                     break
             if changed_938:
                 scripts_narc.files[938] = bytes(assemble(sf_938))
+                modified_scripts = True
+    except Exception:
+        pass
+
+    # Opelucid Gym (Script 242): skip badge 3D cutscene + heap free/create when talk_to_trainer_without_battling is enabled
+    if options and options.get("talk_to_trainer_without_battling", False):
+        try:
+            raw_242 = scripts_narc.files[242]
+            if raw_242:
+                sf_242 = disassemble(raw_242)
+                new_242 = [
+                    l for l in sf_242.lines
+                    if not (l.type == "command" and l.parts and l.parts[0] in ("OpelucidGymFreeHeap", "OpelucidGymCreateHeap", "Animate19B"))
+                ]
+                if len(new_242) != len(sf_242.lines):
+                    sf_242.lines = new_242
+                    scripts_narc.files[242] = bytes(assemble(sf_242))
+                    modified_scripts = True
+        except Exception:
+            pass
+
+    # Dragonspiral Tower Top (Script 426): keep Dark Stone (617) / Light Stone (616) in bag so Cedric entrance gift (s412) stays reachable
+    try:
+        raw_426 = scripts_narc.files[426]
+        if raw_426:
+            sf_426 = disassemble(raw_426)
+            new_426 = [
+                l for l in sf_426.lines
+                if not (l.type == "command" and l.parts and l.parts[0] == "TakeItem" and l.parts[1] in (616, 617))
+            ]
+            if len(new_426) != len(sf_426.lines):
+                sf_426.lines = new_426
+                scripts_narc.files[426] = bytes(assemble(sf_426))
                 modified_scripts = True
     except Exception:
         pass
@@ -1250,10 +2075,10 @@ def apply_roadblock_texts(rom: "NintendoDSRom") -> None:
     try:
         t290 = decode(story_narc.files[290])
         t290[0][0].line = (
-            "We're under strict orders not to[NextLine]let anyone past without the Card Key![End]"
+            "We're under strict orders not to[NextLine]let anyone past without the Plasma Card![End]"
         )
         t290[0][1].line = (
-            "This is our important task! Nobody[NextLine]enters Giant Chasm without the Card Key![End]"
+            "This is our important task! Nobody[NextLine]enters Giant Chasm without the Plasma Card!"
         )
         t290[0][12].line = (
             "Team Plasma: Nobody's getting past[NextLine]to Route 23! Not unless you hold[Scroll][NextLine]"

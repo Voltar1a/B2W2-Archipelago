@@ -49,7 +49,6 @@ async def become_champion(client: "PokemonB2W2Client", ctx: "BizHawkClientContex
         or client.get_flag(2296)
         or client.get_flag(2056)
         or client.get_flag(2301)
-        or client.get_flag(0x1D4)
     )
 
 

@@ -13,6 +13,7 @@ except (ImportError, ValueError):
 from .species_data import (
     SPECIES_TABLE,
     ALL_SPECIES,
+    get_base_stage,
     get_level_appropriate_species,
     get_3stage_starters,
     get_species_by_type,
@@ -35,7 +36,7 @@ def _has_mod(opt: Any, name: str) -> bool:
     return False
 
 
-# Gym leader, Elite Four, and specialist trainer class type themes (B2W2 class IDs)
+# Gym leader, Elite Four, and boss trainer class type themes (B2W2 class IDs)
 SPECIALIST_CLASS_TYPES: dict[int, str] = {
     115: "Normal",     # Cheren (Aspertia Gym)
     116: "Poison",     # Roxie (Virbank Gym)
@@ -53,16 +54,6 @@ SPECIALIST_CLASS_TYPES: dict[int, str] = {
     10: "Fire",        # Chili
     11: "Grass",       # Cilan
     12: "Water",       # Cress
-    29: "Water",       # Fisherman
-    35: "Psychic",     # Psychic (M)
-    36: "Psychic",     # Psychic (F)
-    43: "Flying",      # Pilot (Mistralton Gym)
-    51: "Fighting",    # Black Belt
-    64: "Fighting",    # Battle Girl
-    83: "Ground",      # Depot Agent
-    84: "Water",       # Swimmer (M)
-    85: "Water",       # Swimmer (F)
-    179: "Electric",   # Beauty (Nimbasa Gym)
     186: "Steel",      # Colress (Plasma Frigate / P2 Lab)
     195: "Steel",      # Colress (Route 4)
     191: "Ice",        # Zinzolin
@@ -290,17 +281,20 @@ def randomise_wild_pokemon(rom: NintendoDSRom, options: dict[str, Any], rng: ran
                         continue
 
                     if dex_num not in area_map:
-                        min_lvl = fdata[slot_offset + 2]
-                        max_lvl = fdata[slot_offset + 3]
-                        avg_lvl = (min_lvl + max_lvl) // 2
-
                         used = set(area_map.values())
-                        avail = [c for c in type_cands if c not in used] or type_cands
-                        chosen_base = rng.choice(avail)
-                        final_species = get_level_appropriate_species(chosen_base, avg_lvl) if level_appropriate else chosen_base
-                        area_map[dex_num] = final_species
+                        if level_appropriate:
+                            avail = [c for c in type_cands if get_base_stage(c) not in used] or type_cands
+                            chosen_base = get_base_stage(rng.choice(avail))
+                        else:
+                            avail = [c for c in type_cands if c not in used] or type_cands
+                            chosen_base = rng.choice(avail)
+                        area_map[dex_num] = chosen_base
 
-                    final_species = area_map[dex_num]
+                    min_lvl = fdata[slot_offset + 2]
+                    max_lvl = fdata[slot_offset + 3]
+                    avg_lvl = (min_lvl + max_lvl) // 2
+                    base_species = area_map[dex_num]
+                    final_species = get_level_appropriate_species(base_species, avg_lvl, rng) if level_appropriate else base_species
                     form = (season if season < 4 else 0) if final_species in (585, 586) else 0
                     new_raw = (form << 11) | (final_species & 0x7FF)
                     fdata[slot_offset:slot_offset + 2] = new_raw.to_bytes(2, "little")
@@ -440,7 +434,7 @@ def randomise_trainer_pokemon(
                 base_mon = rng.choice(type_cands)
 
             if level_appropriate:
-                new_species = get_level_appropriate_species(base_mon, level)
+                new_species = get_level_appropriate_species(base_mon, level, rng)
             else:
                 new_species = base_mon
 

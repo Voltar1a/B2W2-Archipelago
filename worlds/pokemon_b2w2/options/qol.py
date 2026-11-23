@@ -42,6 +42,12 @@ class BlindTrainers(Toggle):
     default = False
 
 
+class TalkToTrainerWithoutBattling(Toggle):
+    """Testing option: talking to trainers (including scripted battles) skips the battle and marks them defeated."""
+    display_name = "Talk to Trainer Without Battling"
+    default = False
+
+
 class GuaranteedCatch(Toggle):
     """Any Poké Ball thrown guarantees 100% catch rate. Changeable ingame via APtransceiver."""
     display_name = "Guaranteed Catch Rate"
@@ -88,7 +94,7 @@ class RemoveSurfBikeMusic(Toggle):
 
 
 class BattleScene(Choice):
-    """Move battle animations. NOT changeable ingame via APtransceiver (vanilla Options menu)."""
+    """Move battle animations. Changeable via vanilla options menu."""
     display_name = "Battle Scene Animations"
     option_on = 0
     option_off = 1
@@ -96,7 +102,7 @@ class BattleScene(Choice):
 
 
 class BattleStyle(Choice):
-    """In-battle switch prompt when opponent faints. NOT changeable ingame via APtransceiver (vanilla Options menu)."""
+    """In-battle switch prompt when opponent faints. Changeable via vanilla options menu."""
     display_name = "Battle Style"
     option_shift = 0
     option_set = 1
@@ -133,13 +139,10 @@ class InfiniteRepels(Toggle):
     default = False
 
 
-class SkipPWT(Choice):
-    """Driftveil PWT Tournament handling."""
+class SkipPWT(Toggle):
+    """Skips the mandatory Driftveil PWT tournament and unlocks the Plasma Frigate immediately."""
     display_name = "Skip Driftveil PWT"
-    option_vanilla = 0
-    option_faster_cutscenes = 1
-    option_skip_entirely = 2
-    default = 2
+    default = True
 
 
 class SkipJoinAvenue(Toggle):

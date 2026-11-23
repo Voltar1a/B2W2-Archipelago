@@ -46,7 +46,7 @@ def _make_pwt_skip_cmds(flash_black: bool) -> list:
 def apply_faster_story(rom: NintendoDSRom, is_white2: bool, options: dict[str, Any]) -> None:
     """Applies streamlined cutscene skips using native script and overlay edits."""
     skip_catching = options.get("skip_catching_tutorial", True)
-    skip_pwt = options.get("skip_pwt", 2)
+    skip_pwt = bool(options.get("skip_pwt", True))
     skip_join = options.get("skip_join_avenue", True)
     skip_cinematics = options.get("skip_cinematic_movies", True)
 
@@ -94,17 +94,40 @@ def apply_faster_story(rom: NintendoDSRom, is_white2: bool, options: dict[str, A
         except Exception:
             pass
 
-    if skip_pwt in (1, 2, "faster_cutscenes", "skip_entirely", "1", "2"):
-        for sid, lbl, flash in ((196, "scr2", True), (384, "scr11", False)):
-            try:
-                sf = disassemble(narc_056.files[sid])
-                idx = sf.find_label(lbl)
-                if idx != -1 and idx + 1 < len(sf.lines):
-                    sf.lines[idx + 1 : idx + 1] = _make_pwt_skip_cmds(flash)
-                    narc_056.files[sid] = bytes(assemble(sf))
-                    modified_056 = True
-            except Exception:
-                pass
+    if skip_pwt:
+        # Let Clay/Hugh drag you into PWT (s382 scr0), skip the interior intro/registration
+        # cutscene (s384 scr7) and set completed-PWT state (16582=2, 16693=2) so leaving
+        # the building immediately triggers the post-PWT Frigate cutscene (s382 scr1).
+        try:
+            s384 = disassemble(narc_056.files[384])
+            scr7_384 = s384.find_label("scr7")
+            if scr7_384 != -1:
+                s384.lines[scr7_384 + 1 : scr7_384 + 1] = [
+                    Line("command", ["ActorPauseAll"]),
+                    Line("command", ["ActorDelete", 13]),
+                    Line("command", ["MapReplaceSetEvent", 4, 1, 1]),
+                    Line("command", ["MapReplaceSetEvent", 3, 0, 0]),
+                    Line("command", ["FlagSet", 894]),
+                    Line("command", ["FlagSet", 893]),
+                    Line("command", ["FlagSet", 892]),
+                    Line("command", ["FlagSet", 891]),
+                    Line("command", ["FlagReset", 890]),
+                    Line("command", ["WorkSetConst", 16582, 2]),
+                    Line("command", ["WorkSetConst", 16452, 0]),
+                    Line("command", ["FlagReset", 2441]),
+                    Line("command", ["FlagReset", 1001]),
+                    Line("command", ["HollowRivalSetValue", 1, 14]),
+                    Line("command", ["HollowRivalSetValue", 2, 2]),
+                    Line("command", ["WorkSetConst", 16693, 2]),
+                    Line("command", ["ActorAdd", 17]),
+                    Line("command", ["RTFinishSubEvents"]),
+                    Line("command", ["ActorUnlockAll"]),
+                    Line("command", ["VMHalt"]),
+                ]
+                narc_056.files[384] = bytes(assemble(s384))
+                modified_056 = True
+        except Exception:
+            pass
 
     if skip_join and narc_126 is not None:
         try:
@@ -155,20 +178,6 @@ def apply_faster_story(rom: NintendoDSRom, is_white2: bool, options: dict[str, A
                     ov35_data[6] = 0x0A
                     ov35.data = bytes(ov35_data)
                     rom.files[ov35.fileID] = ov35.save(compress=ov35.compressed)
-                    table_modified = True
-            except Exception:
-                pass
-
-        if 294 in ov_table:
-            try:
-                ov294 = ov_table[294]
-                ov294_data = bytearray(ov294.data)
-                if len(ov294_data) >= 0x2FA0:
-                    for off in (0x2764, 0x27C4, 0x28E4, 0x28FC, 0x2B3C, 0x2F74, 0x2F8C):
-                        ov294_data[off : off + 5] = b"\x16\x00\x00\x00\x00"
-                        ov294_data[off + 0x0C] = 0x00
-                    ov294.data = bytes(ov294_data)
-                    rom.files[ov294.fileID] = ov294.save(compress=ov294.compressed)
                     table_modified = True
             except Exception:
                 pass

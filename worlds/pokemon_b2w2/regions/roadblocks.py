@@ -69,7 +69,6 @@ def badge_count(state: CollectionState, player: int) -> int:
 def has_badge_count(state: CollectionState, player: int, count: int) -> bool:
     return badge_count(state, player) >= count
 
-
 # HM & field move helpers
 
 def can_use_cut(state: CollectionState, player: int, world: "PokemonB2W2World" | None = None) -> bool:
@@ -143,8 +142,12 @@ def has_permit(state: CollectionState, player: int) -> bool:
     return state.has("Permit", player)
 
 
+def has_prop_case(state: CollectionState, player: int) -> bool:
+    return state.has("Prop Case", player)
+
+
 def can_enter_giant_chasm(state: CollectionState, player: int) -> bool:
-    return has_card_key(state, player)
+    return has_plasma_card(state, player)
 
 
 def can_access_black_tower(state: CollectionState, player: int, world: "PokemonB2W2World" | None = None) -> bool:
@@ -223,7 +226,7 @@ def can_access_winter(state: CollectionState, player: int, world: "PokemonB2W2Wo
 
 
 def can_board_plasma_frigate(state: CollectionState, player: int) -> bool:
-    return has_plasma_card(state, player)
+    return True
 
 
 def can_pass_giant_chasm_to_route_23(state: CollectionState, player: int, world: "PokemonB2W2World" | None = None) -> bool:
@@ -260,7 +263,7 @@ def can_access_top_trainer(trainer: str, state: CollectionState, player: int, wo
     elif trainer == "alder":
         return champion_ok
     elif trainer == "colress":
-        return champion_ok and can_use_surf(state, player, world)
+        return state.can_reach("Plasma Frigate (P2 Laboratory)", "Region", player)
     elif trainer == "n":
         return champion_ok
     elif trainer == "league_rematch":

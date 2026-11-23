@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import random
 from typing import NamedTuple
 
 
@@ -679,7 +680,7 @@ def get_base_stage(dex_id: int) -> int:
         visited.add(curr)
 
 
-def get_level_appropriate_species(dex_id: int, level: int) -> int:
+def get_level_appropriate_species(dex_id: int, level: int, rng: random.Random | None = None) -> int:
     # Given a Pokémon species and encounter/trainer level, evolves it along its line
     curr = get_base_stage(dex_id)
     visited = {curr}
@@ -688,15 +689,15 @@ def get_level_appropriate_species(dex_id: int, level: int) -> int:
         if not info or not info.evos:
             return curr
         # Check if any evolution condition is met at current level
-        evolved = False
-        for next_dex, req_level in info.evos:
-            if level >= req_level and next_dex not in visited:
-                curr = next_dex
-                visited.add(curr)
-                evolved = True
-                break
-        if not evolved:
+        eligible = [
+            next_dex
+            for next_dex, req_level in info.evos
+            if level >= req_level and next_dex not in visited
+        ]
+        if not eligible:
             return curr
+        curr = rng.choice(eligible) if rng is not None else eligible[0]
+        visited.add(curr)
 
 
 def get_3stage_starters() -> list[int]:

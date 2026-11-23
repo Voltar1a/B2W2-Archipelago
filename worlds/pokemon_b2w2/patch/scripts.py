@@ -35,9 +35,12 @@ def patch_scripts_from_rom(rom: "NintendoDSRom", slot_data: dict[str, Any] | Non
     flag_to_text_id: dict[int, int] = {f_id: 21 + i for i, f_id in enumerate(all_flags)}
 
     hard_required_dowsing = int(slot_data.get("options", {}).get("dowsing_machine_logic", 1)) == 0
+    no_trainer_battles = bool(slot_data.get("options", {}).get("talk_to_trainer_without_battling", False))
     patch_gift_flag_injections(script_narc)
     patch_gym_leader_badges(script_narc)
-    patch_scripted_trainer_battles(script_narc)
+    patch_scripted_trainer_battles(script_narc, no_battle=no_trainer_battles)
+    if no_trainer_battles:
+        patch_overworld_trainer_no_battle(script_narc)
     patch_item_ball_scripts(script_narc, flag_to_text_id)
     patch_hidden_item_scripts(script_narc, flag_to_text_id, hard_required_dowsing=hard_required_dowsing)
     patch_npc_gift_scripts(script_narc, flag_to_text_id)
@@ -123,6 +126,20 @@ def patch_special_gift_requirements(script_narc: NARC, flag_to_text_id: dict[int
         except Exception:
             pass
 
+    # Driftveil Luxury Suites 1F Lady (204): bypass random owned-TM move check
+    if len(script_narc.files) > 204:
+        try:
+            s204 = disassemble(script_narc.files[204])
+            sub5_idx = s204.find_label("sub5")
+            if sub5_idx != -1 and s204.find_label("lbl2_9") != -1:
+                s204.lines[sub5_idx + 1 : sub5_idx + 1] = [
+                    Line("command", ["WorkSetConst", 32802, 0]),
+                    Line("command", ["VMJump", "lbl2_9"]),
+                ]
+                script_narc.files[204] = bytes(assemble(s204))
+        except Exception:
+            pass
+
 
 def patch_roadblock_scripts(script_narc: NARC, rom: Any | None = None) -> None:
     # Patches roadblock scripts so that in-game passage rules align with archi logic items
@@ -197,6 +214,28 @@ def patch_roadblock_scripts(script_narc: NARC, rom: Any | None = None) -> None:
                     texts[0][2].line = jerome_msg + "[End]"
                     a003.files[603] = encode(texts)
                     rom.setFileByName("a/0/0/3", a003.save())
+
+                a126_data = rom.getFileByName("a/1/2/6")
+                if a126_data is not None:
+                    a126 = NARC(a126_data)
+                    if len(a126.files) > 560:
+                        import struct
+                        f560 = bytearray(a126.files[560])
+                        _, nf, nn, nw, nt = struct.unpack_from("<IBBBB", f560, 0)
+                        off_trig = 8 + nf * 20 + nn * 36 + nw * 20
+                        modified_560 = False
+                        for t_idx in range(nt):
+                            t_off = off_trig + t_idx * 22
+                            if t_off + 22 > len(f560):
+                                break
+                            scr_f, val_f, var_f = struct.unpack_from("<3H", f560, t_off)
+                            x_f = struct.unpack_from("<H", f560, t_off + 10)[0]
+                            if scr_f == 2 and val_f == 1 and var_f == 16555 and x_f == 158:
+                                f560[t_off + 10 : t_off + 12] = (159).to_bytes(2, "little")
+                                modified_560 = True
+                        if modified_560:
+                            a126.files[560] = bytes(f560)
+                            rom.setFileByName("a/1/2/6", a126.save())
         except Exception:
             pass
 
@@ -366,28 +405,52 @@ def patch_roadblock_scripts(script_narc: NARC, rom: Any | None = None) -> None:
                     Line("label", ["lbl_virbank_init_done"]),
                 ]
                 modified_896 = True
-            idx22 = s896.find_label("scr22")
-            if idx22 != -1:
-                end22 = idx22 + 1
-                while end22 < len(s896.lines):
-                    if s896.lines[end22].type == "command" and s896.lines[end22].parts == ["VMHalt"]:
-                        end22 += 1
-                        break
-                    if s896.lines[end22].type == "label" and s896.lines[end22].parts[0].startswith(("scr", "sub", "act")):
-                        break
-                    end22 += 1
-                s896.lines[idx22 + 1 : end22] = [
-                    Line("command", ["FlagReset", 763]),
-                    Line("command", ["WorkSetConst", 16556, 8]),
-                    Line("command", ["FlagReset", 723]),
-                    Line("command", ["FlagSet", 722]),
-                    Line("command", ["RTFinishSubEvents"]),
-                    Line("command", ["ActorUnlockAll"]),
-                    Line("command", ["VMHalt"]),
-                ]
-                modified_896 = True
             if modified_896:
                 script_narc.files[896] = bytes(assemble(s896))
+        except Exception:
+            pass
+
+    # Virbank Gym (1004): skip Pokéstar Studios scout & story flags after beating Roxie,
+    # jumping straight to post-Pokéstar (var 16556 = 5) so the harbor Plasma sequence still plays.
+    if len(script_narc.files) > 1004:
+        try:
+            s1004 = disassemble(script_narc.files[1004])
+            modified_1004 = False
+            for i, l in enumerate(s1004.lines):
+                if (
+                    l.type == "command"
+                    and l.parts == ["WorkSetConst", 16557, 1]
+                    and i + 3 < len(s1004.lines)
+                    and s1004.lines[i + 1].parts == ["WorkSetConst", 16650, 1]
+                    and s1004.lines[i + 2].parts == ["WorkSetConst", 16556, 3]
+                ):
+                    s1004.lines[i : i + 3] = [
+                        Line("command", ["WorkSetConst", 16557, 2]),
+                        Line("command", ["WorkSetConst", 16650, 3]),
+                        Line("command", ["WorkSetConst", 16556, 5]),
+                        Line("command", ["FlagSet", 720]),
+                        Line("command", ["FlagSet", 721]),
+                        Line("command", ["FlagSet", 2440]),
+                        Line("command", ["FlagReset", 724]),
+                    ]
+                    modified_1004 = True
+                    break
+            if modified_1004:
+                script_narc.files[1004] = bytes(assemble(s1004))
+        except Exception:
+            pass
+
+    # Castelia Gym (976): keep Colress hidden at Castelia fountain (flag 756) after beating Burgh
+    if len(script_narc.files) > 976:
+        try:
+            s976 = disassemble(script_narc.files[976])
+            modified_976 = False
+            for i, l in enumerate(s976.lines):
+                if l.type == "command" and l.parts == ["FlagReset", 756]:
+                    s976.lines[i] = Line("command", ["FlagSet", 756])
+                    modified_976 = True
+            if modified_976:
+                script_narc.files[976] = bytes(assemble(s976))
         except Exception:
             pass
 
@@ -625,12 +688,13 @@ def patch_hidden_item_scripts(
             Line("command", ["VMJumpIf", 1, "lbl7_34"]),
         ]
 
-    sub37_idx = s1238.find_label("sub37")
-    if sub37_idx != -1:
-        s1238.lines[sub37_idx + 1 : sub37_idx + 1] = [
-            Line("command", ["WorkCmpConst", 32768, 639]),
-            Line("command", ["VMJumpIf", 1, "lbl_sub37_remote"]),
-        ]
+    for sub_name in ("sub37", "sub62"):
+        sub_idx = s1238.find_label(sub_name)
+        if sub_idx != -1:
+            s1238.lines[sub_idx + 1 : sub_idx + 1] = [
+                Line("command", ["WorkCmpConst", 32768, 639]),
+                Line("command", ["VMJumpIf", 1, "lbl_sub37_remote"]),
+            ]
 
     for sub_name in ("sub3", "sub24"):
         sub_idx = s1238.find_label(sub_name)
@@ -684,7 +748,8 @@ VAR_TO_GIFT_FLAG: dict[tuple[int, int], int] = {
     (16610, 6): 2339,   # Castelia Harlequin after finding clowns
     (16622, 7): 2347,   # Humilau walkway
     (16519, 2): 2350,   # musical owner
-    (16604, 3): 2353,   # Nacrene Cafe Warehouse Fluffy Tail
+    (16604, 1): 2553,   # Nacrene Cafe Warehouse Grubby Hanky (Sun)
+    (16604, 3): 2353,   # Nacrene Cafe Warehouse Fluffy Tail (Sun/Thu)
     (16648, 7): 2586,   # Skyarrow Bridge Marathon Runner
 }
 
@@ -694,7 +759,8 @@ CUSTOM_GIFT_INJECTIONS: list[tuple[int, list[Any], int]] = [
     (652, ["WorkSet", 32768, 46], 1705),     # Route 4 (B2) Colress after battle
     (1102, ["WorkSet", 32768, 46], 1705),    # Route 4 (W2) Colress after battle
     (102, ["WorkSet", 32768, 471], 1706),    # Castelia gate Bianca
-    (214, ["WorkSet", 32768, 367], 1707),    # Mistralton Juniper on runway
+    (214, ["WorkSet", 32768, 1], 1707),      # Mistralton Juniper on runway
+    (676, ["WorkSet", 32768, 231], 1711),    # Celestial Tower 1F Juniper (Lucky Egg)
     (556, ["WorkSet", 32768, 617], 1708),    # N's castle N in throne room (B2 dark stone)
     (556, ["WorkSet", 32768, 616], 1708),    # N's castle N in throne room (W2 light stone)
     (824, ["WorkSet", 32768, 425], 414),     # Undella Town Hugh outside villa (HM06 dive)
@@ -731,6 +797,7 @@ CUSTOM_GIFT_INJECTIONS: list[tuple[int, list[Any], int]] = [
     (854, ["WorkSet", 32768, 354], 2368),    # Aspertia city Bianca outside gym (TM27 return)
     (890, ["WorkSet", 32768, 348], 2371),    # Floccesy ranch Plasma grunt (TM21 frustration)
     (516, ["WorkSet", 32768, 7], 299),       # Village Bridge fisherman (Dive Ball x5)
+    (204, ["WorkSet", 32768, 93], 2759),     # Driftveil Luxury Suites 1F lady (Heart Scale)
 ]
 
 # Gym leader & interior helper/Clyde scripts -> badge index (0..7)
@@ -924,7 +991,33 @@ def patch_gym_clyde_autocollect(script_narc: NARC) -> None:
             pass
 
 
-def patch_scripted_trainer_battles(script_narc: NARC) -> None:
+def patch_overworld_trainer_no_battle(script_narc: NARC) -> None:
+    # Skips overworld trainer battles in s1239 so talking to a trainer marks them defeated immediately
+    from .script_editing import disassemble, assemble, Line
+
+    if len(script_narc.files) <= 1239 or not script_narc.files[1239]:
+        return
+    try:
+        sf = disassemble(script_narc.files[1239])
+        modified = False
+        for i, line in enumerate(sf.lines):
+            if line.type == "command" and line.parts:
+                if line.parts[0] == "StorePartyCountMore":
+                    sf.lines[i] = Line("command", ["WorkSetConst", line.parts[1], 6])
+                    modified = True
+                elif line.parts[0] in ("SingleTrainerBattle", "DoubleTrainerBattle", "MultiTrainerBattle"):
+                    sf.lines[i] = Line("command", ["WorkSetConst", 32784, 1])
+                    modified = True
+                elif line.parts[0] == "StoreBattleResult" and len(line.parts) > 1:
+                    sf.lines[i] = Line("command", ["WorkSetConst", line.parts[1], 1])
+                    modified = True
+        if modified:
+            script_narc.files[1239] = bytes(assemble(sf))
+    except Exception:
+        pass
+
+
+def patch_scripted_trainer_battles(script_narc: NARC, no_battle: bool = False) -> None:
     # Injects FlagSet (1520 + tid) right after scripted trainer battles
     from .script_editing import disassemble, assemble, Line
 
@@ -936,12 +1029,18 @@ def patch_scripted_trainer_battles(script_narc: NARC) -> None:
             modified = False
             i = 0
             inject_count = 0
+            last_was_trainer = False
             while i < len(scr.lines):
                 line = scr.lines[i]
                 if line.type == "command":
                     to_inject = []
                     is_losable = False
-                    if line.parts[0] == "SingleTrainerBattle" and len(line.parts) > 1:
+                    if line.parts[0] == "StartWildBattle":
+                        last_was_trainer = False
+                    elif no_battle and last_was_trainer and line.parts[0] == "StoreBattleResult" and len(line.parts) > 1:
+                        scr.lines[i] = Line("command", ["WorkSetConst", line.parts[1], 1])
+                        modified = True
+                    elif line.parts[0] == "SingleTrainerBattle" and len(line.parts) > 1:
                         tid = line.parts[1]
                         flags = line.parts[3] if len(line.parts) > 3 else 0
                         if isinstance(tid, int) and 0 < tid < 1000:
@@ -962,6 +1061,11 @@ def patch_scripted_trainer_battles(script_narc: NARC) -> None:
                         if flags == 1:
                             is_losable = True
 
+                    if no_battle and line.parts[0] in ("SingleTrainerBattle", "DoubleTrainerBattle", "MultiTrainerBattle"):
+                        scr.lines[i] = Line("command", ["WorkSetConst", 32784, 1])
+                        last_was_trainer = True
+                        modified = True
+
                     if to_inject:
                         already_patched = any(
                             scr.lines[k].type == "command" and scr.lines[k].parts == ["FlagSet", to_inject[0]]
@@ -976,7 +1080,7 @@ def patch_scripted_trainer_battles(script_narc: NARC) -> None:
                                 for f_id in to_inject:
                                     injected_lines.append(Line("command", ["FlagSet", f_id]))
                             else:
-                                injected_lines.append(Line("command", ["StoreBattleResult", 32784]))
+                                injected_lines.append(Line("command", ["WorkSetConst", 32784, 1] if no_battle else ["StoreBattleResult", 32784]))
                                 injected_lines.append(Line("command", ["StackPush", 32784]))
                                 injected_lines.append(Line("command", ["StackPushConst", 1]))
                                 injected_lines.append(Line("command", ["StackCmp", 1]))
@@ -998,38 +1102,52 @@ def patch_scripted_trainer_battles(script_narc: NARC) -> None:
     _inject_missable_trainer_flags(script_narc)
 
 
-_FRIGATE_INTERIOR_AND_BOSS_TIDS: list[int] = [
-    343, 344, 347, 348,
-    426, 427, 428, 429, 431, 436, 437,
+_GIANT_CHASM_FRIGATE_TIDS: list[int] = [
+    344, 348,
+    431,
     445, 446, 447, 448, 449, 452, 453, 454,
     497, 498, 499,
-    797, 798, 799,
-    800, 801, 802, 807, 808, 809, 810, 811, 812,
+    802, 807, 808, 809, 810, 811, 812,
+]
+
+_ROUTE_21_FRIGATE_TIDS: list[int] = [
+    343, 347, 426, 427, 428, 429, 436, 437, 500, 797, 798, 799, 800, 801,
+]
+
+_GIANT_CHASM_FRIGATE_ITEM_FLAGS: list[int] = [
+    1287, 1288, 1289, 1290, 1292, 1293,
+]
+
+_ROUTE_21_FRIGATE_ITEM_FLAGS: list[int] = [
+    1291, 1478, 1479,
 ]
 
 _MISSABLE_TRAINER_TRIGGERS: list[tuple[int, list[Any], list[int]]] = [
     # Opelucid City Plasma assault cleared -> Grunts 1..3
     (240, ["FlagSet", 796], [585, 586, 587]),
-    # PWT Plasma Frigate deck grunts cleared before bridge
-    (1104, ["WorkSetConst", 16624, 2], [372, 373]),
-    # PWT Plasma Frigate departs
-    (1104, ["FlagSet", 830], [372, 373, 374, 375, 376, 377, 500]),
-    # Seaside Cave / Humilau Plasma Frigate departure
-    (1106, ["FlagSet", 830], [798, 799]),
-    (1126, ["FlagSet", 830], [798, 799]),
+    # Route 21 / Seaside Cave Plasma Frigate departure
+    (1112, ["WorkSetConst", 16646, 4], _ROUTE_21_FRIGATE_TIDS),
     # Giant Chasm Plasma Frigate completed (Ghetsis beaten) or skipped (1242 unlock)
-    (466, ["FlagSet", 975], _FRIGATE_INTERIOR_AND_BOSS_TIDS),
-    (1242, ["FlagSet", 976], _FRIGATE_INTERIOR_AND_BOSS_TIDS),
+    (1208, ["FlagSet", 885], _GIANT_CHASM_FRIGATE_TIDS),
+    (1242, ["FlagSet", 976], _GIANT_CHASM_FRIGATE_TIDS),
+]
+
+_MISSABLE_ITEM_TRIGGERS: list[tuple[int, list[Any], list[int]]] = [
+    (1112, ["WorkSetConst", 16646, 4], _ROUTE_21_FRIGATE_ITEM_FLAGS),
+    (1208, ["FlagSet", 885], _GIANT_CHASM_FRIGATE_ITEM_FLAGS),
+    (1242, ["FlagSet", 976], _GIANT_CHASM_FRIGATE_ITEM_FLAGS),
 ]
 
 
 def _inject_missable_trainer_flags(script_narc: NARC) -> None:
-    # Auto-flags mutually exclusive or story-locked trainers when their area clears
+    # Auto-flags mutually exclusive or story-locked trainers and items when their area clears
     from .script_editing import disassemble, assemble, Line
 
     by_script: dict[int, list[tuple[list[Any], list[int]]]] = {}
     for s_idx, trigger_parts, tids in _MISSABLE_TRAINER_TRIGGERS:
-        by_script.setdefault(s_idx, []).append((trigger_parts, tids))
+        by_script.setdefault(s_idx, []).append((trigger_parts, [1520 + tid for tid in tids]))
+    for s_idx, trigger_parts, flags in _MISSABLE_ITEM_TRIGGERS:
+        by_script.setdefault(s_idx, []).append((trigger_parts, flags))
 
     for s_idx, rules in by_script.items():
         if len(script_narc.files) <= s_idx:
@@ -1037,19 +1155,19 @@ def _inject_missable_trainer_flags(script_narc: NARC) -> None:
         try:
             scr = disassemble(script_narc.files[s_idx])
             modified = False
-            for trigger_parts, tids in rules:
+            for trigger_parts, flags in rules:
                 i = 0
                 while i < len(scr.lines):
                     if scr.lines[i].type == "command" and scr.lines[i].parts == trigger_parts:
                         nearby = {
                             scr.lines[k].parts[1]
-                            for k in range(i + 1, min(len(scr.lines), i + len(tids) + 10))
+                            for k in range(i + 1, min(len(scr.lines), i + len(flags) + 10))
                             if scr.lines[k].type == "command" and scr.lines[k].parts[0] == "FlagSet"
                         }
                         inject = [
-                            Line("command", ["FlagSet", 1520 + tid])
-                            for tid in tids
-                            if (1520 + tid) not in nearby
+                            Line("command", ["FlagSet", flg])
+                            for flg in flags
+                            if flg not in nearby
                         ]
                         if inject:
                             scr.lines[i + 1 : i + 1] = inject
@@ -1167,38 +1285,43 @@ def patch_npc_gift_scripts(script_narc: NARC, flag_to_text_id: dict[int, int]) -
         except Exception:
             pass
 
-    if 452 in flag_to_text_id:
+    tm_collector_flags = [f for f in (450, 451, 452, 453, 454) if f in flag_to_text_id]
+    if tm_collector_flags:
         try:
             sc224 = disassemble(script_narc.files[224])
             lines224 = sc224.lines
-            for i, l in enumerate(lines224):
-                if l.type == "command" and l.parts == ["FlagSet", 452]:
-                    if i > 0 and lines224[i - 1].type == "command" and lines224[i - 1].parts == ["VMCall", "sub21"]:
-                        lines224[i - 1 : i] = [
-                            Line("command", ["StackPush", 32768]),
-                            Line("command", ["StackPush", 32769]),
-                            Line("command", ["WorkSetConst", 16798, flag_to_text_id[452]]),
-                            Line("command", ["WorkSetConst", 32768, 639]),
-                            Line("command", ["WorkSet", 32769, 1]),
-                            Line("command", ["RTCallGlobal", 2805]),
-                            Line("command", ["StackPop", 32769]),
-                            Line("command", ["StackPop", 32768]),
-                            Line("command", ["MsgActor", 1024, 6, 0, 0]),
-                            Line("command", ["InputWaitLast"]),
-                            Line("command", ["MsgWinCloseAll"]),
-                        ]
-                        script_narc.files[224] = bytes(assemble(sc224))
-                    break
+            modified224 = False
+            for tm_flag in tm_collector_flags:
+                for i, l in enumerate(lines224):
+                    if l.type == "command" and l.parts == ["FlagSet", tm_flag]:
+                        if i > 0 and lines224[i - 1].type == "command" and lines224[i - 1].parts == ["VMCall", "sub21"]:
+                            lines224[i - 1 : i] = [
+                                Line("command", ["StackPush", 32768]),
+                                Line("command", ["StackPush", 32769]),
+                                Line("command", ["WorkSetConst", 16798, flag_to_text_id[tm_flag]]),
+                                Line("command", ["WorkSetConst", 32768, 639]),
+                                Line("command", ["WorkSet", 32769, 1]),
+                                Line("command", ["RTCallGlobal", 2805]),
+                                Line("command", ["StackPop", 32769]),
+                                Line("command", ["StackPop", 32768]),
+                                Line("command", ["MsgActor", 1024, 6, 0, 0]),
+                                Line("command", ["InputWaitLast"]),
+                                Line("command", ["MsgWinCloseAll"]),
+                            ]
+                            modified224 = True
+                        break
+            if modified224:
+                script_narc.files[224] = bytes(assemble(sc224))
         except Exception:
             pass
 
     ranger_trainer_to_gift_flag = {
-        543: 2467, 544: 2469, 509: 2471, 508: 2472, 667: 2473, 666: 2475,
-        298: 2479, 297: 2483, 579: 2484, 578: 2488, 640: 2491, 642: 2492,
-        641: 2493, 639: 2501, 517: 2507, 518: 2507, 515: 2511, 516: 2511,
-        410: 2515, 409: 2516, 305: 2517, 304: 2519, 294: 2520, 295: 2523,
-        388: 2529, 386: 2535, 389: 2536, 387: 2537, 483: 2540, 484: 2544,
-        293: 2549, 292: 2551, 473: 2567, 474: 2568, 658: 2572, 659: 2577,
+        543: 1500, 544: 1501, 509: 1502, 508: 1503, 667: 1504, 666: 1505,
+        298: 1506, 297: 1507, 579: 1508, 578: 1509, 640: 1510, 642: 1511,
+        641: 1512, 639: 1513, 517: 1514, 518: 1514, 515: 1515, 516: 1515,
+        410: 1516, 409: 1517, 305: 1518, 304: 1519, 294: 2385, 295: 2386,
+        388: 2387, 386: 2388, 389: 2389, 387: 2390, 483: 2391, 484: 2392,
+        293: 2393, 292: 2394, 473: 2395, 474: 2396, 658: 2397, 659: 2398,
     }
     try:
         sc1239 = disassemble(script_narc.files[1239])

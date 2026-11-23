@@ -17,7 +17,7 @@ from .options.groups import option_groups
 from .regions import create_regions_and_locations, check_goal_completion
 from .rom import PokemonB2W2Patch, PokemonB2Patch, PokemonW2Patch
 
-APWORLD_VERSION = "0.0.3"
+APWORLD_VERSION = "0.0.4"
 
 bizhawk_client.register_client()
 
@@ -175,7 +175,58 @@ class PokemonB2W2World(World):
                 dowsing_opt is not None and int(dowsing_opt.value) == 2
             ):
                 classification = ItemClassification.useful
+        elif name == "Prop Case":
+            ts_opt = getattr(self.options, "trainersanity", None)
+            if ts_opt is not None and ts_opt.value:
+                classification = ItemClassification.progression
         return PokemonB2W2Item(name, classification, info.ap_id, self.player)
+
+    _FILLER_ITEMS: tuple[str, ...] = (
+        "Potion",
+        "Super Potion",
+        "Hyper Potion",
+        "Full Restore",
+        "Revive",
+        "Full Heal",
+        "Parlyz Heal",
+        "Antidote",
+        "Awakening",
+        "Burn Heal",
+        "Ether",
+        "Max Ether",
+        "Elixir",
+        "HP Up",
+        "Protein",
+        "Iron",
+        "Carbos",
+        "Calcium",
+        "Zinc",
+        "Poké Ball",
+        "Great Ball",
+        "Ultra Ball",
+        "Net Ball",
+        "Dusk Ball",
+        "Quick Ball",
+        "Timer Ball",
+        "Repel",
+        "Super Repel",
+        "Max Repel",
+        "Escape Rope",
+        "Rare Candy",
+        "PP Up",
+        "Heart Scale",
+        "Nugget",
+        "Big Pearl",
+        "Star Piece",
+        "Oran Berry",
+        "Cheri Berry",
+        "Pecha Berry",
+        "Sitrus Berry",
+        "Lum Berry",
+    )
+
+    def get_filler_item_name(self) -> str:
+        return self.random.choice(self._FILLER_ITEMS)
 
     def create_items(self) -> None:
         item_pool: list[PokemonB2W2Item] = []
@@ -231,6 +282,9 @@ class PokemonB2W2World(World):
             "Permit",
             "TM70 Flash",
         ]
+        ts_opt = getattr(self.options, "trainersanity", None)
+        if ts_opt is not None and ts_opt.value:
+            other_progression_items.append("Prop Case")
         for item_name in other_progression_items:
             item_pool.append(self.create_item(item_name))
 
@@ -327,52 +381,9 @@ class PokemonB2W2World(World):
                 item_pool.append(self.create_item(tm_name))
 
         # Fill remaining locations with repeating filler items
-        filler_cycle = [
-            "Potion",
-            "Super Potion",
-            "Hyper Potion",
-            "Full Restore",
-            "Revive",
-            "Full Heal",
-            "Parlyz Heal",
-            "Antidote",
-            "Awakening",
-            "Burn Heal",
-            "Ether",
-            "Max Ether",
-            "Elixir",
-            "HP Up",
-            "Protein",
-            "Iron",
-            "Carbos",
-            "Calcium",
-            "Zinc",
-            "Poké Ball",
-            "Great Ball",
-            "Ultra Ball",
-            "Net Ball",
-            "Dusk Ball",
-            "Quick Ball",
-            "Timer Ball",
-            "Repel",
-            "Super Repel",
-            "Max Repel",
-            "Escape Rope",
-            "Rare Candy",
-            "PP Up",
-            "Heart Scale",
-            "Nugget",
-            "Big Pearl",
-            "Star Piece",
-            "Oran Berry",
-            "Cheri Berry",
-            "Pecha Berry",
-            "Sitrus Berry",
-            "Lum Berry",
-        ]
         idx = 0
         while len(item_pool) < unfilled_count:
-            item_pool.append(self.create_item(filler_cycle[idx % len(filler_cycle)]))
+            item_pool.append(self.create_item(self._FILLER_ITEMS[idx % len(self._FILLER_ITEMS)]))
             idx += 1
 
         self.multiworld.itempool.extend(item_pool[:unfilled_count])
@@ -444,7 +455,7 @@ class PokemonB2W2World(World):
             if loc.address is not None and 810000 <= loc.address < 820000
         ])
 
-        # Generate Pokémon locations mapping (encounter areas + statics)
+        # Generate Pokemon locations mapping (encounter areas + statics)
         from .randomise.wild_tables import get_pokemon_locations
         is_w2 = (getattr(self.options.version, "current_key", "black2") == "white2")
         rand_wild = bool(self.options.randomise_wild_pokemon.value) if hasattr(self.options.randomise_wild_pokemon, "value") else False
@@ -509,6 +520,7 @@ class PokemonB2W2World(World):
                 "catch_rate_multiplier": int(self.options.catch_rate_multiplier.value),
                 "exp_multiplier": int(self.options.exp_multiplier.value),
                 "blind_trainers": bool(self.options.blind_trainers.value),
+                "talk_to_trainer_without_battling": bool(self.options.talk_to_trainer_without_battling.value),
                 "hold_a_turbo": bool(self.options.hold_a_turbo.value),
                 "fast_hatch": bool(self.options.fast_hatch.value),
                 "fast_fishing": bool(self.options.fast_fishing.value),
@@ -518,7 +530,7 @@ class PokemonB2W2World(World):
                 "remove_surf_bike_music": bool(self.options.remove_surf_bike_music.value),
                 "infinite_repels": bool(self.options.infinite_repels.value),
                 "infinite_rare_candies": bool(self.options.infinite_rare_candies.value),
-                "skip_pwt": int(self.options.skip_pwt.value),
+                "skip_pwt": bool(self.options.skip_pwt.value),
                 "skip_catching_tutorial": bool(self.options.skip_catching_tutorial.value),
                 "skip_join_avenue": bool(self.options.skip_join_avenue.value),
                 "skip_cinematic_movies": bool(self.options.skip_cinematic_movies.value),

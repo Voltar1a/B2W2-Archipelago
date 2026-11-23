@@ -414,13 +414,13 @@ def apply_qol_patches(rom: "NintendoDSRom", options: dict[str, Any]) -> None:
     helper_code += b"\x28\x1c\x30\xbd\x01\x20\x30\xbd\x00\x20\x30\xbd"
     assert len(helper_code) == 0x34
 
-    # BikeHook() at dwc_base + 0x34 (0x20 bytes)
+    # BikeHook(R0=zone_header_ptr) at dwc_base + 0x34 (0x20 bytes)
     bike_hook_addr = dwc_base + 0x34
     bike_code = bytearray()
-    bike_code += b"\x10\xb5\x41\x43\x50\x18\xc0\x7f\x04\x1c"
+    bike_code += b"\x10\xb5\xc4\x8b\x64\x05\xe4\x0f"
     bike_code += b"\x54\x20" + (b"\x01\x21" if bike_everywhere_enabled else b"\x00\x21")
-    bike_code += make_bl(bike_hook_addr + 0x0E, helper_addr)
-    bike_code += b"\x00\x28\x01\xd0\x04\x20\x20\x43\x20\x1c\x10\xbd\xc0\x46"
+    bike_code += make_bl(bike_hook_addr + 0x0C, helper_addr)
+    bike_code += b"\x00\x28\x01\xd0\x01\x20\x10\xbd\x20\x1c\x10\xbd\xc0\x46\xc0\x46"
     assert len(bike_code) == 0x20
 
     # AutoRunGridHook() at dwc_base + 0x54 (0x20 bytes)
@@ -462,7 +462,7 @@ def apply_qol_patches(rom: "NintendoDSRom", options: dict[str, Any]) -> None:
     escape_code = bytearray()
     escape_code += b"\x0f\xb5\x50\x20" + (b"\x01\x21" if guaranteed_escape_enabled else b"\x00\x21")
     escape_code += make_bl(escape_hook_addr + 0x06, helper_addr)
-    escape_code += b"\x00\x28\x05\xd1\x01\x99\x8c\x42\x02\xd9\x04\x98\x22\x30\x04\x90\x0f\xbd"
+    escape_code += b"\x00\x28\x02\xd1\x01\x99\x8c\x42\x02\xd9\x04\x98\x24\x30\x04\x90\x0f\xbd"
     assert len(escape_code) == 0x1C
 
     # Debounces 30vs60 a press problems
@@ -519,8 +519,12 @@ def apply_qol_patches(rom: "NintendoDSRom", options: dict[str, Any]) -> None:
         site_off = menu_off + delta
         arm9[site_off : site_off + 4] = make_bl(arm9_base + site_off, raw_pressed_addr)
 
-    zone_flags_off = 0x0204587E + delta - arm9_base
-    arm9[zone_flags_off : zone_flags_off + 8] = b"\x00\xb5" + make_bl(arm9_base + zone_flags_off + 2, bike_hook_addr) + b"\x00\xbd"
+    bike_allowed_pat = b"\xc0\x8b\x40\x05\xc0\x0f\x08\xbd"
+    bike_allowed_off = arm9.find(bike_allowed_pat)
+    if bike_allowed_off != -1:
+        arm9[bike_allowed_off : bike_allowed_off + 6] = make_bl(
+            arm9_base + bike_allowed_off, bike_hook_addr
+        ) + b"\xc0\x46"
 
     ov_table = rom.loadArm9Overlays()
 
@@ -949,6 +953,12 @@ def apply_qol_patches(rom: "NintendoDSRom", options: dict[str, Any]) -> None:
                 ])
                 skip_until = "scr12"
             else:
+                if l.type == "command" and (
+                    l.parts == ["VMCall", "sub5"]
+                    or l.parts == ["VMCall", "sub7"]
+                    or (l.parts and l.parts[0] == "PlayHMCutInEffect")
+                ):
+                    continue
                 new_lines.append(l)
         sf1243.lines = new_lines
         a056.files[1243] = bytes(assemble(sf1243))
@@ -969,6 +979,42 @@ def apply_qol_patches(rom: "NintendoDSRom", options: dict[str, Any]) -> None:
                     pdata[0x14] = 0xFF
                 a016.files[i] = bytes(pdata)
         rom.setFileByName("a/0/1/6", a016.save())
+
+    # Convert trade evolutions in a/0/1/9 so all Pokemon can evolve:
+    # - Plain/species trade (5, 7) -> level 37 (4)
+    # - Held item trade (6) -> level up while holding item, day an night (19 & 20)
+    a019_data = rom.getFileByName("a/0/1/9")
+    if a019_data is not None:
+        a019 = NARC(a019_data)
+        modified_019 = False
+        for i in range(len(a019.files)):
+            edata = a019.files[i]
+            if len(edata) < 6:
+                continue
+            num_slots = len(edata) // 6
+            new_entries: list[tuple[int, int, int]] = []
+            changed = False
+            for s in range(num_slots):
+                m, p, t = struct.unpack_from("<HHH", edata, s * 6)
+                if m == 0:
+                    continue
+                if m in (5, 7):
+                    new_entries.append((4, 37, t))
+                    changed = True
+                elif m == 6:
+                    new_entries.append((19, p, t))
+                    new_entries.append((20, p, t))
+                    changed = True
+                else:
+                    new_entries.append((m, p, t))
+            if changed:
+                out = bytearray(num_slots * 6)
+                for idx, (m, p, t) in enumerate(new_entries[:num_slots]):
+                    struct.pack_into("<HHH", out, idx * 6, m, p, t)
+                a019.files[i] = bytes(out)
+                modified_019 = True
+        if modified_019:
+            rom.setFileByName("a/0/1/9", a019.save())
 
     a012_data = rom.getFileByName("a/0/1/2")
     if a012_data is not None:

@@ -29,25 +29,43 @@ from .text import decode, encode, insert_line
 # Town fly data for B2W2: (town_id, visit_flag, text_id, (zone_id, x, z, dir))
 # Castelia city (zone 28) is a rail map and uses WarpRail (28, 3, 8, 4, 1) - dumb, why...
 TOWN_FLY_DATA = [
-    (1, 2488, 135, (427, 47, 762, 1)),    # Aspertia city
-    (2, 2491, 136, (439, 105, 694, 1)),   # Floccesy town
-    (3, 2489, 137, (448, 210, 650, 1)),   # Virbank city
-    (4, 2476, 138, (28, 3, 1, 8)),        # Castelia city (rail: line=3, frontpos=8, sidepos=1, dir=1)
-    (5, 2477, 139, (62, 406, 469, 1)),    # Nimbasa city
-    (6, 2478, 140, (96, 188, 414, 1)),    # Driftveil city
-    (7, 2479, 141, (107, 108, 306, 1)),   # Mistralton city
-    (8, 2492, 142, (458, 634, 305, 1)),   # Lentimas town
-    (9, 2481, 143, (120, 425, 174, 1)),   # Opelucid city
-    (10, 2482, 144, (406, 660, 186, 1)),  # Lacunosa town
-    (11, 2485, 145, (412, 760, 301, 1)),  # Undella town
-    (12, 2490, 146, (465, 775, 178, 1)),  # Humilau city
-    (13, 2483, 147, (136, 19, 49, 1)),    # Pokémon league
-    (14, 2474, 148, (6, 781, 589, 1)),    # Striaton city
-    (15, 2475, 149, (16, 637, 599, 1)),   # Nacrene city
+    (1, 2488, 135, (427, 47, 762, 1)),    # Aspertia City
+    (2, 2491, 136, (439, 105, 694, 1)),   # Floccesy Town
+    (3, 2489, 137, (448, 210, 650, 1)),   # Virbank City
+    (16, 2469, 270, (566, 31, 50, 1)),    # Pokéstar Studios
+    (4, 2476, 138, (28, 3, 1, 8)),        # Castelia City (rail: line=3, frontpos=8, sidepos=1, dir=1)
+    (5, 2477, 139, (62, 406, 469, 1)),    # Nimbasa City
+    (6, 2478, 140, (96, 188, 414, 1)),    # Driftveil City
+    (17, 2471, 271, (191, 197, 469, 1)),  # PWT (outdoor plaza)
+    (7, 2479, 141, (107, 108, 306, 1)),   # Mistralton City
+    (8, 2492, 142, (458, 634, 305, 1)),   # Lentimas Town
+    (11, 2485, 145, (412, 760, 301, 1)),  # Undella Town
+    (10, 2482, 144, (406, 660, 186, 1)),  # Lacunosa Town
+    (9, 2481, 143, (120, 425, 174, 1)),   # Opelucid City
+    (12, 2490, 146, (465, 775, 178, 1)),  # Humilau City
+    (18, 2530, 272, (573, 43, 18, 1)),    # Victory Road
+    (13, 2483, 147, (136, 19, 49, 1)),    # Pokémon League
+    (20, 2484, 274, (0, 42, 38, 1)),      # Black City (replaced with White Forest in W2)
+    (19, 2480, 273, (113, 184, 197, 1)),  # Icirrus City
+    (15, 2475, 149, (16, 637, 599, 1)),   # Nacrene City
+    (14, 2474, 148, (6, 781, 589, 1)),    # Striaton City
+    (21, 2473, 275, (397, 796, 659, 1)),  # Accumula Town
+    (22, 2472, 276, (389, 782, 750, 1)),  # Nuvema Town
 ]
 
 
+def _get_town_fly_data(is_white2: bool) -> list[tuple[int, int, int, tuple[int, int, int, int]]]:
+    if not is_white2:
+        return TOWN_FLY_DATA
+    return [
+        (20, 2484, 274, (424, 45, 37, 1)) if entry[0] == 20 else entry
+        for entry in TOWN_FLY_DATA
+    ]
+
+
 def apply_aptransceiver(rom: NintendoDSRom, options: dict[str, Any]) -> None:
+    is_white2 = (b"IRDO" in rom.name or rom.name[8:10] == b"W2" or rom.idCode[:4] == b"IRDO")
+    fly_data = _get_town_fly_data(is_white2)
     a003_data = rom.getFileByName("a/0/0/3")
     if a003_data is not None:
         a003 = NARC(a003_data)
@@ -83,7 +101,7 @@ def apply_aptransceiver(rom: NintendoDSRom, options: dict[str, Any]) -> None:
         insert_line(text_479, 0, 185, "Changed to Friday.")
         insert_line(text_479, 0, 186, "Changed to Saturday.")
 
-        insert_line(text_479, 0, 120, "Travel")
+        insert_line(text_479, 0, 120, "Field Moves")
         insert_line(text_479, 0, 121, "Check log")
         insert_line(text_479, 0, 122, "Level cap")
         insert_line(text_479, 0, 123, "Close")
@@ -91,28 +109,36 @@ def apply_aptransceiver(rom: NintendoDSRom, options: dict[str, Any]) -> None:
         insert_line(text_479, 0, 125, "Dig")
         insert_line(text_479, 0, 126, "Fly")
         insert_line(text_479, 0, 127, "Modifiers")
+        insert_line(text_479, 0, 212, "Flash")
 
         insert_line(text_479, 0, 133, "It can't be used here.")
         insert_line(text_479, 0, 134, "Where would you like to fly?")
 
-        for _, _, text_id, _ in TOWN_FLY_DATA:
-            town_names = {
-                135: "Aspertia City",
-                136: "Floccesy Town",
-                137: "Virbank City",
-                138: "Castelia City",
-                139: "Nimbasa City",
-                140: "Driftveil City",
-                141: "Mistralton City",
-                142: "Lentimas Town",
-                143: "Opelucid City",
-                144: "Lacunosa Town",
-                145: "Undella Town",
-                146: "Humilau City",
-                147: "Pokémon League",
-                148: "Striaton City",
-                149: "Nacrene City",
-            }
+        town_names = {
+            135: "Aspertia City",
+            136: "Floccesy Town",
+            137: "Virbank City",
+            138: "Castelia City",
+            139: "Nimbasa City",
+            140: "Driftveil City",
+            141: "Mistralton City",
+            142: "Lentimas Town",
+            143: "Opelucid City",
+            144: "Lacunosa Town",
+            145: "Undella Town",
+            146: "Humilau City",
+            147: "Pokémon League",
+            148: "Striaton City",
+            149: "Nacrene City",
+            270: "Pokéstar Studios",
+            271: "PWT",
+            272: "Victory Road",
+            273: "Icirrus City",
+            274: "White Forest" if is_white2 else "Black City",
+            275: "Accumula Town",
+            276: "Nuvema Town",
+        }
+        for _, _, text_id, _ in fly_data:
             insert_line(text_479, 0, text_id, town_names[text_id])
 
         insert_line(text_479, 0, 150, "Your current level cap is [c_100_#1_0].")
@@ -189,6 +215,7 @@ def apply_aptransceiver(rom: NintendoDSRom, options: dict[str, Any]) -> None:
     a012_data = rom.getFileByName("a/0/1/2")
     outdoor_zids: list[int] = []
     cave_zids: list[int] = []
+    dark_zids: list[int] = []
     if a012_data is not None:
         a012 = NARC(a012_data)
         z_bytes = a012.files[0]
@@ -198,6 +225,8 @@ def apply_aptransceiver(rom: NintendoDSRom, options: dict[str, Any]) -> None:
                 outdoor_zids.append(zid)
             if entry[31] & 0x10:
                 cave_zids.append(zid)
+            if (entry[31] & 0x10) or entry[27] == 12 or (241 <= zid <= 248):
+                dark_zids.append(zid)
 
     a056_data = rom.getFileByName("a/0/5/6")
     if a056_data is not None:
@@ -318,13 +347,13 @@ def apply_aptransceiver(rom: NintendoDSRom, options: dict[str, Any]) -> None:
             Line("command", ["ListMenuInitTR", 31, 1, 0, 1, 32784]),
             Line("command", ["ListMenuAdd", 124, 65535, 1]),  # Teleport
             Line("command", ["ListMenuAdd", 125, 65535, 2]),  # Dig
-            Line("command", ["CheckItemBagNumber", 421, 1, 32801]),
-            Line("command", ["WorkCmpConst", 32801, 1]),
-            Line("command", ["VMJumpIf", 1, "lbl_add_fly_opt"]),
-            Line("command", ["VMJump", "lbl_skip_fly_opt"]),
-            Line("label", ["lbl_add_fly_opt"]),
+            # TESTING: always show Fly menu option
             Line("command", ["ListMenuAdd", 126, 65535, 3]),  # Fly
-            Line("label", ["lbl_skip_fly_opt"]),
+            Line("command", ["CheckItemBagNumber", 397, 1, 32800]),  # TM70 Flash
+            Line("command", ["WorkCmpConst", 32800, 1]),
+            Line("command", ["VMJumpIf", 5, "lbl_travel_no_flash"]),
+            Line("command", ["ListMenuAdd", 212, 65535, 4]),  # Flash
+            Line("label", ["lbl_travel_no_flash"]),
             Line("command", ["ListMenuAdd", 166, 65535, 0]),  # Cancel
             Line("command", ["ListMenuShow2"]),
             Line("command", ["MsgSystemClose"]),
@@ -334,7 +363,26 @@ def apply_aptransceiver(rom: NintendoDSRom, options: dict[str, Any]) -> None:
             Line("command", ["VMJumpIf", 1, "lbl_travel_dig"]),
             Line("command", ["WorkCmpConst", 32784, 3]),
             Line("command", ["VMJumpIf", 1, "lbl_travel_fly"]),
+            Line("command", ["WorkCmpConst", 32784, 4]),
+            Line("command", ["VMJumpIf", 1, "lbl_travel_flash"]),
             Line("command", ["VMReturn"]),
+
+            Line("label", ["lbl_travel_flash"]),
+            Line("command", ["VMCall", "sub_check_dark"]),
+            Line("command", ["WorkCmpConst", 32801, 1]),
+            Line("command", ["VMJumpIf", 1, "lbl_flash_exec"]),
+            Line("command", ["MsgSystem", 133, 2]),
+            Line("command", ["InputWaitLast"]),
+            Line("command", ["MsgSystemClose"]),
+            Line("command", ["VMJump", "sub_travel"]),
+
+            Line("label", ["lbl_flash_exec"]),
+            Line("command", ["ActorPauseAll"]),
+            Line("command", ["PlaySound", 1350]),
+            Line("command", ["FieldSetWeather", 0, 0]),
+            Line("command", ["RTFinishSubEvents"]),
+            Line("command", ["ActorUnlockAll"]),
+            Line("command", ["VMHalt"]),
 
             Line("label", ["lbl_travel_tp"]),
             Line("command", ["VMCall", "sub_check_outdoors"]),
@@ -386,16 +434,11 @@ def apply_aptransceiver(rom: NintendoDSRom, options: dict[str, Any]) -> None:
             Line("command", ["ListMenuInitTR", 31, 1, 0, 1, 32808]),
         ]
 
-        for town_id, flag_id, text_id, _ in TOWN_FLY_DATA:
-            sub_travel.extend([
-                Line("command", ["FlagGet", flag_id, 32801]),
-                Line("command", ["WorkCmpConst", 32801, 1]),
-                Line("command", ["VMJumpIf", 1, f"lbl_add_fly_{town_id}"]),
-                Line("command", ["VMJump", f"lbl_skip_fly_{town_id}"]),
-                Line("label", [f"lbl_add_fly_{town_id}"]),
-                Line("command", ["ListMenuAdd", text_id, 65535, town_id]),
-                Line("label", [f"lbl_skip_fly_{town_id}"]),
-            ])
+        # TESTING: always show all fly locations
+        for town_id, flag_id, text_id, _ in fly_data:
+            sub_travel.append(
+                Line("command", ["ListMenuAdd", text_id, 65535, town_id])
+            )
 
         sub_travel.extend([
             Line("command", ["ListMenuAdd", 166, 65535, 0]),
@@ -408,7 +451,7 @@ def apply_aptransceiver(rom: NintendoDSRom, options: dict[str, Any]) -> None:
             Line("command", ["VMSleep", 8]),
         ])
 
-        for town_id, _, _, coords in TOWN_FLY_DATA:
+        for town_id, _, _, coords in fly_data:
             sub_travel.extend([
                 Line("command", ["WorkCmpConst", 32808, town_id]),
                 Line("command", ["VMJumpIf", 1, f"lbl_fly_to_{town_id}"]),
@@ -416,7 +459,7 @@ def apply_aptransceiver(rom: NintendoDSRom, options: dict[str, Any]) -> None:
 
         sub_travel.append(Line("command", ["VMReturn"]))
 
-        for town_id, _, _, coords in TOWN_FLY_DATA:
+        for town_id, _, _, coords in fly_data:
             warp_cmd = (
                 Line("command", ["MapChangeWarpRail", 28, 3, 1, 8, 1])
                 if coords[0] == 28
@@ -460,6 +503,23 @@ def apply_aptransceiver(rom: NintendoDSRom, options: dict[str, Any]) -> None:
         sub_check_caves.extend([
             Line("command", ["VMReturn"]),
             Line("label", ["lbl_is_cave"]),
+            Line("command", ["WorkSetConst", 32801, 1]),
+            Line("command", ["VMReturn"]),
+        ])
+
+        sub_check_dark: list[Line] = [
+            Line("label", ["sub_check_dark"]),
+            Line("command", ["FieldGetZoneID", 32800]),
+            Line("command", ["WorkSetConst", 32801, 0]),
+        ]
+        for zid in dark_zids:
+            sub_check_dark.extend([
+                Line("command", ["WorkCmpConst", 32800, zid]),
+                Line("command", ["VMJumpIf", 1, "lbl_is_dark"]),
+            ])
+        sub_check_dark.extend([
+            Line("command", ["VMReturn"]),
+            Line("label", ["lbl_is_dark"]),
             Line("command", ["WorkSetConst", 32801, 1]),
             Line("command", ["VMReturn"]),
         ])
@@ -705,7 +765,7 @@ def apply_aptransceiver(rom: NintendoDSRom, options: dict[str, Any]) -> None:
             Line("label", ["lbl_mod_catch"]),
             Line("command", ["WorkCmpConst", 16792, 255]),
             Line("command", ["VMJumpIf", 1, "lbl_catch_disp_guar"]),
-            Line("command", ["WorkSet", 32800, 16792]),
+            Line("command", ["WorkGet", 32800, 16792]),
             Line("command", ["WordSetNumber", 0, 32800, 2]),
             Line("command", ["MsgSystem", 160, 0]),
             Line("command", ["VMJump", "lbl_catch_menu"]),
@@ -724,11 +784,11 @@ def apply_aptransceiver(rom: NintendoDSRom, options: dict[str, Any]) -> None:
             Line("command", ["MsgSystemClose"]),
             Line("command", ["WorkCmpConst", 32800, 0]),
             Line("command", ["VMJumpIf", 1, "lbl_mod_root"]),
-            Line("command", ["WorkSet", 16792, 32800]),
+            Line("command", ["WorkGet", 16792, 32800]),
             Line("command", ["VMJump", "lbl_mod_root"]),
 
             Line("label", ["lbl_mod_exp"]),
-            Line("command", ["WorkSet", 32800, 16793]),
+            Line("command", ["WorkGet", 32800, 16793]),
             Line("command", ["WordSetNumber", 0, 32800, 2]),
             Line("command", ["MsgSystem", 161, 0]),
             Line("command", ["ListMenuInitTR", 31, 1, 0, 1, 32800]),
@@ -742,7 +802,7 @@ def apply_aptransceiver(rom: NintendoDSRom, options: dict[str, Any]) -> None:
             Line("command", ["MsgSystemClose"]),
             Line("command", ["WorkCmpConst", 32800, 0]),
             Line("command", ["VMJumpIf", 1, "lbl_mod_root"]),
-            Line("command", ["WorkSet", 16793, 32800]),
+            Line("command", ["WorkGet", 16793, 32800]),
             Line("command", ["VMJump", "lbl_mod_root"]),
 
             Line("label", ["lbl_mod_filter"]),
@@ -775,6 +835,7 @@ def apply_aptransceiver(rom: NintendoDSRom, options: dict[str, Any]) -> None:
         s1244.lines.extend(sub_travel)
         s1244.lines.extend(sub_check_outdoors)
         s1244.lines.extend(sub_check_caves)
+        s1244.lines.extend(sub_check_dark)
         # s1244.lines.extend(sub_level_cap)
         s1244.lines.extend(sub_check_log)
         s1244.lines.extend(sub_seasons_menu)
@@ -944,7 +1005,6 @@ def apply_aptransceiver(rom: NintendoDSRom, options: dict[str, Any]) -> None:
         except (ImportError, ValueError):
             from nds_compat import codeCompression
 
-    is_white2 = (b"IRDO" in rom.name or rom.name[8:10] == b"W2" or rom.idCode[:4] == b"IRDO")
     season_rt_addr = 0x02034F98 if is_white2 else 0x02034F6C
 
     arm9 = getattr(rom, "_decompressed_arm9", None)
