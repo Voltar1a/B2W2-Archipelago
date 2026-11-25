@@ -13,8 +13,14 @@ Archipelago multiworld randomiser for Pokémon Black 2 and White 2
 
 - Goals (combinable):
   - `champion`: Defeat Champion Iris.
-  - `top_trainers`: Defeat a configurable number of postgame/superboss trainers (`cynthia`, `benga`, `alder`, `colress`, `n`, `league_rematch`, `gamefreak_morimoto`, `gamefreak_nishino`, `hugh`, `ghetsis`).
+  - `top_trainers`: Defeat a configurable number of postgame/superboss trainers (`ghetsis`, `cynthia`, `hugh`, `alder`, `gamefreak_morimoto`, `gamefreak_nishino`, `n`, `colress`, `league_rematch`, `benga`).
   - `legendary_hunt`: Catch or defeat a configurable number of stationary legendaries.
   - `tmhm_hunt`: Collect the target percentage of TMs and HMs and goal at the TM Collector in Mistralton City.
 - Locations: Shuffled overworld items, NPC gifts, hidden items, trainersanity.
 - QoL + randomisation: Story speedups across the game, instant text, auto-run, infinite repels/candies, universal TM/HM compatibility, wild/trainer/starter/ability/moveset randomisers.
+
+## Useful and interesting pages
+
+- [Setup guide](worlds/pokemon_b2w2/docs/setup.md)
+- [Changes & roadblocks](worlds/pokemon_b2w2/docs/changes.md)
+

@@ -1117,29 +1117,11 @@ def apply_story_roadblocks(rom: "NintendoDSRom", is_white2: bool, options: dict[
     except Exception:
         pass
 
-    # s1122 (B2 Giant Chasm barrier) & s1126 (W2 Route 21 barrier): do not require Plasma Card (Flag 356)
-    for barrier_sid in (1122, 1126):
-        try:
-            if len(scripts_narc.files) > barrier_sid and scripts_narc.files[barrier_sid]:
-                sf_b = disassemble(scripts_narc.files[barrier_sid])
-                changed_b = False
-                for i in range(len(sf_b.lines) - 2):
-                    if (
-                        sf_b.lines[i].type == "command" and sf_b.lines[i].parts == ["StackPushFlag", 356]
-                        and sf_b.lines[i + 1].type == "command" and sf_b.lines[i + 1].parts == ["StackPushConst", 0]
-                        and sf_b.lines[i + 2].type == "command" and sf_b.lines[i + 2].parts == ["StackCmp", 1]
-                    ):
-                        sf_b.lines[i] = Line("command", ["StackPushConst", 1])
-                        changed_b = True
-                if changed_b:
-                    scripts_narc.files[barrier_sid] = bytes(assemble(sf_b))
-                    modified_scripts = True
-        except Exception:
-            pass
 
     # z563 (ow 354, s1124): add sleeping grunt blocking south door (warp1 -> z554, Route 21 Hugh multi-battle room) in Giant Chasm
     try:
         import struct
+
         if a126 is not None and len(a126.files) > 354 and len(scripts_narc.files) > 1124 and scripts_narc.files[1124]:
             raw_354 = bytearray(a126.files[354])
             n_furn, n_npc, n_warp, n_trig = raw_354[4], raw_354[5], raw_354[6], raw_354[7]
@@ -1150,9 +1132,10 @@ def apply_story_roadblocks(rom: "NintendoDSRom", is_white2: bool, options: dict[
                 struct.pack_into("<H", npc5, 12, 1)  # face south
                 struct.pack_into("<2H", npc5, 28, 32, 15)  # in front of north loading zone (32, 14)
                 tail_off = off_npcs + n_npc * 36
+                orig_sz = struct.unpack_from("<I", raw_354, 0)[0]
                 new_354 = bytearray(raw_354[:tail_off]) + npc5 + raw_354[tail_off:]
                 new_354[5] = n_npc + 1
-                struct.pack_into("<I", new_354, 0, len(new_354) - 4)
+                struct.pack_into("<I", new_354, 0, orig_sz + 36)
                 a126.files[354] = bytes(new_354)
                 modified_entities = True
 
@@ -1163,7 +1146,7 @@ def apply_story_roadblocks(rom: "NintendoDSRom", is_white2: bool, options: dict[
                     narc_563 = NARC(a003_563)
                     t_563 = decode(narc_563.files[363])
                     msg_sleep_563 = len(t_563[0])
-                    insert_line(t_563, 0, msg_sleep_563, "Zzz...[End]")
+                    insert_line(t_563, 0, msg_sleep_563, "Zzz...")
                     narc_563.files[363] = encode(t_563)
                     rom.setFileByName("a/0/0/3", narc_563.save())
 
@@ -1171,8 +1154,19 @@ def apply_story_roadblocks(rom: "NintendoDSRom", is_white2: bool, options: dict[
                 sub11_idx = sf_1124.find_label("sub11")
                 if sub11_idx != -1:
                     sf_1124.lines[sub11_idx + 1 : sub11_idx + 1] = [
-                        Line("command", ["WorkCmpConst", 16787, 3]),
-                        Line("command", ["VMJumpIf", 5, "lbl_1124_hide_blocker"]),
+                        Line("command", ["StackPushFlag", 2543]),
+                        Line("command", ["StackPushConst", 1]),
+                        Line("command", ["StackCmp", 1]),
+                        Line("command", ["VMJumpIf", 255, "lbl_1124_chk_m3"]),
+                        Line("command", ["ObjInitWarpGPos", 0, 0, 0, 0]),
+                        Line("command", ["ObjInitWarpGPos", 2, 0, 0, 0]),
+                        Line("command", ["ObjInitWarpGPos", 3, 0, 0, 0]),
+                        Line("command", ["VMJump", "lbl_1124_show_blocker"]),
+                        Line("label", ["lbl_1124_chk_m3"]),
+                        Line("command", ["StackPushFlag", 2542]),
+                        Line("command", ["StackPushConst", 1]),
+                        Line("command", ["StackCmp", 1]),
+                        Line("command", ["VMJumpIf", 255, "lbl_1124_hide_blocker"]),
                         Line("command", ["StackPushFlag", 975]),
                         Line("command", ["StackPushConst", 0]),
                         Line("command", ["StackCmp", 1]),
@@ -1201,9 +1195,31 @@ def apply_story_roadblocks(rom: "NintendoDSRom", is_white2: bool, options: dict[
     except Exception:
         pass
 
-    # Isolate all 4 Plasma Frigate instances (1=PWT, 2=Route 21, 3=Giant Chasm, 4=P2 Lab) via var 16787
-    # and dedicated completion flags (2551=PWT, 2552=Route 21, 2500=R21 Grunt19, 2549=GC, 2548=GC Grunt19)
+    # Isolate all 4 Plasma Frigate instances (1=PWT, 2=Route 21, 3=Giant Chasm, 4=P2 Lab) via persistent flags 2540..2543
+    # (Work vars >= 16700 are temporary/volatile across map loads; EventFlags 2538..2552 persist in save data)
     try:
+        import struct
+
+        if a126 is not None:
+            for ow_id, npc_flag_pairs in (
+                (350, ((3, 997), (4, 997), (5, 998), (6, 998))),
+                (352, ((0, 976),)),
+                (365, ((3, 976), (6, 976))),
+            ):
+                if len(a126.files) > ow_id and a126.files[ow_id]:
+                    raw_ow = bytearray(a126.files[ow_id])
+                    if len(raw_ow) >= 8:
+                        fc_ow, nc_ow = raw_ow[4], raw_ow[5]
+                        npc_off = 8 + fc_ow * 20
+                        changed_ow = False
+                        for npc_idx, new_flag in npc_flag_pairs:
+                            if npc_idx < nc_ow and npc_off + (npc_idx + 1) * 36 <= len(raw_ow):
+                                struct.pack_into("<H", raw_ow, npc_off + npc_idx * 36 + 8, new_flag)
+                                changed_ow = True
+                        if changed_ow:
+                            a126.files[ow_id] = bytes(raw_ow)
+                            modified_entities = True
+
         def _inj_after_cmd(sf, target_parts: list[Any], extra: list[Any]) -> bool:
             for idx, ln in enumerate(sf.lines):
                 if ln.type == "command" and ln.parts == target_parts:
@@ -1211,160 +1227,645 @@ def apply_story_roadblocks(rom: "NintendoDSRom", is_white2: bool, options: dict[
                     return True
             return False
 
-        # 1) PWT (s382): set mode 1 when PWT Frigate starts
+        def _set_mode(mode: int) -> list[Any]:
+            return [Line("command", ["FlagSet" if k == mode else "FlagReset", 2539 + k]) for k in (1, 2, 3, 4)]
+
+        def _jump_if_not_mode(mode: int, lbl: str) -> list[Any]:
+            return [
+                Line("command", ["StackPushFlag", 2539 + mode]),
+                Line("command", ["StackPushConst", 1]),
+                Line("command", ["StackCmp", 1]),
+                Line("command", ["VMJumpIf", 255, lbl]),
+            ]
+
+        def _jump_if_mode(mode: int, lbl: str) -> list[Any]:
+            return [
+                Line("command", ["StackPushFlag", 2539 + mode]),
+                Line("command", ["StackPushConst", 0]),
+                Line("command", ["StackCmp", 1]),
+                Line("command", ["VMJumpIf", 255, lbl]),
+            ]
+
+        def _flag_branch(chk_flag: int, tag_b: str, on_true: list[Any], on_false: list[Any]) -> list[Any]:
+            return [
+                Line("command", ["StackPushFlag", chk_flag]),
+                Line("command", ["StackPushConst", 1]),
+                Line("command", ["StackCmp", 1]),
+                Line("command", ["VMJumpIf", 255, f"lbl_{tag_b}_f"]),
+                *on_true,
+                Line("command", ["VMJump", f"lbl_{tag_b}_e"]),
+                Line("label", [f"lbl_{tag_b}_f"]),
+                *on_false,
+                Line("label", [f"lbl_{tag_b}_e"]),
+            ]
+
+        def _build_mode2_state(tag: str, include_warp: bool = False) -> list[Any]:
+            def _m2_stage_cmds(is_w2: bool) -> list[Any]:
+                ver = "w2" if is_w2 else "b2"
+                active_var, inactive_var = (16625, 16626) if is_w2 else (16626, 16625)
+                set_997, rst_998 = ("FlagSet", "FlagReset") if is_w2 else ("FlagReset", "FlagSet")
+                nr_set, nr_rst = (836, 835) if is_w2 else (835, 836)
+                s2_extra = [Line("command", ["FlagSet", 832])] if is_w2 else []
+                return [
+                    Line("command", [set_997, 997]),
+                    Line("command", [rst_998, 998]),
+                    Line("command", ["WorkSetConst", inactive_var, 0]),
+                    Line("command", ["StackPushFlag", 2545]),
+                    Line("command", ["StackPushConst", 1]),
+                    Line("command", ["StackCmp", 1]),
+                    Line("command", ["VMJumpIf", 255, f"lbl_{tag}_{ver}_s1"]),
+                    Line("command", ["WorkSetConst", active_var, 3]),
+                    *[Line("command", ["WorkSetConst", v, 1]) for v in (16629, 16630, 16631, 16632, 16635)],
+                    Line("command", ["FlagSet", nr_set]),
+                    Line("command", ["FlagReset", nr_rst]),
+                    *s2_extra,
+                    Line("command", ["FlagSet", 830]),
+                    Line("command", ["WorkSetConst", 16640, 1]),
+                    Line("command", ["StackPushFlag", 2536]),
+                    Line("command", ["StackPushConst", 1]),
+                    Line("command", ["StackCmp", 1]),
+                    Line("command", ["VMJumpIf", 255, f"lbl_{tag}_{ver}_c1"]),
+                    Line("command", ["WorkSetConst", 16639, 2]),
+                    Line("command", ["FlagSet", 1036]),
+                    Line("command", ["VMJump", f"lbl_{tag}_g19_chk"]),
+                    Line("label", [f"lbl_{tag}_{ver}_c1"]),
+                    Line("command", ["WorkSetConst", 16639, 1]),
+                    Line("command", ["FlagReset", 1036]),
+                    Line("command", ["VMJump", f"lbl_{tag}_g19_chk"]),
+                    Line("label", [f"lbl_{tag}_{ver}_s1"]),
+                    *(
+                        [
+                            cmd
+                            for k in range(4)
+                            for cmd in _flag_branch(
+                                2553 + k,
+                                f"{tag}_{ver}_sw{k}",
+                                [Line("command", ["WorkSetConst", 16629 + k, 1])],
+                                [Line("command", ["WorkSetConst", 16629 + k, 0])],
+                            )
+                        ]
+                        if not is_w2
+                        else [Line("command", ["WorkSetConst", v, 0]) for v in (16629, 16630, 16631, 16632)]
+                    ),
+                    Line("command", ["WorkSetConst", 16635, 0]),
+                    Line("command", ["FlagReset", 835]),
+                    Line("command", ["FlagReset", 836]),
+                    Line("command", ["FlagReset", 830]),
+                    Line("command", ["FlagReset", 1036]),
+                    Line("command", ["WorkSetConst", 16639, 0]),
+                    Line("command", ["WorkSetConst", 16640, 0]),
+                    Line("command", ["StackPushFlag", 2537]),
+                    Line("command", ["StackPushConst", 1]),
+                    Line("command", ["StackCmp", 1]),
+                    Line("command", ["VMJumpIf", 255, f"lbl_{tag}_{ver}_s0"]),
+                    Line("command", ["WorkSetConst", active_var, 2]),
+                    Line("command", ["VMJump", f"lbl_{tag}_g19_chk"]),
+                    Line("label", [f"lbl_{tag}_{ver}_s0"]),
+                    Line("command", ["WorkSetConst", active_var, 1]),
+                ]
+
+            cmds: list[Any] = [
+                *_set_mode(2),
+                Line("command", ["WorkSetConst", 16452, 1]),
+                Line("command", ["WorkSetConst", 16624, 4]),
+                Line("command", ["WorkSetConst", 16582, 4]),
+                Line("command", ["FlagSet", 829]),
+                Line("command", ["FlagSet", 1029]),
+                Line("command", ["FlagReset", 975]),
+                Line("command", ["FlagReset", 364]),
+                Line("command", ["StackPushFlag", 2552]),
+                Line("command", ["StackPushConst", 0]),
+                Line("command", ["StackCmp", 1]),
+                Line("command", ["VMJumpIf", 255, f"lbl_{tag}_m2_done_chk"]),
+                Line("command", ["FlagReset", 909]),
+                Line("command", ["FlagReset", 976]),
+                Line("command", ["FlagSet", 977]),
+                Line("command", ["FlagSet", 831]),
+                Line("command", ["FlagSet", 833]),
+                Line("command", ["FlagSet", 834]),
+                Line("command", ["FlagReset", 837]),
+                Line("command", ["FlagReset", 838]),
+                Line("command", ["FlagSet", 839]),
+                Line("command", ["StackPush", 16642]),
+                Line("command", ["StackPushConst", 0]),
+                Line("command", ["StackCmp", 1]),
+                Line("command", ["VMJumpIf", 255, f"lbl_{tag}_16642_ok"]),
+                Line("command", ["WorkSetConst", 16642, 1]),
+                Line("label", [f"lbl_{tag}_16642_ok"]),
+                Line("command", ["StackPush", 16643]),
+                Line("command", ["StackPushConst", 0]),
+                Line("command", ["StackCmp", 1]),
+                Line("command", ["VMJumpIf", 255, f"lbl_{tag}_16643_ok"]),
+                Line("command", ["WorkSetConst", 16643, 1]),
+                Line("label", [f"lbl_{tag}_16643_ok"]),
+                Line("command", ["StoreVersion", 32800]),
+                Line("command", ["WorkCmpConst", 32800, 23]),
+                Line("command", ["VMJumpIf", 5, f"lbl_{tag}_w2"]),
+                *_m2_stage_cmds(False),
+                Line("command", ["VMJump", f"lbl_{tag}_g19_chk"]),
+                Line("label", [f"lbl_{tag}_w2"]),
+                *_m2_stage_cmds(True),
+                Line("label", [f"lbl_{tag}_g19_chk"]),
+                Line("command", ["StackPushFlag", 2500]),
+                Line("command", ["StackPushConst", 0]),
+                Line("command", ["StackCmp", 1]),
+                Line("command", ["VMJumpIf", 255, f"lbl_{tag}_g19_set"]),
+                Line("command", ["FlagReset", 832]),
+                Line("command", ["VMJump", f"lbl_{tag}_cut_chk"]),
+                Line("label", [f"lbl_{tag}_g19_set"]),
+                Line("command", ["FlagSet", 832]),
+                Line("label", [f"lbl_{tag}_cut_chk"]),
+            ]
+            if include_warp:
+                cmds.extend([
+                    Line("command", ["StackPushFlag", 2546]),
+                    Line("command", ["StackPushConst", 1]),
+                    Line("command", ["StackCmp", 1]),
+                    Line("command", ["VMJumpIf", 255, f"lbl_{tag}_chk_cutscene"]),
+                    Line("command", ["WorkSetConst", 16646, 3]),
+                    Line("command", ["ObjInitWarpGPos", 2, 800, 65531, 241]),
+                    Line("command", ["MapReplaceSetEvent", 5, 0, 0]),
+                    Line("command", ["MapReplaceSetEvent", 6, 1, 1]),
+                    Line("command", ["FlagReset", 1002]),
+                    Line("command", ["FlagSet", 855]),
+                    Line("command", ["FlagSet", 856]),
+                    Line("command", ["VMJump", f"lbl_{tag}_done"]),
+                    Line("label", [f"lbl_{tag}_chk_cutscene"]),
+                    Line("command", ["StackPush", 16646]),
+                    Line("command", ["StackPushConst", 2]),
+                    Line("command", ["StackCmp", 1]),
+                    Line("command", ["VMJumpIf", 255, f"lbl_{tag}_mr_pre"]),
+                    Line("command", ["VMJump", f"lbl_{tag}_done"]),
+                    Line("label", [f"lbl_{tag}_mr_pre"]),
+                    Line("command", ["MapReplaceSetEvent", 5, 1, 1]),
+                    Line("command", ["MapReplaceSetEvent", 6, 0, 0]),
+                    Line("command", ["StackPush", 16646]),
+                    Line("command", ["StackPushConst", 0]),
+                    Line("command", ["StackCmp", 1]),
+                    Line("command", ["StackPush", 16646]),
+                    Line("command", ["StackPushConst", 3]),
+                    Line("command", ["StackCmp", 1]),
+                    Line("command", ["StackCmp", 6]),
+                    Line("command", ["VMJumpIf", 255, f"lbl_{tag}_done"]),
+                    Line("command", ["WorkSetConst", 16646, 1]),
+                    Line("command", ["VMJump", f"lbl_{tag}_done"]),
+                ])
+            else:
+                cmds.append(Line("command", ["VMJump", f"lbl_{tag}_done"]))
+            cmds.extend([
+                Line("label", [f"lbl_{tag}_m2_done_chk"]),
+                Line("command", ["WorkSetConst", 16625, 0]),
+                Line("command", ["WorkSetConst", 16626, 0]),
+                *[Line("command", ["WorkSetConst", v, 1]) for v in (16629, 16630, 16631, 16632, 16635)],
+                Line("command", ["WorkSetConst", 16639, 2]),
+                Line("command", ["WorkSetConst", 16640, 2]),
+                Line("command", ["WorkSetConst", 16642, 2]),
+                Line("command", ["WorkSetConst", 16643, 2]),
+                Line("command", ["WorkSetConst", 16646, 4]),
+                *[Line("command", ["FlagSet", fl]) for fl in (830, 831, 832, 835, 836, 837, 997, 998, 1036)],
+                Line("label", [f"lbl_{tag}_done"]),
+            ])
+            return cmds
+
+        def _build_mode3_state(tag: str) -> list[Any]:
+            w2_switches = []
+            for k in range(4):
+                w2_switches.extend(_flag_branch(
+                    2503 + k,
+                    f"{tag}_w2sw{k}",
+                    [Line("command", ["WorkSetConst", 16629 + k, 1])],
+                    [Line("command", ["WorkSetConst", 16629 + k, 0])],
+                ))
+            return [
+                *_set_mode(3),
+                Line("command", ["WorkSetConst", 16452, 2]),
+                Line("command", ["WorkSetConst", 16624, 4]),
+                Line("command", ["WorkSetConst", 16582, 4]),
+                Line("command", ["FlagSet", 829]),
+                Line("command", ["FlagSet", 1029]),
+                Line("command", ["FlagSet", 975]),
+                Line("command", ["FlagSet", 364]),
+                Line("command", ["WorkSetConst", 16625, 0]),
+                Line("command", ["WorkSetConst", 16626, 0]),
+                Line("command", ["StackPushFlag", 2549]),
+                Line("command", ["StackPushConst", 1]),
+                Line("command", ["StackCmp", 1]),
+                Line("command", ["VMJumpIf", 255, f"lbl_{tag}_m3_prog"]),
+                Line("command", ["WorkSetConst", 16627, 3]),
+                Line("command", ["WorkSetConst", 16628, 4]),
+                *[Line("command", ["WorkSetConst", v, 1]) for v in (16629, 16630, 16631, 16632, 16634, 16635, 16644, 16645)],
+                *[Line("command", ["WorkSetConst", v, 2]) for v in (16639, 16640, 16641, 16642, 16643, 16677)],
+                *[Line("command", ["FlagSet", fl]) for fl in list(range(830, 846)) + [847, 848, 854, 909, 976, 977, 997, 998, 1026, 1036]],
+                Line("command", ["FlagReset", 846]),
+                Line("command", ["VMJump", f"lbl_{tag}_done"]),
+                Line("label", [f"lbl_{tag}_m3_prog"]),
+                Line("command", ["FlagReset", 976]),
+                Line("command", ["FlagSet", 977]),
+                Line("command", ["FlagReset", 1026]),
+                Line("command", ["FlagReset", 846]),
+                Line("command", ["FlagSet", 833]),
+                Line("command", ["FlagSet", 834]),
+                Line("command", ["FlagSet", 830]),
+                Line("command", ["FlagSet", 831]),
+                Line("command", ["StackPushFlag", 2544]),
+                Line("command", ["StackPushConst", 1]),
+                Line("command", ["StackCmp", 1]),
+                Line("command", ["VMJumpIf", 255, f"lbl_{tag}_r1126_open"]),
+                Line("command", ["WorkSetConst", 16635, 1]),
+                Line("command", ["WorkSetConst", 16640, 1]),
+                Line("command", ["StoreVersion", 32800]),
+                Line("command", ["WorkCmpConst", 32800, 23]),
+                Line("command", ["VMJumpIf", 5, f"lbl_{tag}_m3_w2"]),
+                Line("command", ["FlagSet", 836]),
+                Line("command", ["FlagReset", 835]),
+                *[Line("command", ["WorkSetConst", v, 1]) for v in (16629, 16630, 16631, 16632)],
+                Line("command", ["VMJump", f"lbl_{tag}_m3_c_chk"]),
+                Line("label", [f"lbl_{tag}_m3_w2"]),
+                Line("command", ["FlagSet", 835]),
+                Line("command", ["FlagReset", 836]),
+                *[Line("command", ["WorkSetConst", v, 1]) for v in (16629, 16630, 16631, 16632)],
+                Line("label", [f"lbl_{tag}_m3_c_chk"]),
+                *_flag_branch(
+                    2535,
+                    f"{tag}_m3_c35",
+                    [Line("command", ["WorkSetConst", 16639, 2]), Line("command", ["FlagSet", 1036])],
+                    [Line("command", ["WorkSetConst", 16639, 1]), Line("command", ["FlagReset", 1036])],
+                ),
+                Line("command", ["VMJump", f"lbl_{tag}_lower_chk"]),
+                Line("label", [f"lbl_{tag}_r1126_open"]),
+                *w2_switches,
+                Line("command", ["WorkSetConst", 16635, 0]),
+                Line("command", ["FlagReset", 835]),
+                Line("command", ["FlagReset", 836]),
+                Line("command", ["FlagReset", 1036]),
+                Line("command", ["WorkSetConst", 16639, 0]),
+                Line("command", ["WorkSetConst", 16640, 0]),
+                Line("label", [f"lbl_{tag}_lower_chk"]),
+                *_flag_branch(
+                    2531,
+                    f"{tag}_m3_34",
+                    [Line("command", ["WorkSetConst", 16634, 1])],
+                    [Line("command", ["WorkSetConst", 16634, 0])],
+                ),
+                *_flag_branch(
+                    2532,
+                    f"{tag}_m3_44",
+                    [Line("command", ["WorkSetConst", 16644, 1]), Line("command", ["WorkSetConst", 16645, 1]), Line("command", ["FlagSet", 842]), Line("command", ["FlagSet", 843])],
+                    [Line("command", ["WorkSetConst", 16644, 0]), Line("command", ["WorkSetConst", 16645, 0]), Line("command", ["FlagSet", 842]), Line("command", ["FlagSet", 843])],
+                ),
+                *_flag_branch(
+                    2533,
+                    f"{tag}_m3_27a",
+                    [Line("command", ["WorkSetConst", 16627, 3])],
+                    _flag_branch(
+                        2532,
+                        f"{tag}_m3_27b",
+                        [Line("command", ["WorkSetConst", 16627, 1])],
+                        [Line("command", ["WorkSetConst", 16627, 0])],
+                    ),
+                ),
+                *_flag_branch(
+                    2534,
+                    f"{tag}_m3_77a",
+                    [Line("command", ["WorkSetConst", 16677, 2]), Line("command", ["FlagSet", 840]), Line("command", ["FlagSet", 841])],
+                    [
+                        Line("command", ["FlagReset", 840]),
+                        Line("command", ["FlagReset", 841]),
+                        *_flag_branch(
+                            2533,
+                            f"{tag}_m3_77b",
+                            [Line("command", ["WorkSetConst", 16677, 1])],
+                            [Line("command", ["WorkSetConst", 16677, 0])],
+                        ),
+                    ],
+                ),
+                *_flag_branch(
+                    2502,
+                    f"{tag}_m3_28a",
+                    [
+                        Line("command", ["WorkSetConst", 16628, 4]),
+                        Line("command", ["WorkSetConst", 16641, 2]),
+                        *[Line("command", ["FlagSet", fl]) for fl in (844, 845, 847, 848, 909)],
+                        Line("command", ["FlagReset", 854]),
+                    ],
+                    _flag_branch(
+                        2501,
+                        f"{tag}_m3_28b",
+                        [
+                            Line("command", ["WorkSetConst", 16628, 2]),
+                            Line("command", ["WorkSetConst", 16641, 1]),
+                            *[Line("command", ["FlagReset", fl]) for fl in (844, 845, 848, 854)],
+                            Line("command", ["FlagSet", 847]),
+                            Line("command", ["FlagSet", 909]),
+                        ],
+                        [
+                            Line("command", ["WorkSetConst", 16641, 0]),
+                            *[Line("command", ["FlagReset", fl]) for fl in (844, 845, 847, 909)],
+                            Line("command", ["FlagSet", 848]),
+                            Line("command", ["FlagSet", 854]),
+                            *_flag_branch(
+                                2533,
+                                f"{tag}_m3_28c",
+                                [Line("command", ["WorkSetConst", 16628, 1])],
+                                [Line("command", ["WorkSetConst", 16628, 0])],
+                            ),
+                        ],
+                    ),
+                ),
+                Line("command", ["StackPushFlag", 2548]),
+                Line("command", ["StackPushConst", 0]),
+                Line("command", ["StackCmp", 1]),
+                Line("command", ["VMJumpIf", 255, f"lbl_{tag}_g19_set"]),
+                Line("command", ["FlagReset", 832]),
+                Line("command", ["VMJump", f"lbl_{tag}_done"]),
+                Line("label", [f"lbl_{tag}_g19_set"]),
+                Line("command", ["FlagSet", 832]),
+                Line("label", [f"lbl_{tag}_done"]),
+            ]
+
+        def _build_p2_state(tag: str) -> list[Any]:
+            return [
+                *_set_mode(4),
+                Line("command", ["WorkSetConst", 16452, 3]),
+                Line("command", ["WorkSetConst", 16582, 4]),
+                Line("command", ["WorkSetConst", 16624, 4]),
+                Line("command", ["WorkSetConst", 16625, 0]),
+                Line("command", ["WorkSetConst", 16626, 0]),
+                Line("command", ["WorkSetConst", 16627, 3]),
+                Line("command", ["WorkSetConst", 16628, 4]),
+                *[Line("command", ["WorkSetConst", v, 1]) for v in (16629, 16630, 16631, 16632, 16634, 16635, 16644, 16645)],
+                *[Line("command", ["WorkSetConst", v, 2]) for v in (16639, 16640, 16641, 16642, 16643)],
+                Line("command", ["WorkSetConst", 16677, 0]),
+                Line("command", ["FlagReset", 364]),
+                Line("command", ["FlagReset", 840]),
+                Line("command", ["FlagReset", 841]),
+                Line("command", ["FlagReset", 977]),
+                Line("command", ["FlagReset", 2550]),
+                *[Line("command", ["FlagSet", fl]) for fl in list(range(829, 840)) + [842, 843, 844, 845, 847, 848, 854, 909, 975, 976, 997, 998, 1026, 1036]],
+                Line("command", ["FlagReset", 2793]),
+                *_flag_branch(
+                    429,
+                    f"{tag}_p2_429",
+                    [Line("command", ["FlagReset", 1029]), Line("command", ["FlagSet", 846])],
+                    [Line("command", ["FlagReset", 846]), Line("command", ["FlagSet", 1029])],
+                ),
+            ]
+
+        def _hide_p2_balls(tag: str, pairs: list[tuple[int, int]], extra: list[Any] | None = None) -> list[Any]:
+            cmds: list[Any] = [*_jump_if_not_mode(4, f"lbl_{tag}_balls_skip")]
+            if extra:
+                cmds.extend(extra)
+            for idx_b, (actor_id, item_flag) in enumerate(pairs):
+                lbl_b = f"lbl_{tag}_ball_{idx_b}"
+                cmds.extend([
+                    Line("command", ["StackPushFlag", item_flag]),
+                    Line("command", ["StackPushConst", 0]),
+                    Line("command", ["StackCmp", 1]),
+                    Line("command", ["VMJumpIf", 255, lbl_b]),
+                    Line("command", ["ActorSetGPos", actor_id, 0, 0, 0, 0]),
+                    Line("label", [lbl_b]),
+                ])
+            cmds.append(Line("label", [f"lbl_{tag}_balls_skip"]))
+            return cmds
+
+        # PWT (s382): set mode 1 when PWT Frigate starts (flag 2547) and restore on map load until done (flag 2551)
         if len(scripts_narc.files) > 382 and scripts_narc.files[382]:
             sf_382 = disassemble(scripts_narc.files[382])
-            if _inj_after_cmd(sf_382, ["WorkSetConst", 16624, 1], [
-                Line("command", ["WorkSetConst", 16787, 1]),
+            mod_382 = _inj_after_cmd(sf_382, ["WorkSetConst", 16624, 1], [
+                *_set_mode(1),
+                Line("command", ["FlagReset", 2538]),
+                Line("command", ["FlagReset", 2539]),
                 Line("command", ["WorkSetConst", 16452, 0]),
+                Line("command", ["FlagSet", 2547]),
                 Line("command", ["FlagSet", 1029]),
                 Line("command", ["FlagReset", 829]),
                 Line("command", ["FlagReset", 830]),
                 Line("command", ["FlagReset", 831]),
                 Line("command", ["FlagReset", 975]),
                 Line("command", ["FlagReset", 364]),
-            ]):
+            ])
+            for lbl_382 in ("scr4", "scr16"):
+                idx_382 = sf_382.find_label(lbl_382)
+                if idx_382 != -1:
+                    t_382 = f"pwt_{lbl_382}"
+                    sf_382.lines[idx_382 + 1 : idx_382 + 1] = [
+                        Line("command", ["StackPushFlag", 2547]),
+                        Line("command", ["StackPushConst", 1]),
+                        Line("command", ["StackCmp", 1]),
+                        Line("command", ["StackPushFlag", 2551]),
+                        Line("command", ["StackPushConst", 0]),
+                        Line("command", ["StackCmp", 1]),
+                        Line("command", ["StackCmp", 7]),
+                        Line("command", ["VMJumpIf", 255, f"lbl_{t_382}_done"]),
+                        *_set_mode(1),
+                        Line("command", ["WorkSetConst", 16582, 3]),
+                        Line("command", ["WorkSetConst", 16452, 0]),
+                        Line("command", ["WorkSetConst", 16624, 1]),
+                        Line("command", ["StackPushFlag", 2538]),
+                        Line("command", ["StackPushConst", 1]),
+                        Line("command", ["StackCmp", 1]),
+                        Line("command", ["VMJumpIf", 255, f"lbl_{t_382}_chk3"]),
+                        Line("command", ["WorkSetConst", 16624, 2]),
+                        Line("label", [f"lbl_{t_382}_chk3"]),
+                        Line("command", ["StackPushFlag", 2539]),
+                        Line("command", ["StackPushConst", 1]),
+                        Line("command", ["StackCmp", 1]),
+                        Line("command", ["VMJumpIf", 255, f"lbl_{t_382}_flags"]),
+                        Line("command", ["WorkSetConst", 16624, 3]),
+                        Line("label", [f"lbl_{t_382}_flags"]),
+                        Line("command", ["FlagSet", 1029]),
+                        Line("command", ["FlagReset", 829]),
+                        Line("command", ["FlagReset", 830]),
+                        Line("command", ["FlagReset", 831]),
+                        Line("command", ["FlagReset", 975]),
+                        Line("command", ["FlagReset", 364]),
+                        Line("label", [f"lbl_{t_382}_done"]),
+                    ]
+                    mod_382 = True
+            if mod_382:
                 scripts_narc.files[382] = bytes(assemble(sf_382))
                 modified_scripts = True
 
-        # 2) Route 21 / Seaside Cave (s926): set mode 2 & load Route 21 state on map load / boarding
+        def _sync_ow_init(ow_id: int, new_init: bytes) -> None:
+            nonlocal modified_entities
+            if a126 is None or len(a126.files) <= ow_id or not a126.files[ow_id]:
+                return
+            raw_ow = bytearray(a126.files[ow_id])
+            if len(raw_ow) < 8:
+                return
+            calc = 8 + raw_ow[4] * 20 + raw_ow[5] * 36 + raw_ow[6] * 20 + raw_ow[7] * 22
+            if calc <= len(raw_ow):
+                a126.files[ow_id] = bytes(raw_ow[:calc]) + new_init
+                modified_entities = True
+
+        # Route 21 / Seaside Cave (s926, s1028, s1030): set mode 2 & load Route 21 state on map load / boarding,
+        # and ensure Frigate model (MapReplaceSetEvent 5, 1, 1) is queued in Seaside Cave (z514/z515) before scr3
+        for sc_sid, sc_ow in ((1028, 327), (1030, 390)):
+            if len(scripts_narc.files) > sc_sid and scripts_narc.files[sc_sid]:
+                sf_sc = disassemble(scripts_narc.files[sc_sid])
+                new_idx = (max(sf_sc.script_links.keys()) + 1) if sf_sc.script_links else 0
+                new_lbl = f"scr{new_idx}"
+                sf_sc.lines.extend([
+                    Line("label", [new_lbl]),
+                    Line("command", ["StackPushFlag", 2546]),
+                    Line("command", ["StackPushConst", 0]),
+                    Line("command", ["StackCmp", 1]),
+                    Line("command", ["StackPushFlag", 2552]),
+                    Line("command", ["StackPushConst", 0]),
+                    Line("command", ["StackCmp", 1]),
+                    Line("command", ["StackCmp", 7]),
+                    Line("command", ["VMJumpIf", 255, f"lbl_{sc_sid}_skip_mr"]),
+                    Line("command", ["MapReplaceSetEvent", 5, 1, 1]),
+                    Line("command", ["MapReplaceSetEvent", 6, 0, 0]),
+                    Line("label", [f"lbl_{sc_sid}_skip_mr"]),
+                    Line("command", ["VMHalt"]),
+                ])
+                sf_sc.script_links[new_idx] = new_lbl
+                scripts_narc.files[sc_sid] = bytes(assemble(sf_sc))
+                init_sc = struct.pack("<HHHHHHH", 2, new_idx + 1, 0, 4, new_idx + 1, 0, 0)
+                if len(scripts_narc.files) > sc_sid + 1:
+                    scripts_narc.files[sc_sid + 1] = init_sc
+                _sync_ow_init(sc_ow, init_sc)
+                modified_scripts = True
         if len(scripts_narc.files) > 926 and scripts_narc.files[926]:
             sf_926 = disassemble(scripts_narc.files[926])
-            mod_926 = False
+            mod_926 = _inj_after_cmd(sf_926, ["WorkSetConst", 16646, 3], [Line("command", ["FlagSet", 2546])])
             for lbl in ("scr0", "scr1", "scr2"):
                 idx_l = sf_926.find_label(lbl)
                 if idx_l != -1:
-                    s_tag = f"r21_{lbl}"
-                    sf_926.lines[idx_l + 1 : idx_l + 1] = [
-                        Line("command", ["WorkSetConst", 16787, 2]),
-                        Line("command", ["WorkSetConst", 16452, 1]),
-                        Line("command", ["FlagSet", 1029]),
-                        Line("command", ["FlagReset", 975]),
-                        Line("command", ["FlagSet", 364]),
-                        Line("command", ["StackPushFlag", 2552]),
-                        Line("command", ["StackPushConst", 0]),
-                        Line("command", ["StackCmp", 1]),
-                        Line("command", ["VMJumpIf", 255, f"lbl_{s_tag}_done"]),
-                        Line("command", ["FlagReset", 976]),
-                        Line("command", ["FlagReset", 830]),
-                        Line("command", ["FlagSet", 831]),
-                        Line("command", ["FlagReset", 835]),
-                        Line("command", ["FlagReset", 836]),
-                        Line("command", ["FlagReset", 837]),
-                        Line("command", ["FlagReset", 838]),
-                        Line("command", ["FlagReset", 839]),
-                        Line("command", ["WorkSetConst", 16640, 0]),
-                        Line("command", ["StackPushFlag", 2500]),
-                        Line("command", ["StackPushConst", 0]),
-                        Line("command", ["StackCmp", 1]),
-                        Line("command", ["VMJumpIf", 255, f"lbl_{s_tag}_g19_set"]),
-                        Line("command", ["FlagReset", 832]),
-                        Line("command", ["VMJump", f"lbl_{s_tag}_done"]),
-                        Line("label", [f"lbl_{s_tag}_g19_set"]),
-                        Line("command", ["FlagSet", 832]),
-                        Line("label", [f"lbl_{s_tag}_done"]),
-                    ]
+                    sf_926.lines[idx_l + 1 : idx_l + 1] = _build_mode2_state(f"r21_{lbl}", include_warp=True)
                     mod_926 = True
             if mod_926:
                 scripts_narc.files[926] = bytes(assemble(sf_926))
                 modified_scripts = True
 
-        # 3) Giant Chasm (s462, s466): set mode 3 & load Giant Chasm state on map load
-        for gc_sid in (462, 466):
+        # Giant Chasm (s462, s466): set mode 3 & load Giant Chasm state on map load
+        for gc_sid, gc_lbls in ((462, ("scr0", "scr1", "scr7")), (466, ("scr7", "scr8"))):
             if len(scripts_narc.files) > gc_sid and scripts_narc.files[gc_sid]:
                 sf_gc = disassemble(scripts_narc.files[gc_sid])
                 mod_gc = False
-                for lbl in ("scr0", "scr1"):
+                for lbl in gc_lbls:
                     idx_l = sf_gc.find_label(lbl)
                     if idx_l != -1:
-                        s_tag = f"gc_{gc_sid}_{lbl}"
-                        sf_gc.lines[idx_l + 1 : idx_l + 1] = [
-                            Line("command", ["WorkSetConst", 16787, 3]),
-                            Line("command", ["WorkSetConst", 16452, 2]),
-                            Line("command", ["FlagSet", 1029]),
-                            Line("command", ["FlagSet", 975]),
-                            Line("command", ["FlagReset", 364]),
-                            Line("command", ["StackPushFlag", 2549]),
-                            Line("command", ["StackPushConst", 0]),
-                            Line("command", ["StackCmp", 1]),
-                            Line("command", ["VMJumpIf", 255, f"lbl_{s_tag}_done"]),
-                            Line("command", ["FlagReset", 976]),
-                            Line("command", ["FlagReset", 977]),
-                            Line("command", ["FlagReset", 833]),
-                            Line("command", ["FlagReset", 834]),
-                            Line("command", ["FlagSet", 830]),
-                            Line("command", ["FlagSet", 831]),
-                            Line("command", ["FlagReset", 835]),
-                            Line("command", ["WorkSetConst", 16640, 0]),
-                            Line("command", ["StackPushFlag", 2548]),
-                            Line("command", ["StackPushConst", 0]),
-                            Line("command", ["StackCmp", 1]),
-                            Line("command", ["VMJumpIf", 255, f"lbl_{s_tag}_g19_set"]),
-                            Line("command", ["FlagReset", 832]),
-                            Line("command", ["VMJump", f"lbl_{s_tag}_done"]),
-                            Line("label", [f"lbl_{s_tag}_g19_set"]),
-                            Line("command", ["FlagSet", 832]),
-                            Line("label", [f"lbl_{s_tag}_done"]),
-                        ]
+                        sf_gc.lines[idx_l + 1 : idx_l + 1] = _build_mode3_state(f"gc_{gc_sid}_{lbl}")
                         mod_gc = True
                 if mod_gc:
                     scripts_narc.files[gc_sid] = bytes(assemble(sf_gc))
                     modified_scripts = True
 
-        # 4) Postgame P2 Lab (s474): set mode 4 on map load without clobbering Route 21 / Giant Chasm story flags
-        if len(scripts_narc.files) > 474 and scripts_narc.files[474]:
-            sf_474 = disassemble(scripts_narc.files[474])
-            mod_474 = False
-            for lbl in ("scr0", "scr1"):
-                idx_l = sf_474.find_label(lbl)
+        # Postgame P2 Lab (s476 z238 exterior + s478 z239 interior): set mode 4 on map load AND on z238 gangplank step trigger
+        if len(scripts_narc.files) > 476 and scripts_narc.files[476]:
+            sf_p2e = disassemble(scripts_narc.files[476])
+            new_idx_476 = (max(sf_p2e.script_links.keys()) + 1) if sf_p2e.script_links else 0
+            new_lbl_476 = f"scr{new_idx_476}"
+            trig_idx_476 = new_idx_476 + 1
+            trig_lbl_476 = f"scr{trig_idx_476}"
+            sf_p2e.lines.extend([
+                Line("label", [new_lbl_476]),
+                *_build_p2_state("476"),
+                Line("command", ["VMHalt"]),
+                Line("label", [trig_lbl_476]),
+                Line("command", ["WorkSetConst", 16713, 1]),
+                *_jump_if_mode(4, "lbl_476_trig_done"),
+                *_build_p2_state("476_trig"),
+                Line("label", ["lbl_476_trig_done"]),
+                Line("command", ["VMHalt"]),
+            ])
+            sf_p2e.script_links[new_idx_476] = new_lbl_476
+            sf_p2e.script_links[trig_idx_476] = trig_lbl_476
+            scripts_narc.files[476] = bytes(assemble(sf_p2e))
+            init_477 = struct.pack("<HHHHHHH", 2, new_idx_476 + 1, 0, 4, new_idx_476 + 1, 0, 0)
+            if len(scripts_narc.files) > 477:
+                scripts_narc.files[477] = init_477
+            if a126 is not None and len(a126.files) > 294 and a126.files[294]:
+                raw_294 = bytearray(a126.files[294])
+                if len(raw_294) >= 8:
+                    fc_294, nc_294, wc_294, tc_294 = raw_294[4], raw_294[5], raw_294[6], raw_294[7]
+                    trig_off_294 = 8 + fc_294 * 20 + nc_294 * 36 + wc_294 * 20 + tc_294 * 22
+                    if trig_off_294 <= len(raw_294):
+                        trig_rec_294 = struct.pack("<11H", trig_idx_476 + 1, 0, 16713, 0, 0, 728, 716, 1, 1, 0, 0)
+                        new_294 = bytearray(raw_294[:trig_off_294]) + trig_rec_294 + init_477
+                        new_294[7] = tc_294 + 1
+                        struct.pack_into("<I", new_294, 0, trig_off_294 + 22 - 4)
+                        a126.files[294] = bytes(new_294)
+                        modified_entities = True
+            modified_scripts = True
+        if len(scripts_narc.files) > 478 and scripts_narc.files[478]:
+            sf_478 = disassemble(scripts_narc.files[478])
+            mod_478 = False
+            for lbl in ("scr2", "scr4"):
+                idx_l = sf_478.find_label(lbl)
                 if idx_l != -1:
-                    sf_474.lines[idx_l + 1 : idx_l + 1] = [
-                        Line("command", ["WorkSetConst", 16787, 4]),
-                        Line("command", ["WorkSetConst", 16452, 3]),
-                        Line("command", ["FlagReset", 364]),
-                        Line("command", ["FlagSet", 835]),
-                        Line("command", ["FlagSet", 976]),
-                        Line("command", ["FlagSet", 1029]),
-                    ]
-                    mod_474 = True
-            if mod_474:
-                scripts_narc.files[474] = bytes(assemble(sf_474))
+                    sf_478.lines[idx_l + 1 : idx_l + 1] = _build_p2_state(f"478_{lbl}")
+                    mod_478 = True
+            if mod_478:
+                scripts_narc.files[478] = bytes(assemble(sf_478))
                 modified_scripts = True
 
-        # 4b) s1110 (Bridge Chamber): allow P2 Lab Colress battle/gift (scr5 -> lbl6_13) before Hall of Fame when in mode 4
+        # s1110 (Bridge): allow P2 Lab Colress battle/gift (scr5 -> lbl6_13) before Hall of Fame when in mode 4, and track 16627=3 -> 2533 in mode 3
         if len(scripts_narc.files) > 1110 and scripts_narc.files[1110]:
             sf_1110 = disassemble(scripts_narc.files[1110])
+            mod_1110 = _inj_after_cmd(sf_1110, ["WorkSetConst", 16627, 3], [
+                *_jump_if_not_mode(3, "lbl_1110_2533_skip"),
+                Line("command", ["FlagSet", 2533]),
+                Line("label", ["lbl_1110_2533_skip"]),
+            ])
             scr5_1110 = sf_1110.find_label("scr5")
             if scr5_1110 != -1 and sf_1110.find_label("lbl6_13") != -1:
-                sf_1110.lines[scr5_1110 + 2 : scr5_1110 + 2] = [
-                    Line("command", ["WorkCmpConst", 16787, 4]),
-                    Line("command", ["VMJumpIf", 1, "lbl6_13"]),
-                ]
+                sf_1110.lines[scr5_1110 + 2 : scr5_1110 + 2] = _jump_if_mode(4, "lbl6_13")
+                mod_1110 = True
+            if mod_1110:
                 scripts_narc.files[1110] = bytes(assemble(sf_1110))
                 modified_scripts = True
 
-        # 5) s1104 (1F Deck): guard Postgame Colress (1029) to mode 4, set PWT done (2551), track Grunt 19 per-instance
+        def _make_deck_sync(tag: str) -> list[Any]:
+            return [
+                *_jump_if_not_mode(2, f"lbl_{tag}_not_m2"),
+                *_build_mode2_state(f"{tag}_m2", include_warp=False),
+                Line("command", ["VMJump", f"lbl_{tag}_sync_end"]),
+                Line("label", [f"lbl_{tag}_not_m2"]),
+                *_jump_if_not_mode(3, f"lbl_{tag}_not_m3"),
+                *_build_mode3_state(f"{tag}_m3"),
+                Line("command", ["VMJump", f"lbl_{tag}_sync_end"]),
+                Line("label", [f"lbl_{tag}_not_m3"]),
+                *_jump_if_not_mode(4, f"lbl_{tag}_sync_end"),
+                *_build_p2_state(f"{tag}_m4"),
+                Line("label", [f"lbl_{tag}_sync_end"]),
+            ]
+
+        # s1104 (Deck): guard Postgame Colress (1029) to mode 4, set PWT done (2551), track Grunt 19 & PWT mid-progress, hide item balls in mode 4
         if len(scripts_narc.files) > 1104 and scripts_narc.files[1104]:
             sf_1104 = disassemble(scripts_narc.files[1104])
             mod_1104 = False
+            for pwt_step, pwt_flag in ((2, 2538), (3, 2539)):
+                if _inj_after_cmd(sf_1104, ["WorkSetConst", 16624, pwt_step], [
+                    *_jump_if_not_mode(1, f"lbl_1104_pwt_s{pwt_step}"),
+                    Line("command", ["FlagSet", pwt_flag]),
+                    Line("label", [f"lbl_1104_pwt_s{pwt_step}"]),
+                ]):
+                    mod_1104 = True
             if _inj_after_cmd(sf_1104, ["WorkSetConst", 16624, 4], [Line("command", ["FlagSet", 2551])]):
                 mod_1104 = True
+            for r21_step_var in (16626, 16625):
+                if _inj_after_cmd(sf_1104, ["WorkSetConst", r21_step_var, 2], [
+                    Line("command", ["FlagSet", 2537]),
+                ]):
+                    mod_1104 = True
             if _inj_after_cmd(sf_1104, ["FlagSet", 832], [
-                Line("command", ["WorkCmpConst", 16787, 2]),
-                Line("command", ["VMJumpIf", 5, "lbl_1104_not_r21"]),
+                *_jump_if_not_mode(2, "lbl_1104_not_r21"),
                 Line("command", ["FlagSet", 2500]),
+                Line("command", ["ObjInitWarpGPos", 2, 17, 0, 43]),
                 Line("label", ["lbl_1104_not_r21"]),
-                Line("command", ["WorkCmpConst", 16787, 3]),
-                Line("command", ["VMJumpIf", 5, "lbl_1104_not_gc"]),
+                *_jump_if_not_mode(3, "lbl_1104_not_gc"),
                 Line("command", ["FlagSet", 2548]),
                 Line("label", ["lbl_1104_not_gc"]),
             ]):
                 mod_1104 = True
             scr2_1104 = sf_1104.find_label("scr2")
             if scr2_1104 != -1:
-                sf_1104.lines[scr2_1104 + 1 : scr2_1104 + 1] = [
-                    Line("command", ["WorkCmpConst", 16787, 4]),
-                    Line("command", ["VMJumpIf", 1, "lbl_1104_allow_p2"]),
+                ins_scr2 = scr2_1104 + 2 if (scr2_1104 + 1 < len(sf_1104.lines) and sf_1104.lines[scr2_1104 + 1].parts[:1] == ["VMCall"]) else scr2_1104 + 1
+                sf_1104.lines[ins_scr2 : ins_scr2] = [
+                    *_jump_if_mode(4, "lbl_1104_allow_p2"),
                     Line("command", ["FlagSet", 1029]),
                     Line("command", ["VMHalt"]),
                     Line("label", ["lbl_1104_allow_p2"]),
@@ -1374,53 +1875,100 @@ def apply_story_roadblocks(rom: "NintendoDSRom", is_white2: bool, options: dict[
             lbl1_10_1104 = sf_1104.find_label("lbl1_10")
             lbl1_11_1104 = sf_1104.find_label("lbl1_11")
             if lbl1_8_1104 != -1 and lbl1_10_1104 != -1 and lbl1_11_1104 != -1:
-                # Insert lbl_1104_p2_warps before ObjInitWarpGPos 6, 0, 0, 0 under lbl1_10 and dispatch all 4 modes on 16787
+                # Insert lbl_1104_p2_warps before ObjInitWarpGPos 4, 0, 0, 0 under lbl1_10 and dispatch all 4 modes on flags 2540..2543
                 for k in range(lbl1_10_1104 + 1, min(len(sf_1104.lines), lbl1_10_1104 + 10)):
-                    if sf_1104.lines[k].type == "command" and sf_1104.lines[k].parts == ["ObjInitWarpGPos", 6, 0, 0, 0]:
+                    if sf_1104.lines[k].type == "command" and sf_1104.lines[k].parts == ["ObjInitWarpGPos", 4, 0, 0, 0]:
                         sf_1104.lines.insert(k, Line("label", ["lbl_1104_p2_warps"]))
                         sf_1104.lines[lbl1_8_1104 + 1 : lbl1_8_1104 + 1] = [
-                            Line("command", ["WorkCmpConst", 16787, 1]),
-                            Line("command", ["VMJumpIf", 5, "lbl_1104_chk2"]),
+                            *_jump_if_not_mode(1, "lbl_1104_chk2"),
                             Line("command", ["ObjInitWarpGPos", 6, 0, 0, 0]),
                             Line("command", ["ObjInitWarpGPos", 7, 0, 0, 0]),
                             Line("command", ["VMJump", "lbl1_11"]),
                             Line("label", ["lbl_1104_chk2"]),
-                            Line("command", ["WorkCmpConst", 16787, 2]),
-                            Line("command", ["VMJumpIf", 5, "lbl_1104_chk34"]),
+                            *_jump_if_not_mode(2, "lbl_1104_chk34"),
                             Line("command", ["ObjInitWarpGPos", 4, 0, 0, 0]),
                             Line("command", ["ObjInitWarpGPos", 7, 0, 0, 0]),
+                            Line("command", ["StackPushFlag", 2500]),
+                            Line("command", ["StackPushConst", 0]),
+                            Line("command", ["StackCmp", 1]),
+                            Line("command", ["VMJumpIf", 255, "lbl_1104_stairs_ok"]),
+                            Line("command", ["ObjInitWarpGPos", 2, 0, 0, 0]),
+                            Line("label", ["lbl_1104_stairs_ok"]),
                             Line("command", ["VMJump", "lbl1_11"]),
                             Line("label", ["lbl_1104_chk34"]),
-                            Line("command", ["WorkCmpConst", 16787, 3]),
-                            Line("command", ["VMJumpIf", 1, "lbl_1104_p2_warps"]),
-                            Line("command", ["WorkCmpConst", 16787, 4]),
-                            Line("command", ["VMJumpIf", 1, "lbl_1104_p2_warps"]),
+                            *_jump_if_mode(3, "lbl_1104_p2_warps"),
+                            *_jump_if_not_mode(4, "lbl_1104_p2_warps"),
+                            Line("command", ["ObjInitWarpGPos", 0, 0, 0, 0]),
+                            Line("command", ["ObjInitWarpGPos", 1, 0, 0, 0]),
+                            Line("command", ["ObjInitWarpGPos", 2, 0, 0, 0]),
+                            Line("command", ["ObjInitWarpGPos", 3, 0, 0, 0]),
                         ]
                         mod_1104 = True
                         break
-            scr0_1104 = sf_1104.find_label("scr0")
-            if scr0_1104 != -1:
-                sf_1104.lines[scr0_1104 + 1 : scr0_1104 + 1] = [
-                    Line("command", ["WorkCmpConst", 16787, 4]),
-                    Line("command", ["VMJumpIf", 5, "lbl_1104_scr0_not_p2"]),
-                    Line("command", ["ActorDelete", 0]),
-                    Line("command", ["ActorDelete", 1]),
-                    Line("label", ["lbl_1104_scr0_not_p2"]),
-                ]
-                mod_1104 = True
+            for lbl_s in ("scr0", "scr1"):
+                idx_s = sf_1104.find_label(lbl_s)
+                if idx_s != -1:
+                    sf_1104.lines[idx_s + 1 : idx_s + 1] = [
+                        *_make_deck_sync(f"1104_{lbl_s}"),
+                        *_hide_p2_balls(f"1104_{lbl_s}", [(26, 1478), (27, 1479)]),
+                    ]
+                    mod_1104 = True
             if mod_1104:
                 scripts_narc.files[1104] = bytes(assemble(sf_1104))
                 modified_scripts = True
 
-        # 5b) Clear all floor items, trainers, and story NPCs in P2 Lab mode (16787 == 4) & open southern barriers in s1116
+        # Dynamic progress hooks for North Rooms (s1106 B2 R21 / W2 Chasm, s1126 W2 R21 / B2 Chasm)
+        for room_sid, room_src_flag in (
+            (1106, 835),
+            (1126, 836),
+        ):
+            if len(scripts_narc.files) > room_sid and scripts_narc.files[room_sid]:
+                sf_rm = disassemble(scripts_narc.files[room_sid])
+                extra_rm: list[Any] = [
+                    *_jump_if_not_mode(2, f"lbl_rm_{room_sid}_chk3"),
+                    Line("command", ["FlagSet", 2545]),
+                ]
+                if room_sid == 1126:
+                    extra_rm.append(Line("command", ["FlagSet", 2500]))
+                extra_rm.extend([
+                    Line("label", [f"lbl_rm_{room_sid}_chk3"]),
+                    *_jump_if_not_mode(3, f"lbl_rm_{room_sid}_skip"),
+                    Line("command", ["FlagSet", 2544]),
+                    Line("label", [f"lbl_rm_{room_sid}_skip"]),
+                ])
+                if _inj_after_cmd(sf_rm, ["FlagSet", room_src_flag], extra_rm):
+                    if room_sid == 1106:
+                        for sw_k in range(4):
+                            _inj_after_cmd(sf_rm, ["WorkSetConst", 16629 + sw_k, 1], [
+                                *_jump_if_not_mode(2, f"lbl_rm1106_sw{sw_k}_chk3"),
+                                Line("command", ["FlagSet", 2553 + sw_k]),
+                                Line("label", [f"lbl_rm1106_sw{sw_k}_chk3"]),
+                                *_jump_if_not_mode(3, f"lbl_rm1106_sw{sw_k}_skip"),
+                                Line("command", ["FlagSet", 2503 + sw_k]),
+                                Line("label", [f"lbl_rm1106_sw{sw_k}_skip"]),
+                            ])
+                    scripts_narc.files[room_sid] = bytes(assemble(sf_rm))
+                    modified_scripts = True
+
+        # Enforce active mode state table on s1116 (1F Deck) & clear NPCs/barriers in P2 Lab mode (flag 2543)
         if len(scripts_narc.files) > 1116 and scripts_narc.files[1116]:
             sf_1116 = disassemble(scripts_narc.files[1116])
             mod_1116 = False
+            if _inj_after_cmd(sf_1116, ["WorkSetConst", 16639, 2], [
+                *_jump_if_not_mode(2, "lbl_1116_c_chk3"),
+                Line("command", ["FlagSet", 2536]),
+                Line("label", ["lbl_1116_c_chk3"]),
+                *_jump_if_not_mode(3, "lbl_1116_c_skip"),
+                Line("command", ["FlagSet", 2535]),
+                Line("label", ["lbl_1116_c_skip"]),
+            ]):
+                mod_1116 = True
             scr1_1116 = sf_1116.find_label("scr1")
             if scr1_1116 != -1 and sf_1116.find_label("lbl2_7") != -1:
-                sf_1116.lines[scr1_1116 + 2 : scr1_1116 + 2] = [
-                    Line("command", ["WorkCmpConst", 16787, 4]),
-                    Line("command", ["VMJumpIf", 5, "lbl_1116_not_p2"]),
+                sf_1116.lines[scr1_1116 + 1 : scr1_1116 + 1] = _make_deck_sync("1116_s1")
+                lbl2_7_pos = sf_1116.find_label("lbl_1116_s1_sync_end")
+                sf_1116.lines[lbl2_7_pos + 2 : lbl2_7_pos + 2] = [
+                    *_jump_if_not_mode(4, "lbl_1116_not_p2"),
                     Line("command", ["FlagSet", 837]),
                     Line("command", ["FlagSet", 997]),
                     Line("command", ["FlagSet", 998]),
@@ -1430,41 +1978,92 @@ def apply_story_roadblocks(rom: "NintendoDSRom", is_white2: bool, options: dict[
                 mod_1116 = True
             scr2_1116 = sf_1116.find_label("scr2")
             if scr2_1116 != -1:
-                del_1116 = [Line("command", ["ActorDelete", n]) for n in (*range(25), 26, 27)]
-                sf_1116.lines[scr2_1116 + 1 : scr2_1116 + 1] = [
-                    Line("command", ["WorkCmpConst", 16787, 4]),
-                    Line("command", ["VMJumpIf", 5, "lbl_1116_scr2_not_p2"]),
-                    *del_1116,
-                    Line("command", ["VMHalt"]),
-                    Line("label", ["lbl_1116_scr2_not_p2"]),
-                ]
+                sf_1116.lines[scr2_1116 + 1 : scr2_1116 + 1] = _make_deck_sync("1116_s2")
                 mod_1116 = True
             if mod_1116:
                 scripts_narc.files[1116] = bytes(assemble(sf_1116))
                 modified_scripts = True
 
-        for p2_sid, p2_lbl, p2_npcs in (
-            (1106, "scr2", list(range(10))),
-            (1108, "scr2", [0, 1]),
-            (1110, "scr2", list(range(2, 9))),
-            (1114, "scr2", [0]),
-            (1122, "scr1", [0]),
-            (1124, "scr5", list(range(5))),
-        ):
-            if len(scripts_narc.files) > p2_sid and scripts_narc.files[p2_sid]:
-                sf_p2 = disassemble(scripts_narc.files[p2_sid])
-                idx_p2 = sf_p2.find_label(p2_lbl)
-                if idx_p2 != -1:
-                    sf_p2.lines[idx_p2 + 1 : idx_p2 + 1] = [
-                        Line("command", ["WorkCmpConst", 16787, 4]),
-                        Line("command", ["VMJumpIf", 5, f"lbl_{p2_sid}_not_p2"]),
-                        *[Line("command", ["ActorDelete", n]) for n in p2_npcs],
-                        Line("label", [f"lbl_{p2_sid}_not_p2"]),
-                    ]
-                    scripts_narc.files[p2_sid] = bytes(assemble(sf_p2))
+        # Enforce active mode state table on s1124 (z562 Giant Chasm deck)
+        if len(scripts_narc.files) > 1124 and scripts_narc.files[1124]:
+            sf_1124_sync = disassemble(scripts_narc.files[1124])
+            mod_1124_sync = False
+            for lbl_1124 in ("scr5", "scr6", "scr7"):
+                idx_1124 = sf_1124_sync.find_label(lbl_1124)
+                if idx_1124 != -1:
+                    sf_1124_sync.lines[idx_1124 + 1 : idx_1124 + 1] = _make_deck_sync(f"1124_{lbl_1124}")
+                    mod_1124_sync = True
+            if mod_1124_sync:
+                scripts_narc.files[1124] = bytes(assemble(sf_1124_sync))
+                modified_scripts = True
+
+        # Hide Frigate item balls in Mode 4 (without setting item flags) & track Mode 3 lower-deck milestones
+        m3_hooks: dict[int, list[tuple[list[Any], int]]] = {
+            1114: [(["WorkSetConst", 16628, 2], 2501), (["WorkSetConst", 16641, 2], 2502)],
+            1122: [(["WorkSetConst", 16634, 1], 2531), (["WorkSetConst", 16644, 1], 2532), (["WorkSetConst", 16677, 2], 2534)],
+            1128: [
+                *[(["WorkSetConst", 16629 + k, 1], 2503 + k) for k in range(4)],
+                (["WorkSetConst", 16645, 1], 2532),
+                (["WorkSetConst", 16677, 2], 2534),
+            ],
+        }
+        for hk_sid, hk_list in m3_hooks.items():
+            if len(scripts_narc.files) > hk_sid and scripts_narc.files[hk_sid]:
+                sf_hk = disassemble(scripts_narc.files[hk_sid])
+                mod_hk = False
+                for cmd_parts, dst_flag in hk_list:
+                    if _inj_after_cmd(sf_hk, cmd_parts, [
+                        *_jump_if_not_mode(3, f"lbl_{hk_sid}_{dst_flag}_skip"),
+                        Line("command", ["FlagSet", dst_flag]),
+                        Line("label", [f"lbl_{hk_sid}_{dst_flag}_skip"]),
+                    ]):
+                        mod_hk = True
+                if hk_sid in (1122, 1128):
+                    idx_scr0 = sf_hk.find_label("scr0")
+                    if idx_scr0 != -1:
+                        sf_hk.lines[idx_scr0 + 1 : idx_scr0 + 1] = [
+                            *_jump_if_not_mode(4, f"lbl_{hk_sid}_scr0_p2_skip"),
+                            *_build_p2_state(f"{hk_sid}_scr0_p2"),
+                            Line("label", [f"lbl_{hk_sid}_scr0_p2_skip"]),
+                        ]
+                        mod_hk = True
+                    extra_balls = [Line("command", ["WorkSetConst", v, 1]) for v in range(16714, 16719)] if hk_sid == 1122 else None
+                    pairs_balls = [(12, 1287), (13, 1288), (14, 1290), (15, 1292 if hk_sid == 1122 else 1293)]
+                    idx_scr1 = sf_hk.find_label("scr1")
+                    if idx_scr1 != -1:
+                        sf_hk.lines[idx_scr1 + 1 : idx_scr1 + 1] = _hide_p2_balls(f"{hk_sid}_scr1", pairs_balls, extra_balls)
+                        mod_hk = True
+                if mod_hk:
+                    scripts_narc.files[hk_sid] = bytes(assemble(sf_hk))
                     modified_scripts = True
 
-        # 6) s1112 (Route 21 departure): mark Route 21 Frigate done (2552), keep 16452=1 (Route 21), and hide NPCs in mode 4
+        for rm_sid, rm_ow, rm_pairs, preserve_init in (
+            (1152, 358, [(0, 1291)], False),
+            (1166, 365, [(2, 1289)], True),
+        ):
+            if len(scripts_narc.files) > rm_sid and scripts_narc.files[rm_sid]:
+                sf_rm_b = disassemble(scripts_narc.files[rm_sid])
+                new_idx_rm = (max(sf_rm_b.script_links.keys()) + 1) if sf_rm_b.script_links else 0
+                new_lbl_rm = f"scr{new_idx_rm}"
+                sf_rm_b.lines.extend([
+                    Line("label", [new_lbl_rm]),
+                    *_hide_p2_balls(f"{rm_sid}_p2", rm_pairs),
+                    Line("command", ["VMHalt"]),
+                ])
+                sf_rm_b.script_links[new_idx_rm] = new_lbl_rm
+                scripts_narc.files[rm_sid] = bytes(assemble(sf_rm_b))
+                if len(scripts_narc.files) > rm_sid + 1:
+                    hdr_rm = struct.pack("<HHH", 4, new_idx_rm + 1, 0)
+                    orig_init = bytes(scripts_narc.files[rm_sid + 1]) if preserve_init else b""
+                    if orig_init and orig_init != b"\x00\x00\x00\x00":
+                        new_init_rm = hdr_rm + orig_init
+                    else:
+                        new_init_rm = hdr_rm + b"\x00\x00"
+                    scripts_narc.files[rm_sid + 1] = new_init_rm
+                    _sync_ow_init(rm_ow, new_init_rm)
+                modified_scripts = True
+
+        # s1112 (Route 21 departure): mark Route 21 Frigate done (2552) and keep 16452=1 (Route 21)
         if len(scripts_narc.files) > 1112 and scripts_narc.files[1112]:
             sf_1112 = disassemble(scripts_narc.files[1112])
             mod_1112 = _inj_after_cmd(sf_1112, ["WorkSetConst", 16646, 4], [Line("command", ["FlagSet", 2552])])
@@ -1472,20 +2071,11 @@ def apply_story_roadblocks(rom: "NintendoDSRom", is_white2: bool, options: dict[
                 if ln_12.type == "command" and ln_12.parts == ["WorkSetConst", 16452, 2]:
                     sf_1112.lines[idx_12] = Line("command", ["WorkSetConst", 16452, 1])
                     mod_1112 = True
-            scr1_1112 = sf_1112.find_label("scr1")
-            if scr1_1112 != -1:
-                sf_1112.lines[scr1_1112 + 1 : scr1_1112 + 1] = [
-                    Line("command", ["WorkCmpConst", 16787, 4]),
-                    Line("command", ["VMJumpIf", 5, "lbl_1112_not_p2"]),
-                    *[Line("command", ["ActorDelete", n]) for n in range(10)],
-                    Line("label", ["lbl_1112_not_p2"]),
-                ]
-                mod_1112 = True
             if mod_1112:
                 scripts_narc.files[1112] = bytes(assemble(sf_1112))
                 modified_scripts = True
 
-        # 7) s1208 (Giant Chasm Kyurem): mark Giant Chasm Frigate done (2549) and keep western roadblock (879) gated on DNA Splicers
+        # s1208 (Giant Chasm Kyurem): mark Giant Chasm Frigate done (2549) and keep western roadblock (879) gated on DNA Splicers
         if len(scripts_narc.files) > 1208 and scripts_narc.files[1208]:
             sf_1208 = disassemble(scripts_narc.files[1208])
             mod_1208 = _inj_after_cmd(sf_1208, ["FlagSet", 885], [Line("command", ["FlagSet", 2549])])

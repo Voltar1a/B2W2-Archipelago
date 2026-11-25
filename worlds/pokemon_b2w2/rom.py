@@ -444,7 +444,7 @@ def apply_qol_patches(rom: "NintendoDSRom", options: dict[str, Any]) -> None:
     fish_timer_code = bytearray()
     fish_timer_code += b"\x00\xb5\x52\x20" + (b"\x01\x21" if fast_fishing_enabled else b"\x00\x21")
     fish_timer_code += make_bl(fish_timer_addr + 0x06, helper_addr)
-    fish_timer_code += b"\x00\x28\x01\xd1\x5a\x20"
+    fish_timer_code += b"\x00\x28\x00\xd1\x5a\x20"
     fish_timer_code += make_bl(fish_timer_addr + 0x10, 0x02005784)
     fish_timer_code += b"\x00\xbd\xc0\x46"
     assert len(fish_timer_code) == 0x18
@@ -454,7 +454,7 @@ def apply_qol_patches(rom: "NintendoDSRom", options: dict[str, Any]) -> None:
     fish_bite_code = bytearray()
     fish_bite_code += b"\x0f\xb5\x52\x20" + (b"\x01\x21" if fast_fishing_enabled else b"\x00\x21")
     fish_bite_code += make_bl(fish_bite_addr + 0x06, helper_addr)
-    fish_bite_code += b"\x00\x28\x03\xd1\x00\x98\xa0\x42\x02\xd9\x04\x98\x06\x30\x04\x90\x0f\xbd"
+    fish_bite_code += b"\x00\x28\x02\xd1\x00\x98\xa0\x42\x02\xd8\x04\x98\x06\x30\x04\x90\x0f\xbd"
     assert len(fish_bite_code) == 0x1C
 
     # EscapeHook() at dwc_base + 0xC8 (0x1C bytes)
@@ -633,7 +633,8 @@ def apply_qol_patches(rom: "NintendoDSRom", options: dict[str, Any]) -> None:
         hook_code += b"\xc0\x46" * ((48 - len(hook_code)) // 2)
         assert len(hook_code) == 48
 
-        ov36_data[0x26744 : 0x26748] = make_bl(ov36.ramAddress + 0x26744, hook_ram)
+        for sight_call_off in (0x26744, 0x2678A, 0x267BE):
+            ov36_data[sight_call_off : sight_call_off + 4] = make_bl(ov36.ramAddress + sight_call_off, hook_ram)
         ov36_data[hook_off : hook_off + len(hook_code)] = hook_code
         modified_ov36 = True
 
@@ -980,9 +981,11 @@ def apply_qol_patches(rom: "NintendoDSRom", options: dict[str, Any]) -> None:
                 a016.files[i] = bytes(pdata)
         rom.setFileByName("a/0/1/6", a016.save())
 
-    # Convert trade evolutions in a/0/1/9 so all Pokemon can evolve:
+    # Convert trade and single-branch time-based evolutions in a/0/1/9
     # - Plain/species trade (5, 7) -> level 37 (4)
-    # - Held item trade (6) -> level up while holding item, day an night (19 & 20)
+    # - Held item trade (6) -> level up while holding item, day and night (19 & 20)
+    # - Friendship Day/Night (2, 3) -> Friendship anytime (1), except Eevee (133)
+    # - Held item Day-only (19) or Night-only (20) -> both day and night (19 & 20)
     a019_data = rom.getFileByName("a/0/1/9")
     if a019_data is not None:
         a019 = NARC(a019_data)
@@ -992,21 +995,38 @@ def apply_qol_patches(rom: "NintendoDSRom", options: dict[str, Any]) -> None:
             if len(edata) < 6:
                 continue
             num_slots = len(edata) // 6
-            new_entries: list[tuple[int, int, int]] = []
-            changed = False
+            existing: list[tuple[int, int, int]] = []
             for s in range(num_slots):
                 m, p, t = struct.unpack_from("<HHH", edata, s * 6)
-                if m == 0:
-                    continue
+                if m != 0:
+                    existing.append((m, p, t))
+            new_entries: list[tuple[int, int, int]] = []
+            seen: set[tuple[int, int, int]] = set()
+            changed = False
+
+            def _add(entry: tuple[int, int, int]) -> None:
+                if entry not in seen:
+                    seen.add(entry)
+                    new_entries.append(entry)
+
+            for m, p, t in existing:
                 if m in (5, 7):
-                    new_entries.append((4, 37, t))
+                    _add((4, 37, t))
                     changed = True
                 elif m == 6:
-                    new_entries.append((19, p, t))
-                    new_entries.append((20, p, t))
+                    _add((19, p, t))
+                    _add((20, p, t))
                     changed = True
+                elif m in (2, 3) and i != 133:
+                    _add((1, p, t))
+                    changed = True
+                elif m in (19, 20):
+                    _add((19, p, t))
+                    _add((20, p, t))
+                    if (19 if m == 20 else 20, p, t) not in existing:
+                        changed = True
                 else:
-                    new_entries.append((m, p, t))
+                    _add((m, p, t))
             if changed:
                 out = bytearray(num_slots * 6)
                 for idx, (m, p, t) in enumerate(new_entries[:num_slots]):

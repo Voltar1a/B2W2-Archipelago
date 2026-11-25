@@ -11,6 +11,7 @@ from .sanity import (
     Trainersanity,
     ShuffleBadgeRewards,
     HiddenItems,
+    HabitatListChecks,
 )
 
 from .level_cap import (
@@ -49,7 +50,7 @@ from .qol import (
     InstantText,
     # Incomplete: efficientdialogue
     BlindTrainers,
-    TalkToTrainerWithoutBattling,
+    # TalkToTrainerWithoutBattling,
     GuaranteedCatch,
     TMHMFullyCompatible,
     BikeEverywhere,
@@ -124,29 +125,29 @@ class TopTrainersAllowed(OptionSet):
     """Allowed top trainers / superbosses that count towards the 'top_trainers' goal."""
     display_name = "Top Trainers Allowed"
     valid_keys = [
+        "ghetsis",
         "cynthia",
-        "benga",
+        "hugh",
         "alder",
-        "colress",
-        "n",
-        "league_rematch",
         "gamefreak_morimoto",
         "gamefreak_nishino",
-        "hugh",
-        "ghetsis",
+        "n",
+        "colress",
+        "league_rematch",
+        "benga",
     ]
-    default = {
+    default = [
+        "ghetsis",
         "cynthia",
-        "benga",
+        "hugh",
         "alder",
-        "colress",
-        "n",
-        "league_rematch",
         "gamefreak_morimoto",
         "gamefreak_nishino",
-        "hugh",
-        "ghetsis",
-    }
+        "n",
+        "colress",
+        "league_rematch",
+        "benga",
+    ]
 
 
 class TmhmHuntCount(Range):
@@ -172,32 +173,32 @@ class LegendaryHuntAllowed(OptionSet):
         "cobalion",
         "virizion",
         "terrakion",
-        "zekrom_reshiram",
         "kyurem",
-        "latios_latias",
-        "uxie",
+        "zekrom_reshiram",
         "mesprit",
         "azelf",
+        "uxie",
         "heatran",
         "cresselia",
         "regirock",
         "registeel_regice",
+        "latios_latias",
     ]
-    default = {
+    default = [
         "cobalion",
         "virizion",
         "terrakion",
-        "zekrom_reshiram",
         "kyurem",
-        "latios_latias",
-        "uxie",
+        "zekrom_reshiram",
         "mesprit",
         "azelf",
+        "uxie",
         "heatran",
         "cresselia",
         "regirock",
         "registeel_regice",
-    }
+        "latios_latias",
+    ]
 
 
 
@@ -206,8 +207,8 @@ class LegendaryHuntAllowed(OptionSet):
 class ExcludePostgameChecks(Toggle):
     """
     Excludes locations that are logically only accessible after completing the selected goal.
-    For example, if your goal is Champion Iris, all areas and checks that require defeating
-    the Champion (entering the Hall of Fame) will be removed from the location pool.
+    Automatically enabled when the goal is champion-only: all areas and checks that require
+    defeating the Champion (entering the Hall of Fame) will be removed from the location pool.
     """
     display_name = "Exclude Postgame Checks"
     default = True
@@ -232,6 +233,7 @@ class PokemonB2W2Options(PerGameCommonOptions):
     # shuffle_overworld_items, shuffle_npc_gifts, abyssal_ruins, pokedex_checks, show_checks, Grottosanity
     shuffle_badges: ShuffleBadgeRewards
     hidden_items: HiddenItems
+    habitat_list_checks: HabitatListChecks
 
     # Incomplete: level cap options are disabled until enforcement is implemented
     # level_cap_type: LevelCapType
@@ -262,7 +264,7 @@ class PokemonB2W2Options(PerGameCommonOptions):
     auto_run: AutoRun
     bike_everywhere: BikeEverywhere
     blind_trainers: BlindTrainers
-    talk_to_trainer_without_battling: TalkToTrainerWithoutBattling
+    # talk_to_trainer_without_battling: TalkToTrainerWithoutBattling
     catch_rate_multiplier: CatchRateMultiplier
     check_log_filter: CheckLogFilter
     exp_multiplier: ExpMultiplier

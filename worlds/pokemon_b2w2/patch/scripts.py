@@ -148,6 +148,17 @@ def patch_roadblock_scripts(script_narc: NARC, rom: Any | None = None) -> None:
     if len(script_narc.files) > 892:
         try:
             s892 = disassemble(script_narc.files[892])
+            idx6 = s892.find_label("scr6")
+            if idx6 != -1:
+                for k in range(idx6 + 1, min(idx6 + 40, len(s892.lines))):
+                    if s892.lines[k].type == "command" and s892.lines[k].parts == ["ObjInitNPCGPos", 0, 1, 160, 2, 643]:
+                        s892.lines[k:k] = [
+                            Line("command", ["StackPushFlag", 1726]),
+                            Line("command", ["StackPushConst", 0]),
+                            Line("command", ["StackCmp", 1]),
+                            Line("command", ["VMJumpIf", 255, "lbl7_38"]),
+                        ]
+                        break
             idx0 = s892.find_label("scr0")
             if idx0 != -1:
                 s892.lines[idx0 + 1 : idx0 + 1] = [
@@ -161,6 +172,9 @@ def patch_roadblock_scripts(script_narc: NARC, rom: Any | None = None) -> None:
                     Line("command", ["StoreBadge", 32776, 0]),
                     Line("command", ["WorkCmpConst", 32776, 0]),
                     Line("command", ["VMJumpIf", 1, "scr0"]),
+                    Line("command", ["FlagGet", 1726, 32776]),
+                    Line("command", ["WorkCmpConst", 32776, 1]),
+                    Line("command", ["VMJumpIf", 1, "lbl_jerome_pass"]),
                 ]
             for i, line in enumerate(s892.lines):
                 if line.type == "command" and line.parts == ["WorkSetConst", 16555, 2]:
@@ -169,15 +183,37 @@ def patch_roadblock_scripts(script_narc: NARC, rom: Any | None = None) -> None:
             idx3 = s892.find_label("scr3")
             if idx3 != -1:
                 s892.lines[idx3 + 1 : idx3 + 1] = [
-                    Line("command", ["StackPush", 16555]),
-                    Line("command", ["StackPushConst", 2]),
-                    Line("command", ["StackCmp", 4]),
-                    Line("command", ["VMJumpIf", 255, "lbl_jerome_beaten"]),
                     Line("command", ["StoreBadge", 32776, 0]),
-                    Line("command", ["WorkCmpConst", 32776, 1]),
+                    Line("command", ["WorkCmpConst", 32776, 0]),
+                    Line("command", ["VMJumpIf", 1, "scr0"]),
+                    Line("command", ["FlagGet", 1726, 32776]),
+                    Line("command", ["WorkCmpConst", 32776, 0]),
                     Line("command", ["VMJumpIf", 1, "scr1"]),
-                    Line("label", ["lbl_jerome_beaten"]),
+                    Line("label", ["lbl_jerome_pass"]),
+                    Line("command", ["RTFinishSubEvents"]),
+                    Line("command", ["ActorUnlockAll"]),
+                    Line("command", ["VMHalt"]),
                 ]
+            idx2 = s892.find_label("scr2")
+            if idx2 != -1:
+                s892.lines[idx2 + 1 : idx2 + 1] = [
+                    Line("command", ["FlagGet", 701, 32776]),
+                    Line("command", ["WorkCmpConst", 32776, 1]),
+                    Line("command", ["VMJumpIf", 1, "lbl_scr2_skip"]),
+                    Line("command", ["FlagGet", 703, 32776]),
+                    Line("command", ["WorkCmpConst", 32776, 1]),
+                    Line("command", ["VMJumpIf", 1, "lbl_scr2_skip"]),
+                    Line("command", ["FlagGet", 2363, 32776]),
+                    Line("command", ["WorkCmpConst", 32776, 1]),
+                    Line("command", ["VMJumpIf", 1, "lbl_scr2_skip"]),
+                ]
+                s892.lines.extend([
+                    Line("label", ["lbl_scr2_skip"]),
+                    Line("command", ["WorkSetConst", 16555, 6]),
+                    Line("command", ["RTFinishSubEvents"]),
+                    Line("command", ["ActorUnlockAll"]),
+                    Line("command", ["VMHalt"]),
+                ])
             scr1_pos = s892.find_label("scr1")
             if scr1_pos != -1:
                 act_up = None
@@ -371,7 +407,7 @@ def patch_roadblock_scripts(script_narc: NARC, rom: Any | None = None) -> None:
         except Exception:
             pass
 
-    # Virbank City (896): skip both Xtransceiver (scr8) and Roxie + Poplar (scr0) start cutscenes
+    # Virbank City (896): skip both start cutscenes
     if len(script_narc.files) > 896:
         try:
             s896 = disassemble(script_narc.files[896])
@@ -410,8 +446,7 @@ def patch_roadblock_scripts(script_narc: NARC, rom: Any | None = None) -> None:
         except Exception:
             pass
 
-    # Virbank Gym (1004): skip Pokéstar Studios scout & story flags after beating Roxie,
-    # jumping straight to post-Pokéstar (var 16556 = 5) so the harbor Plasma sequence still plays.
+    # Virbank Gym (1004): skip pokestar and enable grunt at harbour
     if len(script_narc.files) > 1004:
         try:
             s1004 = disassemble(script_narc.files[1004])
@@ -454,7 +489,7 @@ def patch_roadblock_scripts(script_narc: NARC, rom: Any | None = None) -> None:
         except Exception:
             pass
 
-    # Virbank Harbor (904): ensure Harlequin counter (16610) is initialized if story_roadblocks was disabled
+    # Virbank Harbor (904): ensure Harlequin counter (16610) is initialised if story_roadblocks was disabled
     if len(script_narc.files) > 904:
         try:
             s904 = disassemble(script_narc.files[904])
@@ -748,7 +783,7 @@ VAR_TO_GIFT_FLAG: dict[tuple[int, int], int] = {
     (16610, 6): 2339,   # Castelia Harlequin after finding clowns
     (16622, 7): 2347,   # Humilau walkway
     (16519, 2): 2350,   # musical owner
-    (16604, 1): 2553,   # Nacrene Cafe Warehouse Grubby Hanky (Sun)
+    (16604, 1): 2561,   # Nacrene Cafe Warehouse Grubby Hanky (Sun)
     (16604, 3): 2353,   # Nacrene Cafe Warehouse Fluffy Tail (Sun/Thu)
     (16648, 7): 2586,   # Skyarrow Bridge Marathon Runner
 }
@@ -782,7 +817,7 @@ CUSTOM_GIFT_INJECTIONS: list[tuple[int, list[Any], int]] = [
     (412, ["WorkSet", 32768, 54], 2341),     # Dragonspiral tower Cedric
     (466, ["WorkSet", 32768, 29], 2346),     # Giant Chasm rood (max revive x3)
     (948, ["WorkSet", 32768, 635], 2364),    # Route 22 Colress (Colress MCHN)
-    (854, ["FlagSet", 2402], 2802),          # Aspertia lookout Bianca (vanilla non-living-room Pokédex)
+    (870, ["WorkSet", 32768, 4], 2802),     # Aspertia Pokemon Center Bianca (Poké Ball x10)
     (658, ["WorkSet", 32768, 421], 2373),    # Route 5 Bianca (fly)
     (990, ["WorkSet", 32768, 423], 2370),    # Castelia Sewers Iris (strength)
     (1146, ["WorkSet", 32768, 424], 2374),   # Victory road N (waterfall)
@@ -886,36 +921,6 @@ def patch_gym_leader_badges(script_narc: NARC) -> None:
                 pass
 
 
-def patch_gym_clyde_autocollect(script_narc: NARC) -> None:
-    """Set Clyde's gift flag when defeating each gym leader so missed Clyde checks auto-collect."""
-    from .script_editing import disassemble, assemble, Line
-
-    for s_idx, clyde_flag in GYM_CLYDE_FLAGS.items():
-        if len(script_narc.files) <= s_idx or s_idx not in GYM_BADGE_MAP:
-            continue
-        clear_flag = 2414 + GYM_BADGE_MAP[s_idx]
-        try:
-            scr = disassemble(script_narc.files[s_idx])
-            modified = False
-            i = 0
-            while i < len(scr.lines):
-                if scr.lines[i].type == "command" and scr.lines[i].parts == ["FlagSet", clear_flag]:
-                    nearby_flags = {
-                        scr.lines[k].parts[1]
-                        for k in range(max(0, i - 10), min(len(scr.lines), i + 25))
-                        if scr.lines[k].type == "command" and scr.lines[k].parts[0] == "FlagSet"
-                    }
-                    if clyde_flag not in nearby_flags:
-                        scr.lines.insert(i + 1, Line(type="command", parts=["FlagSet", clyde_flag]))
-                        modified = True
-                        i += 1
-                i += 1
-            if modified:
-                script_narc.files[s_idx] = bytes(assemble(scr))
-        except Exception:
-            pass
-
-
 def patch_gift_flag_injections(script_narc: NARC) -> None:
     # Injects physical FlagSet <flag_id> into cutscenes and story scripts that award gifts
     from .script_editing import disassemble, assemble, Line
@@ -935,6 +940,13 @@ def patch_gift_flag_injections(script_narc: NARC) -> None:
                     script_narc.files[s_idx] = bytes(assemble(scr))
             except Exception:
                 pass
+
+
+_VAR_GIFT_BYTE_PATTERNS: tuple[bytes, ...] = tuple(
+    op + k[0].to_bytes(2, "little") + k[1].to_bytes(2, "little")
+    for k in VAR_TO_GIFT_FLAG
+    for op in (b"\x28\x00", b"\x2a\x00")
+)
 
 
 def patch_gym_clyde_autocollect(script_narc: NARC) -> None:
@@ -969,8 +981,11 @@ def patch_gym_clyde_autocollect(script_narc: NARC) -> None:
     for s_idx in range(len(script_narc.files)):
         if s_idx in (856, 1238, 1239, 1240, 1241, 1242, 1243):
             continue
+        raw = script_narc.files[s_idx]
+        if not any(p in raw for p in _VAR_GIFT_BYTE_PATTERNS):
+            continue
         try:
-            scr = disassemble(script_narc.files[s_idx])
+            scr = disassemble(raw)
             modified = False
             for i, line in enumerate(list(scr.lines)):
                 if (
@@ -1024,8 +1039,11 @@ def patch_scripted_trainer_battles(script_narc: NARC, no_battle: bool = False) -
     for s_idx in range(len(script_narc.files)):
         if s_idx in (856, 1238, 1239, 1240, 1241, 1242, 1243):
             continue
+        raw = script_narc.files[s_idx]
+        if not no_battle and b"\x85\x00" not in raw and b"\x86\x00" not in raw:
+            continue
         try:
-            scr = disassemble(script_narc.files[s_idx])
+            scr = disassemble(raw)
             modified = False
             i = 0
             inject_count = 0
@@ -1104,22 +1122,24 @@ def patch_scripted_trainer_battles(script_narc: NARC, no_battle: bool = False) -
 
 _GIANT_CHASM_FRIGATE_TIDS: list[int] = [
     344, 348,
-    431,
+    430, 431, 432, 434, 435, 438, 439,
     445, 446, 447, 448, 449, 452, 453, 454,
     497, 498, 499,
-    802, 807, 808, 809, 810, 811, 812,
+    807, 808, 809, 810, 811,
 ]
 
 _ROUTE_21_FRIGATE_TIDS: list[int] = [
-    343, 347, 426, 427, 428, 429, 436, 437, 500, 797, 798, 799, 800, 801,
+    343, 347, 426, 427, 428, 429, 436, 437,
+    441, 442, 443, 444, 450, 451,
+    500, 797, 798, 799, 800, 801, 802, 812,
 ]
 
 _GIANT_CHASM_FRIGATE_ITEM_FLAGS: list[int] = [
-    1287, 1288, 1289, 1290, 1292, 1293,
+    356, 1287, 1288, 1290, 1292, 1293,
 ]
 
 _ROUTE_21_FRIGATE_ITEM_FLAGS: list[int] = [
-    1291, 1478, 1479,
+    356, 1289, 1291, 1478, 1479,
 ]
 
 _MISSABLE_TRAINER_TRIGGERS: list[tuple[int, list[Any], list[int]]] = [
@@ -1196,8 +1216,11 @@ def patch_npc_gift_scripts(script_narc: NARC, flag_to_text_id: dict[int, int]) -
     for s_idx in range(len(script_narc.files)):
         if s_idx in (856, 1238, 1239, 1240, 1241, 1242, 1243):
             continue
+        raw = script_narc.files[s_idx]
+        if b"\x28\x00\x00\x80" not in raw and b"\x2a\x00\x00\x80" not in raw:
+            continue
         try:
-            scr = disassemble(script_narc.files[s_idx])
+            scr = disassemble(raw)
             modified = False
             new_lines: list[Line] = []
             lines = scr.lines

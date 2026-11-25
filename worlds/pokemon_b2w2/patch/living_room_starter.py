@@ -1,5 +1,3 @@
-# Living room starter event for Pokémon Black 2 and White 2
-
 from typing import TYPE_CHECKING
 
 try:

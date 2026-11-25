@@ -257,6 +257,14 @@ class HiddenItems(Toggle):
     default = True
 
 
+class HabitatListChecks(Toggle):
+    """
+    Include NPC gift checks awarded for completing Pokédex Habitat Lists.
+    """
+    display_name = "Habitat List Checks"
+    default = True
+
+
 # class AbyssalRuins(Toggle):
 #     """
 #     include item checks in the abyssal ruins

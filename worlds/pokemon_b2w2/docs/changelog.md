@@ -1,5 +1,28 @@
 # Changelog
 
+## 0.0.5
+- Fixed skip_join_avenue warp in White 2
+- Added habitat_list_checks YAML option
+- Fixed mismatched surf/season location rule names in Aspertia, Route 19, Castelia Sewers, and Relic Passage
+- Fixed level appropriate evo levels for Wurmple, Tyrogue, Nincada, Burmy, Combee
+- Fixed B button cancel handling in APtransceiver submenus
+- Fixed Route 20 dark grass cutscene freeze when Cheren is hidden
+- Fixed Hiker Jerome refighting after beating Cheren
+- Added Light/Dark Stone and Grubby Hanky to item pool
+- Fixed fast fishing hooks freezing on cast
+- Precomputed TM/HM and region inference tables...
+- Lazy goal and legendary access rule evaluation...
+- Flattened and cached location access rule closures...
+- Cached slot data and single pass location collection...
+- Lazy ARM9 overlay decompression and deferred recompression...
+- Byte-filtered script NARC disassembly passes...
+- ...So basically, faster patching and generation
+- Fixed fast fishing hooks freezing on cast
+- Location overhaul part 3
+- Frigate fixes (many of them)
+- Made single-branch time-based evos work at any time of day
+- Preserved evo-required moves when randomising level-up movesets
+
 ## 0.0.4
 - Location overhaul part 2
 - Fixed Ranger postbattle gifts

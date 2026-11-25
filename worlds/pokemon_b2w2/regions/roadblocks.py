@@ -41,9 +41,23 @@ def has_wave_badge(state: CollectionState, player: int) -> bool:
     return state.has("Wave Badge", player)
 
 
+from ..items.tms import TM_ITEM_TABLE
+from ..items.progression import PROGRESSION_ITEM_TABLE
+
+TM_NAMES: tuple[str, ...] = tuple(TM_ITEM_TABLE.keys())
+TM_HM_NAMES: tuple[str, ...] = TM_NAMES + tuple(k for k in PROGRESSION_ITEM_TABLE if k.startswith("HM"))
+
+
 def has_tm_count(state: CollectionState, player: int, count: int) -> bool:
-    from ..items.tms import TM_ITEM_TABLE
-    return sum(1 for item_name in TM_ITEM_TABLE if state.has(item_name, player)) >= count
+    if count <= 0:
+        return True
+    found = 0
+    for item_name in TM_NAMES:
+        if state.has(item_name, player):
+            found += 1
+            if found >= count:
+                return True
+    return False
 
 
 ALL_BADGES = (
@@ -254,63 +268,74 @@ def can_enter_hall_of_fame(state: CollectionState, player: int, world: "PokemonB
     )
 
 
-def can_access_top_trainer(trainer: str, state: CollectionState, player: int, world: "PokemonB2W2World") -> bool:
-    champion_ok = can_enter_hall_of_fame(state, player, world)
-    if trainer == "cynthia":
-        return champion_ok
-    elif trainer == "benga":
-        return can_battle_benga(state, player, world)
-    elif trainer == "alder":
-        return champion_ok
-    elif trainer == "colress":
+def can_access_top_trainer(
+    trainer: str,
+    state: CollectionState,
+    player: int,
+    world: "PokemonB2W2World",
+    champion_ok: bool | None = None,
+) -> bool:
+    if trainer == "colress":
         return state.can_reach("Plasma Frigate (P2 Laboratory)", "Region", player)
-    elif trainer == "n":
-        return champion_ok
-    elif trainer == "league_rematch":
-        return champion_ok
-    elif trainer in ("gamefreak_morimoto", "gamefreak_nishino"):
-        return champion_ok and has_insect_badge(state, player)
-    elif trainer == "hugh":
-        return has_quake_badge(state, player)
-    elif trainer == "ghetsis":
+    if trainer == "ghetsis":
         return state.can_reach("Plasma Frigate", "Region", player)
-    return False
-
-
-def can_access_legendary_location(loc_key: str, state: CollectionState, player: int, world: "PokemonB2W2World") -> bool:
-    champion_ok = can_enter_hall_of_fame(state, player, world)
-    east_unova_ok = has_jet_badge(state, player) or can_use_surf(state, player, world)
-    humilau_ok = has_legend_badge(state, player) or (can_use_surf(state, player, world) and has_colress_mchn(state, player))
-    lake_trio_ok = champion_ok and can_use_surf(state, player, world)
-    regi_ok = champion_ok and can_use_surf(state, player, world) and can_use_flash(state, player, world)
-
-    if loc_key == "cobalion":
-        return east_unova_ok
-    elif loc_key == "virizion":
-        return east_unova_ok
-    elif loc_key == "terrakion":
-        return humilau_ok
-    elif loc_key == "zekrom_reshiram":
+    if champion_ok is None:
+        champion_ok = can_enter_hall_of_fame(state, player, world)
+    if trainer in ("cynthia", "alder", "n", "league_rematch", "benga"):
         return champion_ok
-    elif loc_key == "kyurem":
-        return champion_ok and can_enter_giant_chasm(state, player) and can_board_plasma_frigate(state, player)
-    elif loc_key == "latios_latias":
-        return champion_ok and can_use_cut(state, player, world)
-    elif loc_key == "uxie":
-        return lake_trio_ok
-    elif loc_key == "mesprit":
-        return lake_trio_ok
-    elif loc_key == "azelf":
-        return lake_trio_ok and can_use_cut(state, player, world)
-    elif loc_key == "heatran":
-        return has_jet_badge(state, player) and state.has("Magma Stone", player)
-    elif loc_key == "cresselia":
-        return champion_ok and state.has("Lunar Wing", player)
-    elif loc_key == "regirock":
-        return regi_ok
-    elif loc_key == "registeel_regice":
-        return regi_ok
+    if trainer in ("gamefreak_morimoto", "gamefreak_nishino"):
+        return champion_ok and has_insect_badge(state, player)
+    if trainer == "hugh":
+        return champion_ok and has_quake_badge(state, player)
     return False
+
+
+def can_access_legendary_location(
+    loc_key: str,
+    state: CollectionState,
+    player: int,
+    world: "PokemonB2W2World",
+    champion_ok: bool | None = None,
+) -> bool:
+    if loc_key in ("cobalion", "virizion"):
+        return has_jet_badge(state, player) or can_use_surf(state, player, world)
+    if loc_key == "terrakion":
+        return has_legend_badge(state, player) or (can_use_surf(state, player, world) and has_colress_mchn(state, player))
+    if loc_key == "heatran":
+        return has_jet_badge(state, player) and state.has("Magma Stone", player)
+
+    if champion_ok is None:
+        champion_ok = can_enter_hall_of_fame(state, player, world)
+    if not champion_ok:
+        return False
+
+    if loc_key == "zekrom_reshiram":
+        return True
+    if loc_key == "kyurem":
+        return can_enter_giant_chasm(state, player) and can_board_plasma_frigate(state, player)
+    if loc_key == "latios_latias":
+        return can_use_cut(state, player, world)
+    if loc_key in ("uxie", "mesprit"):
+        return can_use_surf(state, player, world)
+    if loc_key == "azelf":
+        return can_use_surf(state, player, world) and can_use_cut(state, player, world)
+    if loc_key == "cresselia":
+        return state.has("Lunar Wing", player)
+    if loc_key in ("regirock", "registeel_regice"):
+        return can_use_surf(state, player, world) and can_use_flash(state, player, world)
+    return False
+
+
+_DEFAULT_TOP_TRAINERS: tuple[str, ...] = (
+    "ghetsis", "cynthia", "hugh", "alder", "gamefreak_morimoto",
+    "gamefreak_nishino", "n", "colress", "league_rematch", "benga",
+)
+
+_DEFAULT_LEGENDARIES: tuple[str, ...] = (
+    "cobalion", "virizion", "terrakion", "kyurem", "zekrom_reshiram",
+    "mesprit", "azelf", "uxie", "heatran", "cresselia",
+    "regirock", "registeel_regice", "latios_latias",
+)
 
 
 def check_goal_completion(state: CollectionState, player: int, world: "PokemonB2W2World") -> bool:
@@ -320,59 +345,69 @@ def check_goal_completion(state: CollectionState, player: int, world: "PokemonB2
         return has_all_badges(state, player)
 
     if hasattr(goal_opt, "value") and isinstance(goal_opt.value, set):
-        active_goals = set(goal_opt.value)
+        active_goals = goal_opt.value
     elif hasattr(goal_opt, "current_key"):
-        active_goals = {goal_opt.current_key}
+        active_goals = (goal_opt.current_key,)
     elif isinstance(goal_opt, (list, set, tuple)):
-        active_goals = set(goal_opt)
+        active_goals = goal_opt
     else:
-        active_goals = {"champion"}
+        active_goals = ("champion",)
+
+    champion_ok: bool | None = None
 
     for key in active_goals:
         if key == "champion":
-            if not can_enter_hall_of_fame(state, player, world):
+            if champion_ok is None:
+                champion_ok = can_enter_hall_of_fame(state, player, world)
+            if not champion_ok:
                 return False
         elif key == "top_trainers":
             req_opt = getattr(world.options, "top_trainers_required", None)
             needed = req_opt.value if req_opt is not None else 5
             allowed_opt = getattr(world.options, "top_trainers_allowed", None)
-            allowed = set(allowed_opt.value) if allowed_opt is not None else {
-                "cynthia", "benga", "alder", "colress", "n", "league_rematch",
-                "gamefreak_morimoto", "gamefreak_nishino", "hugh", "ghetsis"
-            }
-            if len(allowed) == 0:
-                needed = 0
-            else:
-                needed = min(needed, len(allowed))
-            count = sum(1 for t in allowed if can_access_top_trainer(t, state, player, world))
-            if count < needed:
-                return False
+            allowed = allowed_opt.value if allowed_opt is not None else _DEFAULT_TOP_TRAINERS
+            needed = min(needed, len(allowed)) if allowed else 0
+            if needed > 0:
+                if champion_ok is None:
+                    champion_ok = can_enter_hall_of_fame(state, player, world)
+                count = 0
+                for t in allowed:
+                    if can_access_top_trainer(t, state, player, world, champion_ok):
+                        count += 1
+                        if count >= needed:
+                            break
+                if count < needed:
+                    return False
         elif key == "legendary_hunt":
             req_opt = getattr(world.options, "legendary_hunt_required", None)
             needed = req_opt.value if req_opt is not None else 3
             allowed_opt = getattr(world.options, "legendary_hunt_allowed", None)
-            allowed = set(allowed_opt.value) if allowed_opt is not None else {
-                "cobalion", "virizion", "terrakion", "zekrom_reshiram", "kyurem",
-                "latios_latias", "uxie", "mesprit", "azelf", "heatran",
-                "cresselia", "regirock", "registeel_regice"
-            }
-            if len(allowed) == 0:
-                needed = 0
-            else:
-                needed = min(needed, len(allowed))
-            count = sum(1 for loc in allowed if can_access_legendary_location(loc, state, player, world))
-            if count < needed:
-                return False
+            allowed = allowed_opt.value if allowed_opt is not None else _DEFAULT_LEGENDARIES
+            needed = min(needed, len(allowed)) if allowed else 0
+            if needed > 0:
+                if champion_ok is None:
+                    champion_ok = can_enter_hall_of_fame(state, player, world)
+                count = 0
+                for loc in allowed:
+                    if can_access_legendary_location(loc, state, player, world, champion_ok):
+                        count += 1
+                        if count >= needed:
+                            break
+                if count < needed:
+                    return False
         elif key == "tmhm_hunt":
             if not state.can_reach("Mistralton City", "Region", player):
                 return False
             cnt_opt = getattr(world.options, "tmhm_hunt", None)
-            from ..items.tms import TM_ITEM_TABLE
-            from ..items.progression import PROGRESSION_ITEM_TABLE
-            tm_hm_names = list(TM_ITEM_TABLE.keys()) + [k for k in PROGRESSION_ITEM_TABLE if k.startswith("HM")]
-            target = max(0, min(len(tm_hm_names), int(cnt_opt.value if cnt_opt is not None else 60)))
-            tms_found = sum(1 for item_name in tm_hm_names if state.has(item_name, player))
-            if tms_found < target:
-                return False
+            target = max(0, min(len(TM_HM_NAMES), int(cnt_opt.value if cnt_opt is not None else 60)))
+            if target > 0:
+                tms_found = 0
+                for item_name in TM_HM_NAMES:
+                    if state.has(item_name, player):
+                        tms_found += 1
+                        if tms_found >= target:
+                            break
+                if tms_found < target:
+                    return False
 
     return True

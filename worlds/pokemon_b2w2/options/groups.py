@@ -16,6 +16,7 @@ from . import (
     # sanity & logic
     ShuffleBadgeRewards,
     HiddenItems,
+    HabitatListChecks,
     Trainersanity,
     FlashLogic,
     DowsingMachineLogic,
@@ -48,7 +49,7 @@ from . import (
     InfiniteRareCandies,
     InfiniteRepels,
     BlindTrainers,
-    TalkToTrainerWithoutBattling,
+    # TalkToTrainerWithoutBattling,
     TMHMFullyCompatible,
     RemoveSurfBikeMusic,
     MaxFriendship,
@@ -77,6 +78,7 @@ option_groups: list[OptionGroup] = [
     OptionGroup("Location checks and logic", [
         ShuffleBadgeRewards,
         HiddenItems,
+        HabitatListChecks,
         Trainersanity,
         FlashLogic,
         DowsingMachineLogic,
@@ -99,7 +101,7 @@ option_groups: list[OptionGroup] = [
         AutoRun,
         BikeEverywhere,
         BlindTrainers,
-        TalkToTrainerWithoutBattling,
+        # TalkToTrainerWithoutBattling,
         CatchRateMultiplier,
         CheckLogFilter,
         ExpMultiplier,
@@ -107,7 +109,7 @@ option_groups: list[OptionGroup] = [
         GuaranteedCatch,
         GuaranteedEscape,
         HoldATurbo,
-        # Non-APtransceiver (NOT changeable ingame)
+        # Non-APtransceiver (not changeable ingame)
         InstantText,
         FastHatch,
         InfiniteRareCandies,

@@ -22,8 +22,7 @@ def early_return(client: "PokemonB2W2Client") -> bool:
     client.is_battle = False
     client._cached_received_count = -1
     client.flags_buffer = None
-    client.vars_cache = bytearray(0x240)
-    client._cleared_legendaries = set()
+    client.vars_cache = bytearray(0x35E)
     client.bag_buffers = None
     client.dex_caught_buffer = None
     client.local_seen_pokemon = []
@@ -34,6 +33,10 @@ def early_return(client: "PokemonB2W2Client") -> bool:
 
 
 def early_setup(client: "PokemonB2W2Client") -> None:
+    if not hasattr(client, "_cleared_legendaries"):
+        client._cleared_legendaries = set()
+        client._cleared_legendaries_loaded = False
+        client._synced_cleared_legendaries = set()
     client.flags_cache = bytearray(386)
     client.missing_flags = [
         loc.flag_id for loc in ALL_LOCATION_TABLE.values()
@@ -100,7 +103,7 @@ OV167_MAGIC = b"\xf8\xb5\x82\xb0\x0f\x1c\x05\x1c"
 
 
 async def check_ingame_state(client: "PokemonB2W2Client", ctx: "BizHawkClientContext") -> bool:
-    # Verifies that the player is actively in-game
+    # Verifies that the player is actively ingame
     try:
         reads = [
             (0x17F600, 8, client.ram_Segment),
@@ -128,7 +131,7 @@ async def check_ingame_state(client: "PokemonB2W2Client", ctx: "BizHawkClientCon
 
 
 async def check_save_address(client: "PokemonB2W2Client", ctx: "BizHawkClientContext") -> bool:
-    # Finds and verifies save_data_address in main RAM only when actively in-game
+    # Finds and verifies save_data_address in main RAM only when actively ingame
     if not await check_ingame_state(client, ctx):
         return False
 

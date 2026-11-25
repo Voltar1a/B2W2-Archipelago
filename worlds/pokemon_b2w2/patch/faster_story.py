@@ -95,9 +95,6 @@ def apply_faster_story(rom: NintendoDSRom, is_white2: bool, options: dict[str, A
             pass
 
     if skip_pwt:
-        # Let Clay/Hugh drag you into PWT (s382 scr0), skip the interior intro/registration
-        # cutscene (s384 scr7) and set completed-PWT state (16582=2, 16693=2) so leaving
-        # the building immediately triggers the post-PWT Frigate cutscene (s382 scr1).
         try:
             s384 = disassemble(narc_056.files[384])
             scr7_384 = s384.find_label("scr7")
@@ -151,15 +148,16 @@ def apply_faster_story(rom: NintendoDSRom, is_white2: bool, options: dict[str, A
                 narc_126.files[66] = bytes(d66)
                 modified_126 = True
 
-        if len(narc_126.files) > 482:
-            d482 = bytearray(narc_126.files[482])
-            if len(d482) >= 8:
-                furn_c, npc_c, warp_c = d482[4], d482[5], d482[6]
-                warp_off = 8 + furn_c * 0x14 + npc_c * 0x24 + 6 * 0x14
-                if warp_c > 6 and warp_off + 4 <= len(d482):
-                    d482[warp_off : warp_off + 4] = (62).to_bytes(2, "little") + (0).to_bytes(2, "little")
-                    narc_126.files[482] = bytes(d482)
-                    modified_126 = True
+        for ev_id in (482, 497):
+            if len(narc_126.files) > ev_id:
+                d_gate = bytearray(narc_126.files[ev_id])
+                if len(d_gate) >= 8:
+                    furn_c, npc_c, warp_c = d_gate[4], d_gate[5], d_gate[6]
+                    warp_off = 8 + furn_c * 0x14 + npc_c * 0x24 + 6 * 0x14
+                    if warp_c > 6 and warp_off + 4 <= len(d_gate):
+                        d_gate[warp_off : warp_off + 4] = (62).to_bytes(2, "little") + (0).to_bytes(2, "little")
+                        narc_126.files[ev_id] = bytes(d_gate)
+                        modified_126 = True
 
     if modified_056:
         rom.setFileByName("a/0/5/6", narc_056.save())

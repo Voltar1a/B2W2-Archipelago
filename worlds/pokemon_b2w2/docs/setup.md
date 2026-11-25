@@ -4,9 +4,7 @@
 - Archipelago `0.6.7` or newer (with `pokemon_b2w2.apworld` installed).
 - BizHawk (Windows or Linux).
   - If using BizHawk 2.10 or lower, disable AutoSaveRam (`Config > Customize... > Advanced`) so save data persists properly.
-  - Highly recommend using 2.11 though as that makes it way easier to help with issues.
 - A clean USA/Europe `.nds` ROM of Pokémon Black Version 2 or Pokémon White Version 2.
-- Can also use Universal Tracker.
 
 ## Patch and launch
 1. Open your patch file.

@@ -51,11 +51,11 @@ TRACKED_EVENTS: list[tuple[str, Callable[[PokemonB2W2Client], bool]]] = [
 
     # Goals
     ("event_defeat_cynthia", lambda c: bool(c.get_flag(1976))),
-    ("event_defeat_benga", lambda c: any(c.get_flag(f) for f in (1689, 1690, 2267, 2268, 2269, 2270))),
+    ("event_defeat_benga", lambda c: c.get_var(16708) >= 1),
     ("event_defeat_alder", lambda c: bool(c.get_flag(2102))),
     ("event_defeat_n", lambda c: any(c.get_flag(f) for f in (2302, 2303, 2304, 2305))),
-    ("event_defeat_gamefreak_morimoto", lambda c: bool(c.get_flag(1660) or c.get_flag(2112))),
-    ("event_defeat_gamefreak_nishino", lambda c: bool(c.get_flag(1877) or c.get_flag(2111))),
+    ("event_defeat_gamefreak_morimoto", lambda c: bool(c.get_flag(1660))),
+    ("event_defeat_gamefreak_nishino", lambda c: bool(c.get_flag(2111))),
 
     # Legendary encounters
     ("event_catch_cobalion", lambda c: is_legendary_defeated("cobalion", c)),
@@ -77,7 +77,7 @@ TRACKED_EVENTS: list[tuple[str, Callable[[PokemonB2W2Client], bool]]] = [
 
 
 async def sync_datastorage(client: PokemonB2W2Client, ctx: BizHawkClientContext) -> None:
-    # Synchronises seen Pokémon, caught Pokémon, map ID, and tracked event bitmap flags
+    # Synchronises seen pokemon, caught pokemon, map ID, and tracked event bitmap flags
     if client.save_data_address == 0 or not client.data_address_confirmed:
         return
 

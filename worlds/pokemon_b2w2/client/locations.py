@@ -13,7 +13,7 @@ async def check_flag_locations(client: "PokemonB2W2Client", ctx: "BizHawkClientC
     from .setup import early_return
 
     flags_block_size = 386
-    vars_block_size = 0x240
+    vars_block_size = 0x35E
     base = client.save_data_address
 
     reads = [

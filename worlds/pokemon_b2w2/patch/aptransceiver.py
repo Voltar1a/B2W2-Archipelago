@@ -27,7 +27,7 @@ from .text import decode, encode, insert_line
 
 
 # Town fly data for B2W2: (town_id, visit_flag, text_id, (zone_id, x, z, dir))
-# Castelia city (zone 28) is a rail map and uses WarpRail (28, 3, 8, 4, 1) - dumb, why...
+# Castelia city (zone 28) is a rail map and uses WarpRail (28, 3, 8, 4, 1)
 TOWN_FLY_DATA = [
     (1, 2488, 135, (427, 47, 762, 1)),    # Aspertia City
     (2, 2491, 136, (439, 105, 694, 1)),   # Floccesy Town
@@ -45,7 +45,7 @@ TOWN_FLY_DATA = [
     (12, 2490, 146, (465, 775, 178, 1)),  # Humilau City
     (18, 2530, 272, (573, 43, 18, 1)),    # Victory Road
     (13, 2483, 147, (136, 19, 49, 1)),    # Pokémon League
-    (20, 2484, 274, (0, 42, 38, 1)),      # Black City (replaced with White Forest in W2)
+    (20, 2484, 274, (0, 42, 38, 1)),      # Black City / White Forest
     (19, 2480, 273, (113, 184, 197, 1)),  # Icirrus City
     (15, 2475, 149, (16, 637, 599, 1)),   # Nacrene City
     (14, 2474, 148, (6, 781, 589, 1)),    # Striaton City
@@ -347,8 +347,11 @@ def apply_aptransceiver(rom: NintendoDSRom, options: dict[str, Any]) -> None:
             Line("command", ["ListMenuInitTR", 31, 1, 0, 1, 32784]),
             Line("command", ["ListMenuAdd", 124, 65535, 1]),  # Teleport
             Line("command", ["ListMenuAdd", 125, 65535, 2]),  # Dig
-            # TESTING: always show Fly menu option
+            Line("command", ["CheckItemBagNumber", 421, 1, 32800]),  # HM02 Fly
+            Line("command", ["WorkCmpConst", 32800, 1]),
+            Line("command", ["VMJumpIf", 5, "lbl_travel_no_fly"]),
             Line("command", ["ListMenuAdd", 126, 65535, 3]),  # Fly
+            Line("label", ["lbl_travel_no_fly"]),
             Line("command", ["CheckItemBagNumber", 397, 1, 32800]),  # TM70 Flash
             Line("command", ["WorkCmpConst", 32800, 1]),
             Line("command", ["VMJumpIf", 5, "lbl_travel_no_flash"]),
@@ -434,17 +437,23 @@ def apply_aptransceiver(rom: NintendoDSRom, options: dict[str, Any]) -> None:
             Line("command", ["ListMenuInitTR", 31, 1, 0, 1, 32808]),
         ]
 
-        # TESTING: always show all fly locations
         for town_id, flag_id, text_id, _ in fly_data:
-            sub_travel.append(
-                Line("command", ["ListMenuAdd", text_id, 65535, town_id])
-            )
+            skip_lbl = f"lbl_fly_skip_{town_id}"
+            sub_travel.extend([
+                Line("command", ["FlagGet", flag_id, 32800]),
+                Line("command", ["WorkCmpConst", 32800, 1]),
+                Line("command", ["VMJumpIf", 5, skip_lbl]),
+                Line("command", ["ListMenuAdd", text_id, 65535, town_id]),
+                Line("label", [skip_lbl]),
+            ])
 
         sub_travel.extend([
             Line("command", ["ListMenuAdd", 166, 65535, 0]),
             Line("command", ["ListMenuShow2"]),
             Line("command", ["MsgSystemClose"]),
             Line("command", ["WorkCmpConst", 32808, 0]),
+            Line("command", ["VMJumpIf", 1, "sub_travel"]),
+            Line("command", ["WorkCmpConst", 32808, 65534]),
             Line("command", ["VMJumpIf", 1, "sub_travel"]),
             Line("command", ["ActorPauseAll"]),
             Line("command", ["PlaySound", 1350]),
@@ -581,7 +590,7 @@ def apply_aptransceiver(rom: NintendoDSRom, options: dict[str, Any]) -> None:
         sub_seasons_menu: list[Line] = [
             Line("label", ["sub_seasons_menu"]),
             Line("command", ["StackPush", 32800]),
-            Line("command", ["ListMenuInitTR", 31, 10, 0, 0, 32808]),
+            Line("command", ["ListMenuInitTR", 31, 10, 0, 1, 32808]),
         ]
         for s_idx, s_name_id in enumerate(range(100, 104)):
             sub_seasons_menu.extend([
@@ -617,7 +626,7 @@ def apply_aptransceiver(rom: NintendoDSRom, options: dict[str, Any]) -> None:
         sub_days_menu: list[Line] = [
             Line("label", ["sub_days_menu"]),
             Line("command", ["StackPush", 32800]),
-            Line("command", ["ListMenuInitTR", 31, 10, 0, 0, 32808]),
+            Line("command", ["ListMenuInitTR", 31, 10, 0, 1, 32808]),
         ]
         for d_idx, d_name_id in enumerate(range(172, 179)):
             sub_days_menu.extend([
@@ -784,6 +793,8 @@ def apply_aptransceiver(rom: NintendoDSRom, options: dict[str, Any]) -> None:
             Line("command", ["MsgSystemClose"]),
             Line("command", ["WorkCmpConst", 32800, 0]),
             Line("command", ["VMJumpIf", 1, "lbl_mod_root"]),
+            Line("command", ["WorkCmpConst", 32800, 65534]),
+            Line("command", ["VMJumpIf", 1, "lbl_mod_root"]),
             Line("command", ["WorkGet", 16792, 32800]),
             Line("command", ["VMJump", "lbl_mod_root"]),
 
@@ -801,6 +812,8 @@ def apply_aptransceiver(rom: NintendoDSRom, options: dict[str, Any]) -> None:
             Line("command", ["ListMenuShow2"]),
             Line("command", ["MsgSystemClose"]),
             Line("command", ["WorkCmpConst", 32800, 0]),
+            Line("command", ["VMJumpIf", 1, "lbl_mod_root"]),
+            Line("command", ["WorkCmpConst", 32800, 65534]),
             Line("command", ["VMJumpIf", 1, "lbl_mod_root"]),
             Line("command", ["WorkGet", 16793, 32800]),
             Line("command", ["VMJump", "lbl_mod_root"]),
@@ -825,8 +838,8 @@ def apply_aptransceiver(rom: NintendoDSRom, options: dict[str, Any]) -> None:
             Line("command", ["ListMenuAdd", 166, 65535, 99]),  # cancel
             Line("command", ["ListMenuShow2"]),
             Line("command", ["MsgSystemClose"]),
-            Line("command", ["WorkCmpConst", 32800, 99]),
-            Line("command", ["VMJumpIf", 1, "lbl_mod_root"]),
+            Line("command", ["WorkCmpConst", 32800, 2]),
+            Line("command", ["VMJumpIf", 2, "lbl_mod_root"]),
             Line("command", ["WorkSet", 16791, 32800]),
             Line("command", ["VMJump", "lbl_mod_root"]),
         ]

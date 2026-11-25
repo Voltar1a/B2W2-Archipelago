@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+import inspect
+from typing import TYPE_CHECKING, Any, Callable
 from BaseClasses import Region
 
 from .roadblocks import (
@@ -52,6 +53,245 @@ if TYPE_CHECKING:
     from .. import PokemonB2W2World
 
 
+# Version-exclusive locations
+BLACK2_EXCLUSIVE_LOCATIONS: frozenset[str] = frozenset({
+    "Route 4 - Item: Near sign in the west",
+    "Route 4 - Item: Hill on western side",
+    "Route 4 - Item: South of Roughnecks in the west",
+    "Route 4 - Item: 2F of second house on right",
+    "Route 4 - Gift: Ace Trainer in first house on right",
+    "Route 4 - Gift: Black Belt in 2F of first left house",
+    "Route 4 - Gift: Maid in third house on right (Guess Pokémon cry)",
+    "Route 4 - Trainer: Fisherman Hubert by water in southwest top",
+    "Route 4 - Trainer: Breeder Irene by Castelia Gate",
+    "Route 4 - Hidden: Western area between stairways southeast of rest house",
+    "Route 4 - Hidden: In deep sand between two stairways south of Policeman",
+    "Route 4 - Hidden: Deep sand north of fences east of the Roughnecks",
+    "Route 4 - Hidden: In the middle of a deep sand patch in the west",
+    "Route 4 - Hidden: Western area west of Bikers in deep sand next to barricade",
+    "Route 4 - Trainer: Policeman Braven in south near Castelia Gate",
+    "Route 4 - Trainer: Policeman Dell in north near Nimbasa Gate",
+    "Route 4 - Trainer: Policeman Neagle south of rest house on western side",
+    "Route 4 - Trainer: Roughneck Joey in the west south of the stairs",
+    "Route 4 - Trainer: Roughneck Silvester in northwest fenced area",
+    "Route 4 - Trainer: Biker Stanley in the west",
+    "Route 4 - Trainer: Hooligans Rob & Sal by the south fence in the west",
+    "Route 4 - Trainer: Youngster Sinclair in the west",
+    "Reversal Mountain - Item: 1F, dead-end tunnel north of Battle Girl",
+    "Reversal Mountain - Item: 1F, dead-end tunnel east of Doctor in south of main cavern",
+    "Reversal Mountain - Item: 1F, south of Hiker in north of main cavern",
+    "Reversal Mountain - Item: 1F, east of Black Belt in west of main cavern",
+    "Reversal Mountain - Item: 1F, dead-end tunnel east of Backpacker and Hiker in southwest of main cavern",
+    "Reversal Mountain - Item: B1F, next to the Ranger",
+    "Reversal Mountain - Hidden: B1F, in the stalagmite below the stairs",
+    "Reversal Mountain - Hidden: 1F, in the stalagmite north of Backpacker and Hiker in the west",
+    "Reversal Mountain - Hidden: 1F, in stalagmite south of Scientist in east of main cavern",
+    "Reversal Mountain - Hidden: 1F, in stalagmite in the southeast of main cavern",
+    "Reversal Mountain - Hidden: 1F, dead end south of Ace Trainers in north of main cavern",
+    "Reversal Mountain - Hidden: 1F, dead-end tunnel east of Backpacker and Hiker in south",
+    "Reversal Mountain - Trainer: 1F, Backpacker Kiyo in southwest of main cavern",
+    "Reversal Mountain - Trainer: 1F, Backpacker Kumiko in north of main cavern",
+    "Reversal Mountain - Trainer: Ranger Lewis B1F to the left",
+    "Reversal Mountain - Gift: Ranger Lewis B1F to the left",
+    "Reversal Mountain - Trainer: Ranger Eliza 1F in south of the main cavern",
+    "Reversal Mountain - Gift: Ranger Eliza 1F in south of the main cavern",
+    "Reversal Mountain - Trainer: 1F, Ace Trainer Ray in north of main cavern",
+    "Reversal Mountain - Trainer: 1F, Ace Trainer Cora in north of main cavern",
+    "Reversal Mountain - Trainer: 1F, Hiker Jared in north of main cavern",
+    "Reversal Mountain - Trainer: 1F, Hiker Markus in southwest of main cavern",
+    "Reversal Mountain - Trainer: 1F, Black Belt Corey in the west of the main cavern",
+    "Reversal Mountain - Trainer: 1F, Battle Girl Chan in south of main cavern",
+    "Reversal Mountain - Trainer: 1F, Doctor Derek by stairs to B1F in south of main cavern",
+    "Plasma Frigate - Item: Near Grunt in southwest of beam puzzle room left ball",
+    "Plasma Frigate - Item: Near Grunt in southwest of beam puzzle room right ball",
+    "Plasma Frigate - Item: Right of beam puzzle pit",
+    "Plasma Frigate - Item: In the northeast room (from Route 21)",
+    "Plasma Frigate - Trainer: Team Plasma Grunt 1 by teleporter in southwestern room (from Route 21)",
+    "Plasma Frigate - Trainer: Team Plasma Grunt 4 by teleporter in northwest room (from Route 21)",
+    "Plasma Frigate - Trainer: Team Plasma Grunt 5 between beds in northwest room (from Route 21)",
+    "Plasma Frigate - Trainer: Team Plasma Grunt 6 next to teleporter in centre east room (from Route 21)",
+    "Plasma Frigate - Trainer: Team Plasma Grunt 7 between beds in centre east room (from Route 21)",
+    "Plasma Frigate - Trainer: Team Plasma Grunt 9 between beds in southwestern room (from Route 21)",
+    "Plasma Frigate - Trainer: Team Plasma Grunt 10 southeastern room (from Route 21)",
+    "Plasma Frigate - Trainer: Team Plasma Grunt 20 patrolling western side (from Route 21)",
+    "Plasma Frigate - Trainer: Team Plasma Grunt 21 patrolling eastern side (from Route 21)",
+    "Plasma Frigate - Trainer: Team Plasma Grunt 8 northeast of beam puzzle room (from Giant Chasm)",
+    "Plasma Frigate - Trainer: Team Plasma Grunt 24 in southwest of beam puzzle room near two item balls (from Giant Chasm)",
+    "Plasma Frigate - Trainer: Team Plasma Grunt 26 in southeast of beam puzzle room (from Giant Chasm)",
+    "Plasma Frigate - Trainer: Doctor Julius in southeast of beam puzzle room (from Giant Chasm)",
+    "Plasma Frigate - Trainer: Team Plasma Password Grunt 1 northwest of beam puzzle room (from Giant Chasm)",
+    "Plasma Frigate - Trainer: Team Plasma Password Grunt 2 northwest of beam puzzle pit (from Giant Chasm)",
+    "Plasma Frigate - Trainer: Team Plasma Password Grunt 3 northeast of beam puzzle pit (from Giant Chasm)",
+    "Plasma Frigate - Trainer: Team Plasma Password Grunt 4 southeast of beam puzzle pit (from Giant Chasm)",
+    "Plasma Frigate - Trainer: Team Plasma Password Grunt 5 southeast of beam puzzle pit (from Giant Chasm)",
+    "Plasma Frigate - Trainer: Team Plasma Password Grunt 6 north of beam puzzle pit (from Giant Chasm)",
+    "Plasma Frigate - Gift: Team Plasma Password Grunt 6 north of beam puzzle pit (from Giant Chasm)",
+    "Mistralton City - Item: South of runway between greenhouses",
+    'Victory Road - Gift: Section 3: Cave, Ranger Eddie accessed from southeast of League gate',
+    'Victory Road - Gift: Section 3: Cave, Ranger Elle northwest lower',
+    'Victory Road - Item: Section 2: Black Bridge, northwest',
+    'Victory Road - Item: Section 4: Mountain, outside Flash cave',
+    'Victory Road - Item: Section 2: Black Bridge, southwest',
+    'Victory Road - Item: Section 3: Cave, north in Flash section',
+    'Victory Road - Item: Bonus: Grove, southwestern corner',
+    'Victory Road - Item: Bonus: Grove, northeastern corner',
+    'Victory Road - Item: Bonus: White Bridge, southeast of cave entrance',
+    'Victory Road - Item: Section 2: Black Bridge, southeast',
+    'Victory Road - Item: Section 4: Mountain, far southeast of League exit',
+    'Victory Road - Item: Section 3: Cave, southeast across pond in Flash section',
+    'Victory Road - Item: Section 4: Mountain, up second set of stairs north in southwest',
+    'Victory Road - Hidden: Section 3: Cave, south in Flash section',
+    'Victory Road - Hidden: Section 3: Cave, east across pond in Flash section',
+    'Victory Road - Hidden: Section 4: Mountain, southwest halfway up stairs east of Battle Girl',
+    'Victory Road - Hidden: Section 4: Mountain, southeast of League gate in rock',
+    'Victory Road - Hidden: Section 3: Cave, southeast',
+    'Victory Road - Hidden: Section 3: Cave, in rock in southwest',
+    'Victory Road - Trainer: Section 1: Ruins, Ace Trainer Billy in southeast',
+    'Victory Road - Trainer: Section 1: Ruins, Psychic Alia in north',
+    'Victory Road - Trainer: Section 2: Black Bridge, Ace Trainer Beckett north',
+    'Victory Road - Trainer: Section 2: Black Bridge, Ace Trainer Shelly centre',
+    'Victory Road - Trainer: Section 2: Black Bridge, Veteran Cathy southwest',
+    'Victory Road - Trainer: Section 2: Black Bridge, Doctor Logan northwest',
+    'Victory Road - Trainer: Section 3: Cave, Ace Trainer Webster in southeast',
+    'Victory Road - Trainer: Section 3: Cave, Ace Trainer Shanta in southeast',
+    'Victory Road - Trainer: Section 4: Mountain, Veteran Sterling outside League gate atop stairs',
+    'Victory Road - Trainer: Section 4: Mountain, Veteran Portia outside League gate below stairs',
+    'Victory Road - Trainer: Section 4: Mountain, Ace Trainer Caroll down stairs southeast of League gate',
+    'Victory Road - Trainer: Section 4: Mountain, Black Belt Martell down stairs far southeast of League gate',
+    'Victory Road - Trainer: Section 4: Mountain, Ace Trainer Elmer southwest up stairs',
+    'Victory Road - Trainer: Section 4: Mountain, Battle Girl Chalina halfway up stairs in southwest',
+    'Victory Road - Trainer: Bonus: White Bridge, Ace Trainer Pierce by water',
+    'Victory Road - Trainer: Bonus: Grove, Ace Trainer Chandra north',
+    'Victory Road - Trainer: Section 3: Cave, Veteran Abraham southwest',
+    'Victory Road - Trainer: Section 1 via Grove, Ace Trainer Jamie centre',
+    'Victory Road - Trainer: Section 1 via Grove, Psychic Al south',
+    'Victory Road - Trainer: Section 3: Cave, Ranger Eddie accessed from southeast of League gate',
+    'Victory Road - Trainer: Section 3: Cave, Ranger Elle northwest lower',
+})
+
+WHITE2_EXCLUSIVE_LOCATIONS: frozenset[str] = frozenset({
+    "Route 4 - Item: Between two houses in central ruins",
+    "Route 4 - Item: Northwest ruins",
+    "Route 4 - Item: Hidden behind Pokéfan in northeast of ruins",
+    "Route 4 - Item: Inside Cottonee trade house",
+    "Route 4 - Gift: Ace Trainer in first house east of ruins crossroads",
+    "Route 4 - Gift: Black Belt in house in the far southeast of ruins",
+    "Route 4 - Gift: Maid in southwest house (Guess Pokémon cry)",
+    "Route 4 - Trainer: Fisherman Hubert at south water top",
+    "Route 4 - Trainer: Breeder Irene along road in the south",
+    "Route 4 - Hidden: In deep sand in southwest of ruins",
+    "Route 4 - Hidden: Northwest of crossroads along ruins road",
+    "Route 4 - Hidden: Far east deep sand in ruins",
+    "Route 4 - Hidden: Southeast of ruins between two houses",
+    "Route 4 - Hidden: West of Pokéfan in east of ruins",
+    "Route 4 - Trainer: Rich Boy Keenan along ruins road to the west",
+    "Route 4 - Trainer: Backpacker Roland along road north of ruins",
+    "Route 4 - Trainer: Backpacker Rachel east along ruins road",
+    "Route 4 - Trainer: Pokéfan Norbert in far southeast of ruins",
+    "Route 4 - Trainer: Pokéfan Sachiko in northeast ruins",
+    "Route 4 - Trainer: Twins Tara & Val at start of ruins road",
+    "Route 4 - Trainer: Backpacker Clifford in southeast on road",
+    "Route 4 - Trainer: Lady Lina in central ruins",
+    "Reversal Mountain - Item: 1F, above Hiker in the southeast",
+    "Reversal Mountain - Item: 1F, in the west southeast of male Backpacker and Hiker",
+    "Reversal Mountain - Item: 1F, northwest of Black Belt southwest of Ace Trainers",
+    "Reversal Mountain - Item: 1F, south of Scientist in northeast",
+    "Reversal Mountain - Item: 1F, in the west east of the entrance",
+    "Reversal Mountain - Item: B1F, near the entrance to 1F",
+    "Reversal Mountain - Hidden: B1F, in a rock near the big rock",
+    "Reversal Mountain - Hidden: Rock centre-east by B1F stairs",
+    "Reversal Mountain - Hidden: 1F, north in southern dead end west of Ace Trainers, in a rock",
+    "Reversal Mountain - Hidden: North in rock west of Ace Trainers",
+    "Reversal Mountain - Hidden: In central west, northeast of Battle Girl",
+    "Reversal Mountain - Hidden: 1F, far southeast in a rock",
+    "Reversal Mountain - Trainer: 1F, Backpacker Kiyo in west",
+    "Reversal Mountain - Trainer: 1F, Backpacker Kumiko southeast",
+    "Reversal Mountain - Trainer: 1F, Ranger Lewis in the southwest",
+    "Reversal Mountain - Gift: 1F, Ranger Lewis in the southwest",
+    "Reversal Mountain - Trainer: B1F, Ranger Eliza in the northwest",
+    "Reversal Mountain - Gift: B1F, Ranger Eliza in the northwest",
+    "Reversal Mountain - Trainer: 1F, Ace Trainer Ray in north",
+    "Reversal Mountain - Trainer: 1F, Ace Trainer Cora in north",
+    "Reversal Mountain - Trainer: 1F, Hiker Jared southeast",
+    "Reversal Mountain - Trainer: 1F, Hiker Markus in west",
+    "Reversal Mountain - Trainer: 1F, Black Belt Corey centre east",
+    "Reversal Mountain - Trainer: 1F, Battle Girl Chan central west",
+    "Reversal Mountain - Trainer: 1F, Doctor Derek in south",
+    "Plasma Frigate - Item: Near Grunt in southeast of beam puzzle room right ball",
+    "Plasma Frigate - Item: Near Grunt in southeast of beam puzzle room left ball",
+    "Plasma Frigate - Item: B1F, left big room (from Route 21)",
+    "Plasma Frigate - Item: B2F, in the yellow warp panel to left of the puzzle pit",
+    "Plasma Frigate - Trainer: Team Plasma Grunt 22 patrolling on right (from Route 21)",
+    "Plasma Frigate - Trainer: Team Plasma Grunt 27 patrolling on left (from Route 21)",
+    "Plasma Frigate - Trainer: Team Plasma Grunt 11 northwest of beam puzzle room (from Giant Chasm)",
+    "Plasma Frigate - Trainer: Team Plasma Grunt 12 northeast of beam puzzle room (from Giant Chasm)",
+    "Plasma Frigate - Trainer: Team Plasma Grunt 13 top left of puzzle pit (from Giant Chasm)",
+    "Plasma Frigate - Trainer: Team Plasma Grunt 14 northeast of beam puzzle pit (from Giant Chasm)",
+    "Plasma Frigate - Trainer: Team Plasma Grunt 15 centre left of puzzle pit (from Giant Chasm)",
+    "Plasma Frigate - Trainer: Team Plasma Grunt 16 in southwest of beam puzzle room near Doctor (from Giant Chasm)",
+    "Plasma Frigate - Trainer: Team Plasma Grunt 17 in southeast of beam puzzle room near two item balls (from Giant Chasm)",
+    "Plasma Frigate - Trainer: Team Plasma Grunt 18 centre right of puzzle pit (from Giant Chasm)",
+    "Plasma Frigate - Trainer: Doctor Julius in southwest of beam puzzle room (from Giant Chasm)",
+    "Plasma Frigate - Trainer: Team Plasma Password Grunt 1 in bottom right room between beds (from Route 21)",
+    "Plasma Frigate - Trainer: Team Plasma Password Grunt 2 at bottom of left big room (from Route 21)",
+    "Plasma Frigate - Trainer: Team Plasma Password Grunt 3 in top left room (from Route 21)",
+    "Plasma Frigate - Trainer: Team Plasma Password Grunt 4 on right of bottom right room (from Route 21)",
+    "Plasma Frigate - Trainer: Team Plasma Password Grunt 5 in top right room (from Route 21)",
+    "Plasma Frigate - Trainer: Team Plasma Password Grunt 6 in left big room middle (from Route 21)",
+    "Plasma Frigate - Gift: Team Plasma Password Grunt 6 in left big room middle (from Route 21)",
+    "Mistralton City - Item: South of runway between fields",
+    'Victory Road - Gift: Section 4: Cave, Ranger Eddie accessed from southeast of League gate',
+    'Victory Road - Gift: Section 4: Cave, Ranger Elle northwest lower',
+    'Victory Road - Item: Bonus: Black Bridge, east of entrance',
+    'Victory Road - Item: Section 5: Mountain, outside Flash cave',
+    'Victory Road - Item: Bonus: Black Bridge, near Ace Trainer by water',
+    'Victory Road - Item: Section 4: Cave, north in Flash section',
+    'Victory Road - Item: Section 2: Grove, southwestern corner',
+    'Victory Road - Item: Section 2: Grove, northeastern corner',
+    'Victory Road - Item: Section 3: White Bridge, southeast of cave entrance',
+    'Victory Road - Item: Bonus: Black Bridge, across water in southeast',
+    'Victory Road - Item: Section 5: Mountain, far southeast of League exit',
+    'Victory Road - Item: Section 4: Cave, southeast across pond in Flash section',
+    'Victory Road - Item: Section 5: Mountain, up second set of stairs north in southwest',
+    'Victory Road - Hidden: Section 4: Cave, south in Flash section',
+    'Victory Road - Hidden: Section 4: Cave, east across pond in Flash section',
+    'Victory Road - Hidden: Section 5: Mountain, southwest halfway up stairs east of Battle Girl',
+    'Victory Road - Hidden: Section 5: Mountain, southeast of League gate in rock',
+    'Victory Road - Hidden: Section 4: Cave, southeast',
+    'Victory Road - Hidden: Section 4: Cave, in rock in southwest',
+    'Victory Road - Trainer: Section 1, Ace Trainer Jamie centre',
+    'Victory Road - Trainer: Section 1, Psychic Al northwest',
+    'Victory Road - Trainer: Section 1 via Black Bridge, Ace Trainer Billy past Strength boulder',
+    'Victory Road - Trainer: Bonus: Black Bridge, Psychic Alia north',
+    'Victory Road - Trainer: Section 2: Grove, Ace Trainer Beckett north',
+    'Victory Road - Trainer: Section 2: Grove, Ace Trainer Shelly south',
+    'Victory Road - Trainer: Section 3: White Bridge, Veteran Cathy by entrance',
+    'Victory Road - Trainer: Section 3: White Bridge, Doctor Logan north',
+    'Victory Road - Trainer: Section 4: Cave, Ace Trainer Webster in southeast',
+    'Victory Road - Trainer: Section 4: Cave, Ace Trainer Shanta in southeast',
+    'Victory Road - Trainer: Section 5: Mountain, Veteran Sterling outside League gate atop stairs',
+    'Victory Road - Trainer: Section 5: Mountain, Veteran Portia outside League gate below stairs',
+    'Victory Road - Trainer: Section 5: Mountain, Ace Trainer Caroll down stairs southeast of League gate',
+    'Victory Road - Trainer: Section 5: Mountain, Black Belt Martell down stairs far southeast of League gate',
+    'Victory Road - Trainer: Section 5: Mountain, Ace Trainer Elmer southwest up stairs',
+    'Victory Road - Trainer: Section 5: Mountain, Battle Girl Chalina halfway up stairs in southwest',
+    'Victory Road - Trainer: Bonus: Black Bridge, Ace Trainer Pierce by water',
+    'Victory Road - Trainer: Bonus: Black Bridge, Ace Trainer Chandra across water in southeast',
+    'Victory Road - Trainer: Section 4: Cave, Veteran Abraham southwest',
+    'Victory Road - Trainer: Section 4: Cave, Ranger Eddie accessed from southeast of League gate',
+    'Victory Road - Trainer: Section 4: Cave, Ranger Elle northwest lower',
+})
+
+_RULE_PARAM_COUNTS: dict[Any, int] = {}
+
+HABITAT_LIST_LOCATIONS: frozenset[str] = frozenset({
+    "Pinwheel Forest - Gift: Inside: Scientist after Habitat List south",
+    "Route 3 - Gift: School Kid after Habitat List in the north",
+    "Virbank Complex - Gift: Girl at southernmost end after filling Habitat List",
+    "Reversal Mountain - Gift: Scientist after Habitat List in northeast of main cavern",
+})
+
+
 def create_regions_and_locations(world: "PokemonB2W2World") -> dict[str, Region]:
     from ..locations import (
         PokemonB2W2Location,
@@ -60,176 +300,69 @@ def create_regions_and_locations(world: "PokemonB2W2World") -> dict[str, Region]
         SANITY_LOCATION_TABLE,
     )
     from ..locations.items import HIDDEN_ITEM_LOCATIONS
-
-    # Version-exclusive locations
-    BLACK2_EXCLUSIVE_LOCATIONS = {
-        "Route 4 - Item: Near sign in the west",
-        "Route 4 - Item: Hill on western side",
-        "Route 4 - Item: South of Roughnecks in the west",
-        "Route 4 - Item: 2F of second house on right",
-        "Route 4 - Gift: Ace Trainer in first house on right",
-        "Route 4 - Gift: Black Belt in 2F of first left house",
-        "Route 4 - Gift: Maid in third house on right (Guess Pokémon cry)",
-        "Route 4 - Trainer: Fisherman Hubert by water in southwest top",
-        "Route 4 - Trainer: Breeder Irene by Castelia Gate",
-        "Route 4 - Hidden: Western area between stairways southeast of rest house",
-        "Route 4 - Hidden: In deep sand between two stairways south of Policeman",
-        "Route 4 - Hidden: Deep sand north of fences east of the Roughnecks",
-        "Route 4 - Hidden: In the middle of a deep sand patch in the west",
-        "Route 4 - Hidden: Western area west of bikers in deep sand next to barricade",
-        "Route 4 - Trainer: Policeman Braven in south near Castelia Gate",
-        "Route 4 - Trainer: Policeman Dell in north near Nimbasa Gate",
-        "Route 4 - Trainer: Policeman Neagle south of rest house on western side",
-        "Route 4 - Trainer: Roughneck Joey in the west south of the stairs",
-        "Route 4 - Trainer: Roughneck Silvester in northwest fenced area",
-        "Route 4 - Trainer: Biker Stanley in the west",
-        "Route 4 - Trainer: Hooligans Rob & Sal by the south fence in the west",
-        "Route 4 - Trainer: Youngster Sinclair in the west",
-        "Reversal Mountain - Item: 1F, dead-end tunnel north of Battle Girl",
-        "Reversal Mountain - Item: 1F, dead-end tunnel east of Doctor in south of main cavern",
-        "Reversal Mountain - Item: 1F, south of Hiker in north of main cavern",
-        "Reversal Mountain - Item: 1F, east of Black Belt in west of main cavern",
-        "Reversal Mountain - Item: 1F, dead-end tunnel east of Backpacker and Hiker in southwest of main cavern",
-        "Reversal Mountain - Hidden: B1F, in the stalagmite below the stairs",
-        "Reversal Mountain - Hidden: 1F, in the stalagmite north of Backpacker and Hiker in the west",
-        "Reversal Mountain - Hidden: 1F, in stalagmite south of Scientist in east of main cavern",
-        "Reversal Mountain - Hidden: 1F, in stalagmite in the southeast of main cavern",
-        "Reversal Mountain - Hidden: 1F, dead end south of Ace Trainers in north of main cavern",
-        "Reversal Mountain - Hidden: 1F, dead-end tunnel east of Backpacker and Hiker in south",
-        "Reversal Mountain - Trainer: 1F, Backpacker Kiyo in southwest of main cavern",
-        "Reversal Mountain - Trainer: 1F, Backpacker Kumiko in north of main cavern",
-        "Reversal Mountain - Trainer: Ranger Lewis B1F to the left",
-        "Reversal Mountain - Trainer: Ranger Eliza 1F in south of the main cavern",
-        "Reversal Mountain - Trainer: 1F, Ace Trainer Ray in north of main cavern",
-        "Reversal Mountain - Trainer: 1F, Ace Trainer Cora in north of main cavern",
-        "Reversal Mountain - Trainer: 1F, Hiker Jared in north of main cavern",
-        "Reversal Mountain - Trainer: 1F, Hiker Markus in southwest of main cavern",
-        "Reversal Mountain - Trainer: 1F, Black Belt Corey in the west of the main cavern",
-        "Reversal Mountain - Trainer: 1F, Battle Girl Chan in south of main cavern",
-        "Reversal Mountain - Trainer: 1F, Doctor Derek by stairs to B1F in south of main cavern",
-        "Plasma Frigate - Item: B2F, bow side of the maze",
-        "Plasma Frigate - Item: B2F, near Grunt with Krokorok and Krookodile (Max Revive)",
-        "Plasma Frigate - Item: B2F, near Grunt with Krokorok and Krookodile (Max Elixir)",
-        "Plasma Frigate - Item: In the northeast room",
-        "Plasma Frigate - Item: B2F, bow side from Grunt with Drapion",
-        "Plasma Frigate - Trainer: Team Plasma Grunt 1 by teleporter in southwestern room (from Route 21)",
-        "Plasma Frigate - Trainer: Team Plasma Grunt 6 next to teleporter in centre east room (from Route 21)",
-        "Plasma Frigate - Trainer: Team Plasma Grunt 7 between beds in centre east room (from Route 21)",
-        "Plasma Frigate - Trainer: Team Plasma Grunt 8 (from Giant Chasm)",
-        "Plasma Frigate - Trainer: Team Plasma Grunt 9 between beds in southwestern room (from Route 21)",
-        "Plasma Frigate - Trainer: Team Plasma Grunt 10 southeastern room (from Route 21)",
-        "Plasma Frigate - Trainer: Team Plasma Grunt at entrance (from Route 21)",
-        "Plasma Frigate - Trainer: Team Plasma Grunt 22 (from Giant Chasm)",
-        "Plasma Frigate - Trainer: Team Plasma Grunt 27 (from Giant Chasm)",
-        "Plasma Frigate - Trainer: Team Plasma Grunt 24 (from Giant Chasm)",
-        "Plasma Frigate - Trainer: Team Plasma Grunt 26 (from Giant Chasm)",
-        "Plasma Frigate - Trainer: Doctor Julius (from Giant Chasm)",
-        "Mistralton City - Item: South of runway between greenhouses",
-    }
-
-    WHITE2_EXCLUSIVE_LOCATIONS = {
-        "Route 4 - Item: Between two houses in central ruins",
-        "Route 4 - Item: Northwest ruins",
-        "Route 4 - Item: Hidden behind Pokéfan in northeast of ruins",
-        "Route 4 - Item: Inside Cottonee trade house",
-        "Route 4 - Gift: Ace Trainer in first house east of ruins crossroads",
-        "Route 4 - Gift: Black Belt in house in the far southeast of ruins",
-        "Route 4 - Gift: Maid in southwest house (Guess Pokémon cry)",
-        "Route 4 - Trainer: Fisherman Hubert at south water top",
-        "Route 4 - Trainer: Breeder Irene along road in the south",
-        "Route 4 - Hidden: In deep sand in southwest of ruins",
-        "Route 4 - Hidden: Northwest of crossroads along ruins road",
-        "Route 4 - Hidden: Far east deep sand in ruins",
-        "Route 4 - Hidden: Southeast of ruins between two houses",
-        "Route 4 - Hidden: West of Pokéfan in east of ruins",
-        "Route 4 - Trainer: Rich Boy Keenan along ruins road to the west",
-        "Route 4 - Trainer: Backpacker Roland along road north of ruins",
-        "Route 4 - Trainer: Backpacker Rachel east along ruins road",
-        "Route 4 - Trainer: Pokéfan Norbert in far southeast of ruins",
-        "Route 4 - Trainer: Pokéfan Sachiko in northeast ruins",
-        "Route 4 - Trainer: Twins Tara & Val at start of ruins road",
-        "Route 4 - Trainer: Backpacker Clifford in southeast on road",
-        "Route 4 - Trainer: Lady Lina in central ruins",
-        "Reversal Mountain - Item: 1F, above Hiker in the southeast",
-        "Reversal Mountain - Item: 1F, in the west southeast of male Backpacker and Hiker",
-        "Reversal Mountain - Item: 1F, northwest of Black Belt southwest of Ace Trainers",
-        "Reversal Mountain - Item: 1F, south of Scientist in northeast",
-        "Reversal Mountain - Item: 1F, in the west east of the entrance",
-        "Reversal Mountain - Item: B1F, near the entrance to 1F",
-        "Reversal Mountain - Hidden: B1F, in a rock near the big rock",
-        "Reversal Mountain - Hidden: Rock centre-east by B1F stairs",
-        "Reversal Mountain - Hidden: 1F, north in southern dead end west of Ace Trainers, in a rock",
-        "Reversal Mountain - Hidden: North in rock west of Ace Trainers",
-        "Reversal Mountain - Hidden: In central west, northeast of Battle Girl",
-        "Reversal Mountain - Hidden: 1F, far southeast in a rock",
-        "Reversal Mountain - Trainer: 1F, Backpacker Kiyo in west",
-        "Reversal Mountain - Trainer: 1F, Backpacker Kumiko southeast",
-        "Reversal Mountain - Trainer: 1F, Ranger Lewis in the southwest",
-        "Reversal Mountain - Trainer: B1F, Ranger Eliza in the northwest",
-        "Reversal Mountain - Trainer: 1F, Ace Trainer Ray in north",
-        "Reversal Mountain - Trainer: 1F, Ace Trainer Cora in north",
-        "Reversal Mountain - Trainer: 1F, Hiker Jared southeast",
-        "Reversal Mountain - Trainer: 1F, Hiker Markus in west",
-        "Reversal Mountain - Trainer: 1F, Black Belt Corey centre east",
-        "Reversal Mountain - Trainer: 1F, Battle Girl Chan central west",
-        "Reversal Mountain - Trainer: 1F, Doctor Derek in south",
-        "Plasma Frigate - Item: B2F, top of the beam puzzle maze bow side of the maze",
-        "Plasma Frigate - Item: Near Grunt in southeast of beam puzzle room right ball",
-        "Plasma Frigate - Item: Near Grunt in southeast of beam puzzle room left ball",
-        "Plasma Frigate - Item: B1F, bigger room on the left",
-        "Plasma Frigate - Item: B2F, in the yellow warp panel to left of the puzzle pit",
-        "Plasma Frigate - Trainer: Team Plasma Grunt 11 northwest of beam puzzle room (from Giant Chasm)",
-        "Plasma Frigate - Trainer: Team Plasma Grunt 12 northeast of beam puzzle room (from Giant Chasm)",
-        "Plasma Frigate - Trainer: Team Plasma Grunt 13 top left of puzzle pit (from Giant Chasm)",
-        "Plasma Frigate - Trainer: Team Plasma Grunt 14 northeast of beam puzzle pit (from Giant Chasm)",
-        "Plasma Frigate - Trainer: Team Plasma Grunt 15 centre left of puzzle pit (from Giant Chasm)",
-        "Plasma Frigate - Trainer: Team Plasma Grunt 16 in southwest of beam puzzle room near doctor (from Giant Chasm)",
-        "Plasma Frigate - Trainer: Team Plasma Grunt 17 in southeast of beam puzzle room near two item balls (from Giant Chasm)",
-        "Plasma Frigate - Trainer: Team Plasma Grunt 18 centre right of puzzle pit (from Giant Chasm)",
-        "Plasma Frigate - Trainer: Team Plasma Grunt 23 left ambushing double battling grunt guarding southern door (from Giant Chasm)",
-        "Plasma Frigate - Trainer: Team Plasma Grunt 25 right ambushing double battling grunt guarding southern door (from Giant Chasm)",
-        "Plasma Frigate - Trainer: Doctor Julius in southwest of beam puzzle room (from Giant Chasm)",
-        "Mistralton City - Item: South of runway between fields",
-    }
+    from itertools import chain
 
     v_opt = getattr(world.options, "version", None)
     v_key = v_opt.current_key if v_opt is not None else "black2"
+    player = world.player
 
     regions: dict[str, Region] = {
-        name: Region(name, world.player, world.multiworld)
+        name: Region(name, player, world.multiworld)
         for name in REGION_LIST
     }
 
     # Connect regions
-    import inspect
     for conn in REGION_CONNECTIONS:
         src = regions[conn.source]
         dst = regions[conn.destination]
         conn_name = conn.name or f"{conn.source} -> {conn.destination}"
         if conn.rule is not None:
             rule_fn = conn.rule
-            sig = inspect.signature(rule_fn)
-            if len(sig.parameters) >= 3:
-                src.connect(dst, conn_name, lambda state, fn=rule_fn: fn(state, world.player, world))
+            param_count = _RULE_PARAM_COUNTS.get(rule_fn)
+            if param_count is None:
+                param_count = len(inspect.signature(rule_fn).parameters)
+                _RULE_PARAM_COUNTS[rule_fn] = param_count
+            if param_count >= 3:
+                src.connect(dst, conn_name, lambda state, fn=rule_fn, p=player, w=world: fn(state, p, w))
             else:
-                src.connect(dst, conn_name, lambda state, fn=rule_fn: fn(state, world.player))
+                src.connect(dst, conn_name, lambda state, fn=rule_fn, p=player: fn(state, p))
         else:
             src.connect(dst, conn_name)
 
     world.multiworld.regions.extend(regions.values())
 
+    dowsing_opt = getattr(world.options, "dowsing_machine_logic", None)
+    dowsing_required = dowsing_opt is None or int(getattr(dowsing_opt, "value", dowsing_opt)) != 2
+    rule_cache: dict[str, Callable[[Any], bool] | None] = {}
+
     def make_access_rule(loc_name: str, base_rule):
+        if loc_name in rule_cache:
+            return rule_cache[loc_name]
         tags = []
         if base_rule is not None:
             tags.append(base_rule)
-        if loc_name in HIDDEN_ITEM_LOCATIONS:
-            tags.append(lambda state, p: has_dowsing_machine(state, p, world))
+        if dowsing_required and loc_name in HIDDEN_ITEM_LOCATIONS:
+            tags.append(lambda state, p: state.has("Dowsing Machine", p))
         if loc_name in LOCATION_RULES:
             rule_cb = LOCATION_RULES[loc_name]
-            tags.append(lambda state, p, cb=rule_cb: cb(state, p, world))
+            tags.append(lambda state, p, cb=rule_cb, w=world: cb(state, p, w))
         if not tags:
-            return None
-        return lambda state: all(t(state, world.player) for t in tags)
+            compiled = None
+        elif len(tags) == 1:
+            t0 = tags[0]
+            compiled = lambda state, fn0=t0, p=player: fn0(state, p)
+        elif len(tags) == 2:
+            t0, t1 = tags
+            compiled = lambda state, fn0=t0, fn1=t1, p=player: fn0(state, p) and fn1(state, p)
+        else:
+            tag_tuple = tuple(tags)
+            compiled = lambda state, fns=tag_tuple, p=player: all(fn(state, p) for fn in fns)
+        rule_cache[loc_name] = compiled
+        return compiled
+
+    is_b2 = v_key in ("black2", "black_2", "b2")
+    is_w2 = v_key in ("white2", "white_2", "w2")
+    excluded_by_version = WHITE2_EXCLUSIVE_LOCATIONS if is_b2 else (BLACK2_EXCLUSIVE_LOCATIONS if is_w2 else frozenset())
 
     rem_opt = getattr(world.options, "exclude_postgame_checks", None)
     remove_postgame = rem_opt is not None and bool(rem_opt.value)
@@ -246,6 +379,7 @@ def create_regions_and_locations(world: "PokemonB2W2World") -> dict[str, Region]
                 test_state.collect(world.create_item(item_name))
             for item_name in TM_ITEM_TABLE:
                 test_state.collect(world.create_item(item_name))
+            test_state.collect(world.create_item("Prop Case"))
 
             # BFS reachability of regions starting from Aspertia city
             reachable_regions: set[str] = set()
@@ -261,7 +395,9 @@ def create_regions_and_locations(world: "PokemonB2W2World") -> dict[str, Region]
                                 reachable_regions.add(exit_conn.connected_region.name)
                                 queue.append(exit_conn.connected_region)
 
-            for loc_name, loc_info in {**BASE_LOCATION_TABLE, **TRAINER_LOCATION_TABLE}.items():
+            for loc_name, loc_info in chain(BASE_LOCATION_TABLE.items(), TRAINER_LOCATION_TABLE.items()):
+                if loc_name in excluded_by_version:
+                    continue
                 reg_name = loc_info.region or infer_region_from_name(loc_name)
                 if reg_name not in reachable_regions:
                     excluded_postgame_locations.add(loc_name)
@@ -273,20 +409,17 @@ def create_regions_and_locations(world: "PokemonB2W2World") -> dict[str, Region]
             world._evaluating_pre_goal = False
 
     def is_loc_allowed(name: str) -> bool:
-        if name in excluded_postgame_locations:
-            return False
-        if v_key in ("black2", "black_2", "b2"):
-            return name not in WHITE2_EXCLUSIVE_LOCATIONS
-        elif v_key in ("white2", "white_2", "w2"):
-            return name not in BLACK2_EXCLUSIVE_LOCATIONS
-        return True
+        return name not in excluded_postgame_locations and name not in excluded_by_version
 
     # Place base item/gift/badge/tm locations
     hidden_enabled = getattr(world.options, "hidden_items", None) is None or bool(world.options.hidden_items.value)
+    habitat_enabled = getattr(world.options, "habitat_list_checks", None) is None or bool(world.options.habitat_list_checks.value)
     for loc_name, loc_info in BASE_LOCATION_TABLE.items():
         if not is_loc_allowed(loc_name):
             continue
         if loc_name in HIDDEN_ITEM_LOCATIONS and not hidden_enabled:
+            continue
+        if loc_name in HABITAT_LIST_LOCATIONS and not habitat_enabled:
             continue
         reg_name = loc_info.region or infer_region_from_name(loc_name)
         region = regions.get(reg_name, regions["Aspertia City"])

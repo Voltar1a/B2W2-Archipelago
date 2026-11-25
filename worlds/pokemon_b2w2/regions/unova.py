@@ -459,9 +459,14 @@ REGION_CONNECTIONS: list[ConnectionInfo] = [
 ]
 
 
+_SORTED_REGIONS_FOR_INFER: tuple[tuple[str, str, str], ...] = tuple(
+    (r, f" - {r}", f"- {r}") for r in sorted(REGION_LIST, key=len, reverse=True)
+)
+
+
 def infer_region_from_name(loc_name: str) -> str:
     # Infers the region for a location when not explicitly set
-    for region in sorted(REGION_LIST, key=len, reverse=True):
-        if loc_name.startswith(region) or f" - {region}" in loc_name or f"- {region}" in loc_name:
+    for region, dash_spaced, dash_tight in _SORTED_REGIONS_FOR_INFER:
+        if loc_name.startswith(region) or dash_spaced in loc_name or dash_tight in loc_name:
             return region
     return "Aspertia City"

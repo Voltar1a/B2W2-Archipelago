@@ -229,6 +229,29 @@ class PokemonB2W2Client(BizHawkClient):
                 import asyncio
                 asyncio.create_task(ctx.disconnect(allow_autoreconnect=False))
                 return
+        elif cmd == "Connected":
+            self._cleared_legendaries = set()
+            self._cleared_legendaries_loaded = False
+            self._synced_cleared_legendaries = set()
+            if getattr(ctx, "slot", None) is not None and getattr(ctx, "team", None) is not None:
+                import asyncio
+                key = f"pokemon_b2w2_cleared_legendaries_{ctx.team}_{ctx.slot}"
+                asyncio.create_task(ctx.send_msgs([{"cmd": "Get", "keys": [key]}]))
+        elif cmd == "Retrieved":
+            if getattr(ctx, "slot", None) is not None and getattr(ctx, "team", None) is not None:
+                key = f"pokemon_b2w2_cleared_legendaries_{ctx.team}_{ctx.slot}"
+                keys = args.get("keys", {})
+                if key in keys:
+                    val = keys[key]
+                    if not hasattr(self, "_cleared_legendaries") or self._cleared_legendaries is None:
+                        self._cleared_legendaries = set()
+                    if isinstance(val, list):
+                        server_set = {str(x) for x in val}
+                        self._cleared_legendaries.update(server_set)
+                        self._synced_cleared_legendaries = server_set
+                    else:
+                        self._synced_cleared_legendaries = set()
+                    self._cleared_legendaries_loaded = True
         elif cmd == "Bounced":
             pass
 

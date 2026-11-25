@@ -43,14 +43,37 @@ class OverlayWrapper:
         self.sinitInitEnd: int = ov.sinit_init_end
         self.fileID: int = -(index + 1)
         self.compressed: bool = ov.is_compressed()
-        if self.compressed:
-            dec, _ = decompress_code(ov.data, len(ov.data))
-            self.data: bytes = dec
-        else:
-            self.data = ov.data
+        self._data: bytes | None = None
+        self._dirty_compress: bool | None = None
+
+    @property
+    def data(self) -> bytes:
+        if self._data is None:
+            if self._ov.is_compressed():
+                dec, _ = decompress_code(self._ov.data, len(self._ov.data))
+                self._data = dec
+            else:
+                self._data = self._ov.data
+        return self._data
+
+    @data.setter
+    def data(self, value: bytes | bytearray) -> None:
+        self._data = bytes(value)
 
     def save(self, compress: bool = False) -> bytes:
         raw = bytes(self.data)
+        self.ramSize = len(raw)
+        self._ov.ram_size = len(raw)
+        self.compressed = bool(compress)
+        self._dirty_compress = bool(compress)
+        return raw
+
+    def flush(self) -> bytes:
+        if self._dirty_compress is None:
+            return self._ov.data
+        raw = bytes(self.data)
+        compress = self._dirty_compress
+        self._dirty_compress = None
         self.ramSize = len(raw)
         self._ov.ram_size = len(raw)
         if compress:
@@ -107,6 +130,7 @@ class NintendoDSRom:
         self.files = _FilesProxy(self._rom)
         self.filenames = _FilenamesProxy()
         self._arm9_overlay_table: bytes = b""
+        self._overlay_cache: dict[int, OverlayWrapper] = {}
 
     @classmethod
     def fromFile(cls, filePath: str | Path) -> "NintendoDSRom":
@@ -166,10 +190,16 @@ class NintendoDSRom:
         out: dict[int, OverlayWrapper] = {}
         for idx, ov in enumerate(self._rom.arm9_overlays):
             if wanted is None or ov.id in wanted:
-                out[ov.id] = OverlayWrapper(ov, idx)
+                wrapper = self._overlay_cache.get(ov.id)
+                if wrapper is None:
+                    wrapper = OverlayWrapper(ov, idx)
+                    self._overlay_cache[ov.id] = wrapper
+                out[ov.id] = wrapper
         return out
 
     def save(self, updateDeviceCapacity: bool = False) -> bytes:
+        for wrapper in self._overlay_cache.values():
+            wrapper.flush()
         return self._rom.to_bytes()
 
     def saveToFile(self, filePath: str | Path, updateDeviceCapacity: bool = False) -> None:

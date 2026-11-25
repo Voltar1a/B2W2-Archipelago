@@ -302,7 +302,7 @@ commands_table: dict[int, tuple[str, ...]] = {
     0x132: ('PokecenPCClose', '2a' ),
     0x134: ('CasteliaRushInit', ),
     0x135: ('FieldSetWeather', '2a', '2a' ),
-    0x136: ('FieldSetWeather', '2a', '2a' ),
+    0x136: ('FieldSetWeather2', '2a', '2a' ),
     0x137: ('SaveDataWrite', '2a' ),
     0x138: ('SaveDataGetStatus', '2a', '2a', '2a' ),
     0x139: ('GameCommDisconnect', '2a' ),

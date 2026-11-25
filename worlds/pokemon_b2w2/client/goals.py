@@ -57,7 +57,7 @@ def is_trainer_defeated(trainer: str, client: "PokemonB2W2Client") -> bool:
         case "cynthia":
             return bool(client.get_flag(1976))
         case "benga":
-            return any(client.get_flag(f) for f in (1689, 1690, 2267, 2268, 2269, 2270))
+            return client.get_var(16708) >= 1
         case "alder":
             return bool(client.get_flag(2102))
         case "colress":
@@ -67,13 +67,13 @@ def is_trainer_defeated(trainer: str, client: "PokemonB2W2Client") -> bool:
         case "league_rematch":
             return bool(client.get_flag(2056) or client.get_flag(2301))
         case "gamefreak_morimoto":
-            return bool(client.get_flag(1660) or client.get_flag(2112))
+            return bool(client.get_flag(1660))
         case "gamefreak_nishino":
-            return bool(client.get_flag(1877) or client.get_flag(2111))
+            return bool(client.get_flag(2111))
         case "hugh":
             return any(
                 client.get_flag(f)
-                for f in (1898, 1899, 1900, 2204, 2205, 2206, 2216, 2217, 2218)
+                for f in (2213, 2214, 2215, 2216, 2217, 2218)
             )
         case "ghetsis":
             return bool(client.get_flag(1865) or client.get_flag(885))
@@ -86,8 +86,8 @@ async def check_top_trainers(client: "PokemonB2W2Client", ctx: "BizHawkClientCon
     opts = ctx.slot_data.get("options", {})
     required = opts.get("top_trainers_required", 5)
     allowed = opts.get("top_trainers_allowed", [
-        "cynthia", "benga", "alder", "colress", "n", "league_rematch",
-        "gamefreak_morimoto", "gamefreak_nishino", "hugh", "ghetsis"
+        "ghetsis", "cynthia", "hugh", "alder", "gamefreak_morimoto",
+        "gamefreak_nishino", "n", "colress", "league_rematch", "benga"
     ])
     defeated_count = sum(1 for t in allowed if is_trainer_defeated(t, client))
     return defeated_count >= required
@@ -138,9 +138,9 @@ async def check_legendary_hunt(client: "PokemonB2W2Client", ctx: "BizHawkClientC
     opts = ctx.slot_data.get("options", {})
     required = opts.get("legendary_hunt_required", 3)
     allowed = opts.get("legendary_hunt_allowed", [
-        "cobalion", "virizion", "terrakion", "zekrom_reshiram", "kyurem",
-        "latios_latias", "uxie", "mesprit", "azelf", "heatran",
-        "cresselia", "regirock", "registeel_regice"
+        "cobalion", "virizion", "terrakion", "kyurem", "zekrom_reshiram",
+        "mesprit", "azelf", "uxie", "heatran", "cresselia",
+        "regirock", "registeel_regice", "latios_latias"
     ])
     cleared = getattr(client, "_cleared_legendaries", None)
     defeated_count = 0
@@ -149,6 +149,23 @@ async def check_legendary_hunt(client: "PokemonB2W2Client", ctx: "BizHawkClientC
             if cleared is not None:
                 cleared.add(loc)
             defeated_count += 1
+    if (
+        cleared is not None
+        and getattr(client, "_cleared_legendaries_loaded", False)
+        and getattr(ctx, "slot", None) is not None
+        and getattr(ctx, "team", None) is not None
+    ):
+        synced = getattr(client, "_synced_cleared_legendaries", set())
+        if cleared != synced:
+            key = f"pokemon_b2w2_cleared_legendaries_{ctx.team}_{ctx.slot}"
+            await ctx.send_msgs([{
+                "cmd": "Set",
+                "key": key,
+                "default": [],
+                "want_reply": False,
+                "operations": [{"operation": "replace", "value": sorted(cleared)}],
+            }])
+            client._synced_cleared_legendaries = set(cleared)
     return defeated_count >= required
 
 

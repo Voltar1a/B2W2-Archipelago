@@ -31,7 +31,7 @@ class RivalName(FreeText):
 
 
 class InstantText(Toggle):
-    """All dialogue and textboxes display instantly. NOT changeable ingame."""
+    """All dialogue and textboxes display instantly. Not changeable ingame."""
     display_name = "Instant Text"
     default = True
 
@@ -42,20 +42,20 @@ class BlindTrainers(Toggle):
     default = False
 
 
-class TalkToTrainerWithoutBattling(Toggle):
-    """Testing option: talking to trainers (including scripted battles) skips the battle and marks them defeated."""
-    display_name = "Talk to Trainer Without Battling"
-    default = False
+# class TalkToTrainerWithoutBattling(Toggle):
+#     """Testing option: talking to trainers (including scripted battles) skips the battle and marks them defeated."""
+#     display_name = "Talk to Trainer Without Battling"
+#     default = False
 
 
 class GuaranteedCatch(Toggle):
-    """Any Poké Ball thrown guarantees 100% catch rate. Changeable ingame via APtransceiver."""
+    """Any Poké Ball thrown guarantees a catch. Changeable ingame via APtransceiver."""
     display_name = "Guaranteed Catch Rate"
     default = False
 
 
 class TMHMFullyCompatible(Toggle):
-    """Allows all Pokémon to learn all TMs and HMs. NOT changeable ingame."""
+    """Allows all Pokémon to learn all TMs and HMs. Not changeable ingame."""
     display_name = "Universal TM/HM Compatibility"
     default = False
 
@@ -122,7 +122,7 @@ class GuaranteedEscape(Toggle):
 
 
 class FastHatch(Toggle):
-    """Eggs hatch after walking just a few steps (1 egg cycle). NOT changeable ingame."""
+    """Eggs hatch after walking just a few steps (1 egg cycle). Not changeable ingame."""
     display_name = "Fast Egg Hatching"
     default = True
 
@@ -134,7 +134,7 @@ class FastHatch(Toggle):
 
 
 class InfiniteRepels(Toggle):
-    """Starts you with 999 Max Repels and refills them automatically upon use. NOT changeable ingame."""
+    """Starts you with 999 Max Repels and refills them automatically upon use. Not changeable ingame."""
     display_name = "Infinite Repels"
     default = False
 
@@ -170,7 +170,7 @@ class LivingRoomStarter(Toggle):
 
 
 class MaxFriendship(Toggle):
-    """All obtained Pokémon join with maximum friendship (255). NOT changeable ingame."""
+    """All obtained Pokémon join with maximum friendship (255). Not changeable ingame."""
     display_name = "Max Friendship"
     default = True
 

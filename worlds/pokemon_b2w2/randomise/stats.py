@@ -56,12 +56,26 @@ def randomise_level_up_movesets(rom: NintendoDSRom, options: dict[str, Any], rng
     if not damaging_moves:
         damaging_moves = [1, 33]  # Fallback to pound, tackle
 
+    # Preserve moves required for move-based evolutions (method 21 in a/0/1/9)
+    evo_required_moves: dict[int, set[int]] = {}
+    a019_data = rom.getFileByName("a/0/1/9")
+    if a019_data is not None:
+        a019 = NARC(a019_data)
+        for sp_id in range(len(a019.files)):
+            edata = a019.files[sp_id]
+            for s in range(len(edata) // 6):
+                m = int.from_bytes(edata[s * 6:s * 6 + 2], "little")
+                p = int.from_bytes(edata[s * 6 + 2:s * 6 + 4], "little")
+                if m == 21 and p > 0:
+                    evo_required_moves.setdefault(sp_id, set()).add(p)
+
     a018 = NARC(rom.getFileByName("a/0/1/8"))
     for i in range(1, len(a018.files)):
         ldata = bytearray(a018.files[i])
         if len(ldata) < 4:
             continue
 
+        protected_moves = evo_required_moves.get(i, ())
         num_slots = len(ldata) // 4
         for slot_idx in range(num_slots):
             offset = slot_idx * 4
@@ -69,6 +83,8 @@ def randomise_level_up_movesets(rom: NintendoDSRom, options: dict[str, Any], rng
             level = int.from_bytes(ldata[offset + 2:offset + 4], "little")
             if move_id == 0xFFFF and level == 0xFFFF:
                 break
+            if move_id in protected_moves:
+                continue
             # The first move (slot 0) must always be a damaging move
             if slot_idx == 0:
                 new_move = rng.choice(damaging_moves)

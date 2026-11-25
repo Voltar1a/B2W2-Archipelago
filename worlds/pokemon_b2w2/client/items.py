@@ -366,7 +366,7 @@ async def ensure_infinite_repels(client: "PokemonB2W2Client", ctx: "BizHawkClien
 
 
 async def reload_key_items(client: "PokemonB2W2Client", ctx: "BizHawkClientContext") -> None:
-    # Re-adds any received key items, TMs/HMs, or badges if the player reset without saving
+    # Readds any received key items, TMs/HMs, or badges if the player reset without saving
     received_count = await client.read_var(ctx, RECEIVED_ITEMS_VAR)
     if received_count == 0xFFFF or received_count == 0:
         return

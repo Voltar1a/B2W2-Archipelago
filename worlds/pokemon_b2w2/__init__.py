@@ -17,7 +17,7 @@ from .options.groups import option_groups
 from .regions import create_regions_and_locations, check_goal_completion
 from .rom import PokemonB2W2Patch, PokemonB2Patch, PokemonW2Patch
 
-APWORLD_VERSION = "0.0.4"
+APWORLD_VERSION = "0.0.5"
 
 bizhawk_client.register_client()
 
@@ -94,6 +94,7 @@ class PokemonB2W2World(World):
                     "legendary_hunt_allowed",
                     "shuffle_badges",
                     "hidden_items",
+                    "habitat_list_checks",
                     "trainersanity",
                     "flash_logic",
                     "dowsing_machine_logic",
@@ -121,6 +122,10 @@ class PokemonB2W2World(World):
         if goal_opt is not None and not active_goals:
             goal_opt.value = {"champion"}
             active_goals = {"champion"}
+
+        excl_post = getattr(self.options, "exclude_postgame_checks", None)
+        if excl_post is not None and active_goals.issubset({"champion", "iris"}):
+            excl_post.value = 1
 
         # Clamp goal requirement counts and fill empty allowed sets with a random target
         top_allowed = getattr(self.options, "top_trainers_allowed", None)
@@ -281,7 +286,11 @@ class PokemonB2W2World(World):
             "Magma Stone",
             "Permit",
             "TM70 Flash",
+            "Grubby Hanky",
         ]
+        v_opt = getattr(self.options, "version", None)
+        v_key = v_opt.current_key if v_opt is not None else "black2"
+        other_progression_items.append("Light Stone" if v_key in ("white2", "white_2", "w2") else "Dark Stone")
         ts_opt = getattr(self.options, "trainersanity", None)
         if ts_opt is not None and ts_opt.value:
             other_progression_items.append("Prop Case")
@@ -418,13 +427,23 @@ class PokemonB2W2World(World):
         patch.write()
 
     def fill_slot_data(self) -> Mapping[str, Any]:
+        cached = getattr(self, "_cached_slot_data", None)
+        if cached is not None:
+            return cached
+
         remote_flags: list[int] = []
         remote_recipients: set[str] = set()
         loc_check_info: dict[str, list[Any]] = {}
+        trainer_checks: list[int] = []
 
         for loc in self.multiworld.get_locations(self.player):
-            if loc.address in LOCATION_ID_TO_FLAG and loc.item is not None:
-                f_id = LOCATION_ID_TO_FLAG[loc.address]
+            addr = loc.address
+            if addr is None:
+                continue
+            if 810000 <= addr < 820000:
+                trainer_checks.append(addr)
+            if addr in LOCATION_ID_TO_FLAG and loc.item is not None:
+                f_id = LOCATION_ID_TO_FLAG[addr]
                 if f_id is not None:
                     is_local = bool(loc.item.player == self.player)
                     recipient_name = self.multiworld.get_player_name(loc.item.player)
@@ -433,8 +452,9 @@ class PokemonB2W2World(World):
                         remote_recipients.add(recipient_name)
                     classification = loc.item.classification
                     class_val = int(classification.value if hasattr(classification, "value") else classification)
-                    if str(f_id) not in loc_check_info:
-                        loc_check_info[str(f_id)] = [
+                    f_str = str(f_id)
+                    if f_str not in loc_check_info:
+                        loc_check_info[f_str] = [
                             loc.item.name,
                             recipient_name,
                             class_val,
@@ -442,18 +462,12 @@ class PokemonB2W2World(World):
                         ]
 
         remote_flags.sort()
+        trainer_checks.sort()
         recipient_label = (
             next(iter(remote_recipients))
             if len(remote_recipients) == 1
             else ("another world" if not remote_recipients else "their ally")
         )
-
-        # Collect all active trainer checks by location ID
-        trainer_checks = sorted([
-            loc.address
-            for loc in self.multiworld.get_locations(self.player)
-            if loc.address is not None and 810000 <= loc.address < 820000
-        ])
 
         # Generate Pokemon locations mapping (encounter areas + statics)
         from .randomise.wild_tables import get_pokemon_locations
@@ -475,7 +489,7 @@ class PokemonB2W2World(World):
         except Exception:
             pass
 
-        return {
+        self._cached_slot_data = {
             "apworld_version": APWORLD_VERSION,
             "version": self.options.version.current_key,
             "starting_day": getattr(self, "starting_day", 0),
@@ -504,6 +518,7 @@ class PokemonB2W2World(World):
                 "exclude_postgame_checks": bool(self.options.exclude_postgame_checks.value),
                 "shuffle_badges": bool(self.options.shuffle_badges.value),
                 "hidden_items": bool(self.options.hidden_items.value),
+                "habitat_list_checks": bool(self.options.habitat_list_checks.value),
                 "flash_logic": bool(self.options.flash_logic.value),
                 "dowsing_machine_logic": int(self.options.dowsing_machine_logic.value),
                 "trainersanity": int(self.options.trainersanity.value),
@@ -520,7 +535,7 @@ class PokemonB2W2World(World):
                 "catch_rate_multiplier": int(self.options.catch_rate_multiplier.value),
                 "exp_multiplier": int(self.options.exp_multiplier.value),
                 "blind_trainers": bool(self.options.blind_trainers.value),
-                "talk_to_trainer_without_battling": bool(self.options.talk_to_trainer_without_battling.value),
+                # "talk_to_trainer_without_battling": bool(self.options.talk_to_trainer_without_battling.value),
                 "hold_a_turbo": bool(self.options.hold_a_turbo.value),
                 "fast_hatch": bool(self.options.fast_hatch.value),
                 "fast_fishing": bool(self.options.fast_fishing.value),
@@ -542,6 +557,7 @@ class PokemonB2W2World(World):
                 "randomise_level_up_movesets": list(self.options.randomise_level_up_movesets.value) if isinstance(self.options.randomise_level_up_movesets.value, (set, list)) else bool(self.options.randomise_level_up_movesets.value),
             },
         }
+        return self._cached_slot_data
 
 try:
     from worlds.LauncherComponents import Component, SuffixIdentifier, Type, components, launch_subprocess
