@@ -17,7 +17,7 @@ from .options.groups import option_groups
 from .regions import create_regions_and_locations, check_goal_completion
 from .rom import PokemonB2W2Patch, PokemonB2Patch, PokemonW2Patch
 
-APWORLD_VERSION = "0.1.0"
+APWORLD_VERSION = "0.1.1"
 
 bizhawk_client.register_client()
 
@@ -535,7 +535,7 @@ class PokemonB2W2World(World):
                 "catch_rate_multiplier": int(self.options.catch_rate_multiplier.value),
                 "exp_multiplier": int(self.options.exp_multiplier.value),
                 "blind_trainers": bool(self.options.blind_trainers.value),
-                # "talk_to_trainer_without_battling": bool(self.options.talk_to_trainer_without_battling.value),
+                "talk_to_trainer_without_battling": bool(self.options.talk_to_trainer_without_battling.value),
                 "hold_a_turbo": bool(self.options.hold_a_turbo.value),
                 "fast_hatch": bool(self.options.fast_hatch.value),
                 "fast_fishing": bool(self.options.fast_fishing.value),

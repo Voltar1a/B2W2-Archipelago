@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.1
+- Cleaned up location name prefixes
+- Moved cave/building floor prefixes before the dash
+- Removed grunt ID numbers from Plasma Frigate grunt location names
+- Re-enabled talk_to_trainer_without_battling YAML option
+
 ## 0.1.0
 - Initial public release
 

@@ -50,7 +50,7 @@ from .qol import (
     InstantText,
     # Incomplete: efficientdialogue
     BlindTrainers,
-    # TalkToTrainerWithoutBattling,
+    TalkToTrainerWithoutBattling,
     GuaranteedCatch,
     TMHMFullyCompatible,
     BikeEverywhere,
@@ -264,7 +264,7 @@ class PokemonB2W2Options(PerGameCommonOptions):
     auto_run: AutoRun
     bike_everywhere: BikeEverywhere
     blind_trainers: BlindTrainers
-    # talk_to_trainer_without_battling: TalkToTrainerWithoutBattling
+    talk_to_trainer_without_battling: TalkToTrainerWithoutBattling
     catch_rate_multiplier: CatchRateMultiplier
     check_log_filter: CheckLogFilter
     exp_multiplier: ExpMultiplier

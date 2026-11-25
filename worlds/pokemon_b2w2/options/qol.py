@@ -42,10 +42,10 @@ class BlindTrainers(Toggle):
     default = False
 
 
-# class TalkToTrainerWithoutBattling(Toggle):
-#     """Testing option: talking to trainers (including scripted battles) skips the battle and marks them defeated."""
-#     display_name = "Talk to Trainer Without Battling"
-#     default = False
+class TalkToTrainerWithoutBattling(Toggle):
+    """Talking to trainers (including scripted battles) skips the battle and marks them defeated. Not changeable ingame."""
+    display_name = "Talk to Trainer Without Battling"
+    default = False
 
 
 class GuaranteedCatch(Toggle):
