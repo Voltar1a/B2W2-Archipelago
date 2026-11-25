@@ -1,12 +1,15 @@
 # Changelog
 
+## 0.1.0
+- Initial public release
+
 ## 0.0.5
 - Fixed skip_join_avenue warp in White 2
 - Added habitat_list_checks YAML option
 - Fixed mismatched surf/season location rule names in Aspertia, Route 19, Castelia Sewers, and Relic Passage
 - Fixed level appropriate evo levels for Wurmple, Tyrogue, Nincada, Burmy, Combee
 - Fixed B button cancel handling in APtransceiver submenus
-- Fixed Route 20 dark grass cutscene freeze when Cheren is hidden
+- Fixed Route 20 dark grass cutscene freeze
 - Fixed Hiker Jerome refighting after beating Cheren
 - Added Light/Dark Stone and Grubby Hanky to item pool
 - Fixed fast fishing hooks freezing on cast

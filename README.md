@@ -22,5 +22,8 @@ Archipelago multiworld randomiser for Pokémon Black 2 and White 2
 ## Useful and interesting pages
 
 - [Setup guide](worlds/pokemon_b2w2/docs/setup.md)
-- [Changes & roadblocks](worlds/pokemon_b2w2/docs/changes.md)
+- [Changes](worlds/pokemon_b2w2/docs/changes.md)
+- [Roadmap](worlds/pokemon_b2w2/docs/roadmap.md)
+- [Changelog](worlds/pokemon_b2w2/docs/changelog.md)
+- [Credits](worlds/pokemon_b2w2/docs/credits.md)
 
