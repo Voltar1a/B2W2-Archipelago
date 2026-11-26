@@ -156,8 +156,9 @@ def patch_roadblock_scripts(script_narc: NARC, rom: Any | None = None) -> None:
                             Line("command", ["StackPushFlag", 1726]),
                             Line("command", ["StackPushConst", 0]),
                             Line("command", ["StackCmp", 1]),
-                            Line("command", ["VMJumpIf", 255, "lbl7_38"]),
+                            Line("command", ["VMJumpIf", 255, "lbl_jerome_init_skip"]),
                         ]
+                        s892.lines.insert(k + 5, Line("label", ["lbl_jerome_init_skip"]))
                         break
             idx0 = s892.find_label("scr0")
             if idx0 != -1:

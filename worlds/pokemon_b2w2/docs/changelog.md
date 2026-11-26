@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.2
+- Added Relic Castle Volcarona and Nature Preserve Haxorus to legendary_hunt
+- Excluded HMs and TM70 Flash from level-up moveset randomisation
+- Fixed black screen when returning to Route 20 from Virbank City
+
 ## 0.1.1
 - Cleaned up location name prefixes
 - Moved cave/building floor prefixes before the dash

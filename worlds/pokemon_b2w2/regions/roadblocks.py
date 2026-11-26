@@ -297,6 +297,10 @@ def can_access_legendary_location(
     world: "PokemonB2W2World",
     champion_ok: bool | None = None,
 ) -> bool:
+    if loc_key == "volcarona":
+        return state.can_reach("Relic Castle - Volcarona", "Region", player)
+    if loc_key == "haxorus":
+        return state.can_reach("Nature Preserve", "Region", player)
     if loc_key in ("cobalion", "virizion"):
         return has_jet_badge(state, player) or can_use_surf(state, player, world)
     if loc_key == "terrakion":
@@ -332,7 +336,7 @@ _DEFAULT_TOP_TRAINERS: tuple[str, ...] = (
 )
 
 _DEFAULT_LEGENDARIES: tuple[str, ...] = (
-    "cobalion", "virizion", "terrakion", "kyurem", "zekrom_reshiram",
+    "volcarona", "haxorus", "cobalion", "virizion", "terrakion", "kyurem", "zekrom_reshiram",
     "mesprit", "azelf", "uxie", "heatran", "cresselia",
     "regirock", "registeel_regice", "latios_latias",
 )

@@ -159,10 +159,10 @@ class TmhmHuntCount(Range):
 
 
 class LegendaryHuntRequired(Range):
-    """Number of legendary encounter locations required to clear when 'legendary_hunt' is an active goal (1 to 13)."""
+    """Number of legendary encounter locations required to clear when 'legendary_hunt' is an active goal (1 to 15)."""
     display_name = "Legendaries Required"
     range_start = 1
-    range_end = 13
+    range_end = 15
     default = 3
 
 
@@ -170,6 +170,8 @@ class LegendaryHuntAllowed(OptionSet):
     """Allowed legendary encounter locations that count towards the 'legendary_hunt' goal."""
     display_name = "Legendaries Allowed"
     valid_keys = [
+        "volcarona",
+        "haxorus",
         "cobalion",
         "virizion",
         "terrakion",
@@ -185,6 +187,8 @@ class LegendaryHuntAllowed(OptionSet):
         "latios_latias",
     ]
     default = [
+        "volcarona",
+        "haxorus",
         "cobalion",
         "virizion",
         "terrakion",

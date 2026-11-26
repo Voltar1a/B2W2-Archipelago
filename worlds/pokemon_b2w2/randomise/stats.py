@@ -45,14 +45,19 @@ def randomise_level_up_movesets(rom: NintendoDSRom, options: dict[str, Any], rng
     if not options.get("randomise_level_up_movesets", False):
         return
 
-    all_moves = list(range(1, 560))
+    # Exclude HMs (Cut, Fly, Surf, Strength, Waterfall, Dive) and TM70 Flash
+    excluded_moves = {15, 19, 57, 70, 127, 148, 291}
+    all_moves = [m for m in range(1, 560) if m not in excluded_moves]
 
     # Identify all damaging moves (power > 0) from move data archive a/0/2/1
     a021_data = rom.getFileByName("a/0/2/1")
     damaging_moves = []
     if a021_data is not None:
         moves_narc = NARC(a021_data)
-        damaging_moves = [i for i in range(1, len(moves_narc.files)) if moves_narc.files[i][3] > 0]
+        damaging_moves = [
+            i for i in range(1, len(moves_narc.files))
+            if i not in excluded_moves and moves_narc.files[i][3] > 0
+        ]
     if not damaging_moves:
         damaging_moves = [1, 33]  # Fallback to pound, tackle
 

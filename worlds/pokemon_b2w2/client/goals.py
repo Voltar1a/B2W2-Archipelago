@@ -97,6 +97,10 @@ def is_legendary_defeated(loc: str, client: "PokemonB2W2Client") -> bool:
     # Stationary encounter at the specified location was defeated or captured
     get_var = getattr(client, "get_var", lambda _v: 0)
     match loc:
+        case "volcarona":
+            return bool(client.get_flag(928) or client.get_flag(404) or client.get_flag(403))
+        case "haxorus":
+            return bool(client.get_flag(946) or client.get_flag(420))
         case "cobalion":
             return bool(client.get_flag(802) or client.get_flag(302) or client.get_flag(303))
         case "virizion":
@@ -138,7 +142,7 @@ async def check_legendary_hunt(client: "PokemonB2W2Client", ctx: "BizHawkClientC
     opts = ctx.slot_data.get("options", {})
     required = opts.get("legendary_hunt_required", 3)
     allowed = opts.get("legendary_hunt_allowed", [
-        "cobalion", "virizion", "terrakion", "kyurem", "zekrom_reshiram",
+        "volcarona", "haxorus", "cobalion", "virizion", "terrakion", "kyurem", "zekrom_reshiram",
         "mesprit", "azelf", "uxie", "heatran", "cresselia",
         "regirock", "registeel_regice", "latios_latias"
     ])
