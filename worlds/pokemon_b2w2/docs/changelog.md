@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.3
+- Fixed Castelia City Studio Castelia and Mistralton Cargo Service Worker location labels
+- Fixed Mistralton Cargo Service Worker not giving his item under some circumstances
+- Fixed Mistralton City and Celestial Tower 1F Professor Juniper checks
+- Fixed trainer line-of-sight crash when Blind Trainers is off
+- Removed Plasma Card requirement from the Plasma Frigate password machine in both versions
+- Fixed Route 21 Plasma Frigate softlock and flag collisions
+- Sanitised special characters in multiworld item and player names during patching
+
 ## 0.1.2
 - Added Relic Castle Volcarona and Nature Preserve Haxorus to legendary_hunt
 - Excluded HMs and TM70 Flash from level-up moveset randomisation

@@ -287,6 +287,12 @@ def insert_line(text_file: list[list[Entry]], block_num: int, line_num: int, tex
     text_file[block_num][line_num].key = key
 
 
+def _sanitize_text(text: str) -> str:
+    # Escapes brackets and non-BMP characters so AP strings cannot break Gen 5 text encoding
+    text = text.replace("[", "(").replace("]", ")")
+    return "".join(ch if ord(ch) <= 0xFFFF else "?" for ch in text)
+
+
 def apply_check_text(rom: object, slot_data: dict) -> None:
     # Patches a/0/0/3 text file 437 with custom textboxes
     try:
@@ -300,7 +306,7 @@ def apply_check_text(rom: object, slot_data: dict) -> None:
 
     loc_check_info = slot_data.get("loc_check_info", {})
     all_flags = sorted(int(k) for k in loc_check_info.keys())
-    recipient_label = slot_data.get("recipient_label", "another world")
+    recipient_label = _sanitize_text(str(slot_data.get("recipient_label", "another world")))
 
     k20 = ref_keys[20] if 20 < len(ref_keys) else None
     insert_line(text_437, 0, 20, f"[c_100_#1_0] sent an item[NextLine]to {recipient_label}!", key=k20)
@@ -308,6 +314,8 @@ def apply_check_text(rom: object, slot_data: dict) -> None:
     for i, f_id in enumerate(all_flags):
         text_id = 21 + i
         item_name, player_name, classification, is_local = loc_check_info[str(f_id)]
+        item_name = _sanitize_text(str(item_name))
+        player_name = _sanitize_text(str(player_name))
         if classification & 1:
             color_code = 6  # Progression
         elif classification & 4:

@@ -37,7 +37,7 @@ NPC_GIFT_LOCATIONS: dict[str, tuple[int, int | None, str | None, tuple[int, int]
     'Castelia City - Oceanfront Road - Harlequin after finding clowns': (300074, 2339, 'Castelia City', None),
     'Castelia City - Mode Street - Casteliacone stand lady': (300050, 2752, 'Castelia City', None),
     'Castelia City - Unity Pier - Girl': (300051, 443, 'Castelia City', None),
-    'Castelia City - Gym Street - Man in Studio Castelia 1F': (300063, 2732, 'Castelia City', None),
+    'Castelia City - Mode Street - Man in Studio Castelia 1F': (300063, 2732, 'Castelia City', None),
     'Castelia City - Castelia Street - Woman in Battle Company 1F': (300065, 361, 'Castelia City', None),
     'Castelia City - Castelia Street - Battle Company president on 1F': (300068, 852, 'Castelia City', None),
     'Castelia City - Castelia Street - Scientist in Battle Company 47F': (300069, 143, 'Castelia City', None),
@@ -124,9 +124,9 @@ NPC_GIFT_LOCATIONS: dict[str, tuple[int, int | None, str | None, tuple[int, int]
     'Marine Tube - Female Ace Trainer in middle': (300270, 389, 'Marine Tube', None),
 
     # Mistralton City
-    'Mistralton City - Professor Juniper on runway': (300118, 1707, 'Mistralton City', None),
+    'Mistralton City - Professor Juniper northwest of Pokémon Center': (300118, 1707, 'Mistralton City', None),
     'Mistralton City - Veteran in Cargo Service building': (300358, 121, 'Mistralton City', None),
-    'Mistralton City - Pilot in Cargo Service building': (300120, 472, 'Mistralton City', None),
+    'Mistralton City - Worker in Cargo Service building': (300120, 472, 'Mistralton City', None),
     'Mistralton City - TM collector in house east of Pokémon Center (10 TMs)': (300313, 450, 'Mistralton City', None),
     'Mistralton City - TM collector in house east of Pokémon Center (20 TMs)': (300314, 451, 'Mistralton City', None),
     'Mistralton City - TM collector in house east of Pokémon Center (35 TMs)': (300121, 452, 'Mistralton City', None),

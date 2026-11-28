@@ -17,7 +17,7 @@ from .options.groups import option_groups
 from .regions import create_regions_and_locations, check_goal_completion
 from .rom import PokemonB2W2Patch, PokemonB2Patch, PokemonW2Patch
 
-APWORLD_VERSION = "0.1.2"
+APWORLD_VERSION = "0.1.3"
 
 bizhawk_client.register_client()
 

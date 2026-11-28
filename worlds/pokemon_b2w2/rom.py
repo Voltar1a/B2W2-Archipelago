@@ -608,7 +608,7 @@ def apply_qol_patches(rom: "NintendoDSRom", options: dict[str, Any]) -> None:
 
         blind_trainers_enabled = bool(options.get("blind_trainers", False))
         hook_code = bytearray()
-        hook_code += b"\x10\xb5"
+        hook_code += b"\x12\xb5"  # push {r1, r4, lr}
         # Bypass blind trainers in Nimbasa Gym
         hook_code += b"\xe8\x23\xc3\x5a\x3f\x2b\x07\xd0"
         hook_code += b"\x6b\x23"
@@ -625,11 +625,11 @@ def apply_qol_patches(rom: "NintendoDSRom", options: dict[str, Any]) -> None:
             # Blind if var 16794 == 1 (1=on)
             hook_code += b"\x01\x2b"
             hook_code += b"\x03\xd0"
-        hook_code += b"\x00\x21"
+        hook_code += b"\x00\x99"  # ldr r1, [sp, #0] (preserve caller's r1)
         hook_code += make_bl(hook_ram + 0x1C, vanilla_func)
-        hook_code += b"\x10\xbd"
+        hook_code += b"\x12\xbd"  # pop {r1, r4, pc}
         hook_code += b"\x00\x20"
-        hook_code += b"\x10\xbd"
+        hook_code += b"\x12\xbd"  # pop {r1, r4, pc}
         hook_code += b"\xc0\x46" * ((48 - len(hook_code)) // 2)
         assert len(hook_code) == 48
 

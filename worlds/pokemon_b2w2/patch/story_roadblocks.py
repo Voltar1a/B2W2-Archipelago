@@ -479,21 +479,9 @@ def apply_story_roadblocks(rom: "NintendoDSRom", is_white2: bool, options: dict[
         pass
 
     # Keep Skyla (767) and Juniper (768) out of Cargo Service after Mistralton runway (Script 214 scr5)
-    # and gate Juniper's runway gift (scr4, flag 1707) on defeating Skyla's Gym (flag 1675)
     try:
         sf_214 = disassemble(scripts_narc.files[214])
         changed_214 = False
-        scr4_214 = sf_214.find_label("scr4")
-        if scr4_214 != -1:
-            sf_214.lines[scr4_214 + 1 : scr4_214 + 1] = [
-                Line("command", ["StackPushFlag", 1675]),
-                Line("command", ["StackPushConst", 1]),
-                Line("command", ["StackCmp", 1]),
-                Line("command", ["VMJumpIf", 1, "lbl_214_scr4_ok"]),
-                Line("command", ["VMHalt"]),
-                Line("label", ["lbl_214_scr4_ok"]),
-            ]
-            changed_214 = True
         scr5_214 = sf_214.find_label("scr5")
         if scr5_214 != -1:
             for i in range(scr5_214, min(scr5_214 + 65, len(sf_214.lines))):
@@ -503,6 +491,78 @@ def apply_story_roadblocks(rom: "NintendoDSRom", is_white2: bool, options: dict[
         if changed_214:
             scripts_narc.files[214] = bytes(assemble(sf_214))
             modified_scripts = True
+    except Exception:
+        pass
+
+    # Celestial Tower 1F Juniper (Script 676 scr1) fixes
+    try:
+        if len(scripts_narc.files) > 676 and scripts_narc.files[676]:
+            sf_676 = disassemble(scripts_narc.files[676])
+            scr1_676 = sf_676.find_label("scr1")
+            if scr1_676 != -1:
+                for i in range(scr1_676, min(scr1_676 + 15, len(sf_676.lines))):
+                    if sf_676.lines[i].type == "command" and sf_676.lines[i].parts == ["StoreBadge", 32776, 5]:
+                        sf_676.lines[i] = Line("command", ["FlagGet", 1675, 32776])
+                        break
+                for i in range(scr1_676, min(scr1_676 + 15, len(sf_676.lines))):
+                    if sf_676.lines[i].type == "command" and sf_676.lines[i].parts == ["StackPush", 16578]:
+                        # If Skyla is defeated, jump straight to departure block else if Flag 1711 == 0, jump to pre-Skyla gift block
+                        sf_676.lines[i : i + 4] = [
+                            Line("command", ["WorkCmpConst", 32776, 1]),
+                            Line("command", ["VMJumpIf", 1, "lbl_676_depart"]),
+                            Line("command", ["FlagGet", 2289, 32776]),
+                            Line("command", ["WorkCmpConst", 32776, 1]),
+                            Line("command", ["VMJumpIf", 1, "lbl_676_depart"]),
+                            Line("command", ["FlagGet", 1711, 32776]),
+                            Line("command", ["WorkCmpConst", 32776, 0]),
+                            Line("command", ["VMJumpIf", 1, "lbl_676_give_gift"]),
+                            Line("command", ["VMJump", "lbl_676_wait_msg"]),
+                            Line("label", ["lbl_676_give_gift"]),
+                        ]
+                        # Only increment 16578 if it was 1
+                        for j in range(i + 10, min(i + 40, len(sf_676.lines))):
+                            if sf_676.lines[j].type == "command" and sf_676.lines[j].parts == ["WorkAdd", 16578, 1]:
+                                sf_676.lines[j : j + 1] = [
+                                    Line("command", ["StackPush", 16578]),
+                                    Line("command", ["StackPushConst", 1]),
+                                    Line("command", ["StackCmp", 1]),
+                                    Line("command", ["VMJumpIf", 255, "lbl_676_no_inc"]),
+                                    Line("command", ["WorkAdd", 16578, 1]),
+                                    Line("label", ["lbl_676_no_inc"]),
+                                ]
+                                break
+                        # Mark departure block right after VMJumpIf 255, lbl2_4
+                        for k in range(i + 10, min(i + 60, len(sf_676.lines))):
+                            if sf_676.lines[k].type == "command" and sf_676.lines[k].parts == ["StackCmp", 7]:
+                                if k + 1 < len(sf_676.lines) and sf_676.lines[k + 1].parts[:2] == ["VMJumpIf", 255]:
+                                    sf_676.lines.insert(k + 2, Line("label", ["lbl_676_depart"]))
+                                    break
+                        # Skip duplicate Flag 1711 RTCallGlobal 2805 in departure block if Flag 1711 is already set
+                        dep_idx = sf_676.find_label("lbl_676_depart")
+                        if dep_idx != -1:
+                            for k in range(dep_idx, min(dep_idx + 60, len(sf_676.lines))):
+                                if sf_676.lines[k].type == "command" and sf_676.lines[k].parts == ["FlagSet", 1711]:
+                                    start_g = k - 2 if k >= 2 and sf_676.lines[k - 2].parts == ["StackPush", 32768] else k
+                                    sf_676.lines[start_g:start_g] = [
+                                        Line("command", ["FlagGet", 1711, 32776]),
+                                        Line("command", ["WorkCmpConst", 32776, 1]),
+                                        Line("command", ["VMJumpIf", 1, "lbl_676_skip_dup_gift"]),
+                                    ]
+                                    for m in range(start_g + 4, min(start_g + 16, len(sf_676.lines))):
+                                        if sf_676.lines[m].type == "command" and sf_676.lines[m].parts == ["StackPop", 32768]:
+                                            sf_676.lines.insert(m + 1, Line("label", ["lbl_676_skip_dup_gift"]))
+                                            break
+                                    break
+                        lbl2_4_idx = sf_676.find_label("lbl2_4")
+                        if lbl2_4_idx != -1:
+                            for k in range(lbl2_4_idx, min(lbl2_4_idx + 10, len(sf_676.lines))):
+                                if sf_676.lines[k].type == "command" and sf_676.lines[k].parts[:2] == ["VMJumpIf", 255]:
+                                    sf_676.lines[k] = Line("command", ["VMJumpIf", 255, "lbl_676_wait_msg"])
+                                    sf_676.lines.insert(k + 1, Line("label", ["lbl_676_wait_msg"]))
+                                    break
+                        scripts_narc.files[676] = bytes(assemble(sf_676))
+                        modified_scripts = True
+                        break
     except Exception:
         pass
 
@@ -1128,7 +1188,7 @@ def apply_story_roadblocks(rom: "NintendoDSRom", is_white2: bool, options: dict[
             off_npcs = 8 + n_furn * 20
             if n_npc == 5 and len(raw_354) >= off_npcs + 36:
                 npc5 = bytearray(raw_354[off_npcs : off_npcs + 36])
-                struct.pack_into("<6H", npc5, 0, 5, 293, 0, 0, 2550, 9)
+                struct.pack_into("<6H", npc5, 0, 5, 293, 0, 0, 2616, 9)
                 struct.pack_into("<H", npc5, 12, 1)  # face south
                 struct.pack_into("<2H", npc5, 28, 32, 15)  # in front of north loading zone (32, 14)
                 tail_off = off_npcs + n_npc * 36
@@ -1154,7 +1214,7 @@ def apply_story_roadblocks(rom: "NintendoDSRom", is_white2: bool, options: dict[
                 sub11_idx = sf_1124.find_label("sub11")
                 if sub11_idx != -1:
                     sf_1124.lines[sub11_idx + 1 : sub11_idx + 1] = [
-                        Line("command", ["StackPushFlag", 2543]),
+                        Line("command", ["StackPushFlag", 2609]),
                         Line("command", ["StackPushConst", 1]),
                         Line("command", ["StackCmp", 1]),
                         Line("command", ["VMJumpIf", 255, "lbl_1124_chk_m3"]),
@@ -1163,7 +1223,7 @@ def apply_story_roadblocks(rom: "NintendoDSRom", is_white2: bool, options: dict[
                         Line("command", ["ObjInitWarpGPos", 3, 0, 0, 0]),
                         Line("command", ["VMJump", "lbl_1124_show_blocker"]),
                         Line("label", ["lbl_1124_chk_m3"]),
-                        Line("command", ["StackPushFlag", 2542]),
+                        Line("command", ["StackPushFlag", 2608]),
                         Line("command", ["StackPushConst", 1]),
                         Line("command", ["StackCmp", 1]),
                         Line("command", ["VMJumpIf", 255, "lbl_1124_hide_blocker"]),
@@ -1172,10 +1232,10 @@ def apply_story_roadblocks(rom: "NintendoDSRom", is_white2: bool, options: dict[
                         Line("command", ["StackCmp", 1]),
                         Line("command", ["VMJumpIf", 255, "lbl_1124_show_blocker"]),
                         Line("label", ["lbl_1124_hide_blocker"]),
-                        Line("command", ["FlagSet", 2550]),
+                        Line("command", ["FlagSet", 2616]),
                         Line("command", ["VMJump", "lbl_1124_blocker_done"]),
                         Line("label", ["lbl_1124_show_blocker"]),
-                        Line("command", ["FlagReset", 2550]),
+                        Line("command", ["FlagReset", 2616]),
                         Line("label", ["lbl_1124_blocker_done"]),
                     ]
                     sf_1124.lines.extend([
@@ -1195,8 +1255,8 @@ def apply_story_roadblocks(rom: "NintendoDSRom", is_white2: bool, options: dict[
     except Exception:
         pass
 
-    # Isolate all 4 Plasma Frigate instances (1=PWT, 2=Route 21, 3=Giant Chasm, 4=P2 Lab) via persistent flags 2540..2543
-    # (Work vars >= 16700 are temporary/volatile across map loads; EventFlags 2538..2552 persist in save data)
+    # Isolate all 4 Plasma Frigate instances (1=PWT, 2=Route 21, 3=Giant Chasm, 4=P2 Lab) via persistent flags 2606..2609
+    # (Work vars >= 16700 are temporary/volatile across map loads; EventFlags 2604..2618 persist in save data)
     try:
         import struct
 
@@ -1228,11 +1288,11 @@ def apply_story_roadblocks(rom: "NintendoDSRom", is_white2: bool, options: dict[
             return False
 
         def _set_mode(mode: int) -> list[Any]:
-            return [Line("command", ["FlagSet" if k == mode else "FlagReset", 2539 + k]) for k in (1, 2, 3, 4)]
+            return [Line("command", ["FlagSet" if k == mode else "FlagReset", 2605 + k]) for k in (1, 2, 3, 4)]
 
         def _jump_if_not_mode(mode: int, lbl: str) -> list[Any]:
             return [
-                Line("command", ["StackPushFlag", 2539 + mode]),
+                Line("command", ["StackPushFlag", 2605 + mode]),
                 Line("command", ["StackPushConst", 1]),
                 Line("command", ["StackCmp", 1]),
                 Line("command", ["VMJumpIf", 255, lbl]),
@@ -1240,7 +1300,7 @@ def apply_story_roadblocks(rom: "NintendoDSRom", is_white2: bool, options: dict[
 
         def _jump_if_mode(mode: int, lbl: str) -> list[Any]:
             return [
-                Line("command", ["StackPushFlag", 2539 + mode]),
+                Line("command", ["StackPushFlag", 2605 + mode]),
                 Line("command", ["StackPushConst", 0]),
                 Line("command", ["StackCmp", 1]),
                 Line("command", ["VMJumpIf", 255, lbl]),
@@ -1270,7 +1330,7 @@ def apply_story_roadblocks(rom: "NintendoDSRom", is_white2: bool, options: dict[
                     Line("command", [set_997, 997]),
                     Line("command", [rst_998, 998]),
                     Line("command", ["WorkSetConst", inactive_var, 0]),
-                    Line("command", ["StackPushFlag", 2545]),
+                    Line("command", ["StackPushFlag", 2611]),
                     Line("command", ["StackPushConst", 1]),
                     Line("command", ["StackCmp", 1]),
                     Line("command", ["VMJumpIf", 255, f"lbl_{tag}_{ver}_s1"]),
@@ -1281,7 +1341,7 @@ def apply_story_roadblocks(rom: "NintendoDSRom", is_white2: bool, options: dict[
                     *s2_extra,
                     Line("command", ["FlagSet", 830]),
                     Line("command", ["WorkSetConst", 16640, 1]),
-                    Line("command", ["StackPushFlag", 2536]),
+                    Line("command", ["StackPushFlag", 2602]),
                     Line("command", ["StackPushConst", 1]),
                     Line("command", ["StackCmp", 1]),
                     Line("command", ["VMJumpIf", 255, f"lbl_{tag}_{ver}_c1"]),
@@ -1298,7 +1358,7 @@ def apply_story_roadblocks(rom: "NintendoDSRom", is_white2: bool, options: dict[
                             cmd
                             for k in range(4)
                             for cmd in _flag_branch(
-                                2553 + k,
+                                2619 + k,
                                 f"{tag}_{ver}_sw{k}",
                                 [Line("command", ["WorkSetConst", 16629 + k, 1])],
                                 [Line("command", ["WorkSetConst", 16629 + k, 0])],
@@ -1314,7 +1374,7 @@ def apply_story_roadblocks(rom: "NintendoDSRom", is_white2: bool, options: dict[
                     Line("command", ["FlagReset", 1036]),
                     Line("command", ["WorkSetConst", 16639, 0]),
                     Line("command", ["WorkSetConst", 16640, 0]),
-                    Line("command", ["StackPushFlag", 2537]),
+                    Line("command", ["StackPushFlag", 2603]),
                     Line("command", ["StackPushConst", 1]),
                     Line("command", ["StackCmp", 1]),
                     Line("command", ["VMJumpIf", 255, f"lbl_{tag}_{ver}_s0"]),
@@ -1333,7 +1393,7 @@ def apply_story_roadblocks(rom: "NintendoDSRom", is_white2: bool, options: dict[
                 Line("command", ["FlagSet", 1029]),
                 Line("command", ["FlagReset", 975]),
                 Line("command", ["FlagReset", 364]),
-                Line("command", ["StackPushFlag", 2552]),
+                Line("command", ["StackPushFlag", 2618]),
                 Line("command", ["StackPushConst", 0]),
                 Line("command", ["StackCmp", 1]),
                 Line("command", ["VMJumpIf", 255, f"lbl_{tag}_m2_done_chk"]),
@@ -1366,7 +1426,7 @@ def apply_story_roadblocks(rom: "NintendoDSRom", is_white2: bool, options: dict[
                 Line("label", [f"lbl_{tag}_w2"]),
                 *_m2_stage_cmds(True),
                 Line("label", [f"lbl_{tag}_g19_chk"]),
-                Line("command", ["StackPushFlag", 2500]),
+                Line("command", ["StackPushFlag", 2590]),
                 Line("command", ["StackPushConst", 0]),
                 Line("command", ["StackCmp", 1]),
                 Line("command", ["VMJumpIf", 255, f"lbl_{tag}_g19_set"]),
@@ -1378,7 +1438,7 @@ def apply_story_roadblocks(rom: "NintendoDSRom", is_white2: bool, options: dict[
             ]
             if include_warp:
                 cmds.extend([
-                    Line("command", ["StackPushFlag", 2546]),
+                    Line("command", ["StackPushFlag", 2612]),
                     Line("command", ["StackPushConst", 1]),
                     Line("command", ["StackCmp", 1]),
                     Line("command", ["VMJumpIf", 255, f"lbl_{tag}_chk_cutscene"]),
@@ -1431,7 +1491,7 @@ def apply_story_roadblocks(rom: "NintendoDSRom", is_white2: bool, options: dict[
             w2_switches = []
             for k in range(4):
                 w2_switches.extend(_flag_branch(
-                    2503 + k,
+                    2593 + k,
                     f"{tag}_w2sw{k}",
                     [Line("command", ["WorkSetConst", 16629 + k, 1])],
                     [Line("command", ["WorkSetConst", 16629 + k, 0])],
@@ -1447,7 +1507,7 @@ def apply_story_roadblocks(rom: "NintendoDSRom", is_white2: bool, options: dict[
                 Line("command", ["FlagSet", 364]),
                 Line("command", ["WorkSetConst", 16625, 0]),
                 Line("command", ["WorkSetConst", 16626, 0]),
-                Line("command", ["StackPushFlag", 2549]),
+                Line("command", ["StackPushFlag", 2615]),
                 Line("command", ["StackPushConst", 1]),
                 Line("command", ["StackCmp", 1]),
                 Line("command", ["VMJumpIf", 255, f"lbl_{tag}_m3_prog"]),
@@ -1467,7 +1527,7 @@ def apply_story_roadblocks(rom: "NintendoDSRom", is_white2: bool, options: dict[
                 Line("command", ["FlagSet", 834]),
                 Line("command", ["FlagSet", 830]),
                 Line("command", ["FlagSet", 831]),
-                Line("command", ["StackPushFlag", 2544]),
+                Line("command", ["StackPushFlag", 2610]),
                 Line("command", ["StackPushConst", 1]),
                 Line("command", ["StackCmp", 1]),
                 Line("command", ["VMJumpIf", 255, f"lbl_{tag}_r1126_open"]),
@@ -1486,7 +1546,7 @@ def apply_story_roadblocks(rom: "NintendoDSRom", is_white2: bool, options: dict[
                 *[Line("command", ["WorkSetConst", v, 1]) for v in (16629, 16630, 16631, 16632)],
                 Line("label", [f"lbl_{tag}_m3_c_chk"]),
                 *_flag_branch(
-                    2535,
+                    2601,
                     f"{tag}_m3_c35",
                     [Line("command", ["WorkSetConst", 16639, 2]), Line("command", ["FlagSet", 1036])],
                     [Line("command", ["WorkSetConst", 16639, 1]), Line("command", ["FlagReset", 1036])],
@@ -1502,37 +1562,37 @@ def apply_story_roadblocks(rom: "NintendoDSRom", is_white2: bool, options: dict[
                 Line("command", ["WorkSetConst", 16640, 0]),
                 Line("label", [f"lbl_{tag}_lower_chk"]),
                 *_flag_branch(
-                    2531,
+                    2597,
                     f"{tag}_m3_34",
                     [Line("command", ["WorkSetConst", 16634, 1])],
                     [Line("command", ["WorkSetConst", 16634, 0])],
                 ),
                 *_flag_branch(
-                    2532,
+                    2598,
                     f"{tag}_m3_44",
                     [Line("command", ["WorkSetConst", 16644, 1]), Line("command", ["WorkSetConst", 16645, 1]), Line("command", ["FlagSet", 842]), Line("command", ["FlagSet", 843])],
                     [Line("command", ["WorkSetConst", 16644, 0]), Line("command", ["WorkSetConst", 16645, 0]), Line("command", ["FlagSet", 842]), Line("command", ["FlagSet", 843])],
                 ),
                 *_flag_branch(
-                    2533,
+                    2599,
                     f"{tag}_m3_27a",
                     [Line("command", ["WorkSetConst", 16627, 3])],
                     _flag_branch(
-                        2532,
+                        2598,
                         f"{tag}_m3_27b",
                         [Line("command", ["WorkSetConst", 16627, 1])],
                         [Line("command", ["WorkSetConst", 16627, 0])],
                     ),
                 ),
                 *_flag_branch(
-                    2534,
+                    2600,
                     f"{tag}_m3_77a",
                     [Line("command", ["WorkSetConst", 16677, 2]), Line("command", ["FlagSet", 840]), Line("command", ["FlagSet", 841])],
                     [
                         Line("command", ["FlagReset", 840]),
                         Line("command", ["FlagReset", 841]),
                         *_flag_branch(
-                            2533,
+                            2599,
                             f"{tag}_m3_77b",
                             [Line("command", ["WorkSetConst", 16677, 1])],
                             [Line("command", ["WorkSetConst", 16677, 0])],
@@ -1540,7 +1600,7 @@ def apply_story_roadblocks(rom: "NintendoDSRom", is_white2: bool, options: dict[
                     ],
                 ),
                 *_flag_branch(
-                    2502,
+                    2592,
                     f"{tag}_m3_28a",
                     [
                         Line("command", ["WorkSetConst", 16628, 4]),
@@ -1549,7 +1609,7 @@ def apply_story_roadblocks(rom: "NintendoDSRom", is_white2: bool, options: dict[
                         Line("command", ["FlagReset", 854]),
                     ],
                     _flag_branch(
-                        2501,
+                        2591,
                         f"{tag}_m3_28b",
                         [
                             Line("command", ["WorkSetConst", 16628, 2]),
@@ -1564,7 +1624,7 @@ def apply_story_roadblocks(rom: "NintendoDSRom", is_white2: bool, options: dict[
                             Line("command", ["FlagSet", 848]),
                             Line("command", ["FlagSet", 854]),
                             *_flag_branch(
-                                2533,
+                                2599,
                                 f"{tag}_m3_28c",
                                 [Line("command", ["WorkSetConst", 16628, 1])],
                                 [Line("command", ["WorkSetConst", 16628, 0])],
@@ -1572,7 +1632,7 @@ def apply_story_roadblocks(rom: "NintendoDSRom", is_white2: bool, options: dict[
                         ],
                     ),
                 ),
-                Line("command", ["StackPushFlag", 2548]),
+                Line("command", ["StackPushFlag", 2614]),
                 Line("command", ["StackPushConst", 0]),
                 Line("command", ["StackCmp", 1]),
                 Line("command", ["VMJumpIf", 255, f"lbl_{tag}_g19_set"]),
@@ -1600,7 +1660,7 @@ def apply_story_roadblocks(rom: "NintendoDSRom", is_white2: bool, options: dict[
                 Line("command", ["FlagReset", 840]),
                 Line("command", ["FlagReset", 841]),
                 Line("command", ["FlagReset", 977]),
-                Line("command", ["FlagReset", 2550]),
+                Line("command", ["FlagReset", 2616]),
                 *[Line("command", ["FlagSet", fl]) for fl in list(range(829, 840)) + [842, 843, 844, 845, 847, 848, 854, 909, 975, 976, 997, 998, 1026, 1036]],
                 Line("command", ["FlagReset", 2793]),
                 *_flag_branch(
@@ -1628,15 +1688,15 @@ def apply_story_roadblocks(rom: "NintendoDSRom", is_white2: bool, options: dict[
             cmds.append(Line("label", [f"lbl_{tag}_balls_skip"]))
             return cmds
 
-        # PWT (s382): set mode 1 when PWT Frigate starts (flag 2547) and restore on map load until done (flag 2551)
+        # PWT (s382): set mode 1 when PWT Frigate starts (flag 2613) and restore on map load until done (flag 2617)
         if len(scripts_narc.files) > 382 and scripts_narc.files[382]:
             sf_382 = disassemble(scripts_narc.files[382])
             mod_382 = _inj_after_cmd(sf_382, ["WorkSetConst", 16624, 1], [
                 *_set_mode(1),
-                Line("command", ["FlagReset", 2538]),
-                Line("command", ["FlagReset", 2539]),
+                Line("command", ["FlagReset", 2604]),
+                Line("command", ["FlagReset", 2605]),
                 Line("command", ["WorkSetConst", 16452, 0]),
-                Line("command", ["FlagSet", 2547]),
+                Line("command", ["FlagSet", 2613]),
                 Line("command", ["FlagSet", 1029]),
                 Line("command", ["FlagReset", 829]),
                 Line("command", ["FlagReset", 830]),
@@ -1649,10 +1709,10 @@ def apply_story_roadblocks(rom: "NintendoDSRom", is_white2: bool, options: dict[
                 if idx_382 != -1:
                     t_382 = f"pwt_{lbl_382}"
                     sf_382.lines[idx_382 + 1 : idx_382 + 1] = [
-                        Line("command", ["StackPushFlag", 2547]),
+                        Line("command", ["StackPushFlag", 2613]),
                         Line("command", ["StackPushConst", 1]),
                         Line("command", ["StackCmp", 1]),
-                        Line("command", ["StackPushFlag", 2551]),
+                        Line("command", ["StackPushFlag", 2617]),
                         Line("command", ["StackPushConst", 0]),
                         Line("command", ["StackCmp", 1]),
                         Line("command", ["StackCmp", 7]),
@@ -1661,13 +1721,13 @@ def apply_story_roadblocks(rom: "NintendoDSRom", is_white2: bool, options: dict[
                         Line("command", ["WorkSetConst", 16582, 3]),
                         Line("command", ["WorkSetConst", 16452, 0]),
                         Line("command", ["WorkSetConst", 16624, 1]),
-                        Line("command", ["StackPushFlag", 2538]),
+                        Line("command", ["StackPushFlag", 2604]),
                         Line("command", ["StackPushConst", 1]),
                         Line("command", ["StackCmp", 1]),
                         Line("command", ["VMJumpIf", 255, f"lbl_{t_382}_chk3"]),
                         Line("command", ["WorkSetConst", 16624, 2]),
                         Line("label", [f"lbl_{t_382}_chk3"]),
-                        Line("command", ["StackPushFlag", 2539]),
+                        Line("command", ["StackPushFlag", 2605]),
                         Line("command", ["StackPushConst", 1]),
                         Line("command", ["StackCmp", 1]),
                         Line("command", ["VMJumpIf", 255, f"lbl_{t_382}_flags"]),
@@ -1707,10 +1767,10 @@ def apply_story_roadblocks(rom: "NintendoDSRom", is_white2: bool, options: dict[
                 new_lbl = f"scr{new_idx}"
                 sf_sc.lines.extend([
                     Line("label", [new_lbl]),
-                    Line("command", ["StackPushFlag", 2546]),
+                    Line("command", ["StackPushFlag", 2612]),
                     Line("command", ["StackPushConst", 0]),
                     Line("command", ["StackCmp", 1]),
-                    Line("command", ["StackPushFlag", 2552]),
+                    Line("command", ["StackPushFlag", 2618]),
                     Line("command", ["StackPushConst", 0]),
                     Line("command", ["StackCmp", 1]),
                     Line("command", ["StackCmp", 7]),
@@ -1729,7 +1789,7 @@ def apply_story_roadblocks(rom: "NintendoDSRom", is_white2: bool, options: dict[
                 modified_scripts = True
         if len(scripts_narc.files) > 926 and scripts_narc.files[926]:
             sf_926 = disassemble(scripts_narc.files[926])
-            mod_926 = _inj_after_cmd(sf_926, ["WorkSetConst", 16646, 3], [Line("command", ["FlagSet", 2546])])
+            mod_926 = _inj_after_cmd(sf_926, ["WorkSetConst", 16646, 3], [Line("command", ["FlagSet", 2612])])
             for lbl in ("scr0", "scr1", "scr2"):
                 idx_l = sf_926.find_label(lbl)
                 if idx_l != -1:
@@ -1802,12 +1862,12 @@ def apply_story_roadblocks(rom: "NintendoDSRom", is_white2: bool, options: dict[
                 scripts_narc.files[478] = bytes(assemble(sf_478))
                 modified_scripts = True
 
-        # s1110 (Bridge): allow P2 Lab Colress battle/gift (scr5 -> lbl6_13) before Hall of Fame when in mode 4, and track 16627=3 -> 2533 in mode 3
+        # s1110 (Bridge): allow P2 Lab Colress battle/gift (scr5 -> lbl6_13) before Hall of Fame when in mode 4, and track 16627=3 -> 2599 in mode 3
         if len(scripts_narc.files) > 1110 and scripts_narc.files[1110]:
             sf_1110 = disassemble(scripts_narc.files[1110])
             mod_1110 = _inj_after_cmd(sf_1110, ["WorkSetConst", 16627, 3], [
                 *_jump_if_not_mode(3, "lbl_1110_2533_skip"),
-                Line("command", ["FlagSet", 2533]),
+                Line("command", ["FlagSet", 2599]),
                 Line("label", ["lbl_1110_2533_skip"]),
             ])
             scr5_1110 = sf_1110.find_label("scr5")
@@ -1833,31 +1893,31 @@ def apply_story_roadblocks(rom: "NintendoDSRom", is_white2: bool, options: dict[
                 Line("label", [f"lbl_{tag}_sync_end"]),
             ]
 
-        # s1104 (Deck): guard Postgame Colress (1029) to mode 4, set PWT done (2551), track Grunt 19 & PWT mid-progress, hide item balls in mode 4
+        # s1104 (Deck): guard Postgame Colress (1029) to mode 4, set PWT done (2617), track Grunt 19 & PWT mid-progress, hide item balls in mode 4
         if len(scripts_narc.files) > 1104 and scripts_narc.files[1104]:
             sf_1104 = disassemble(scripts_narc.files[1104])
             mod_1104 = False
-            for pwt_step, pwt_flag in ((2, 2538), (3, 2539)):
+            for pwt_step, pwt_flag in ((2, 2604), (3, 2605)):
                 if _inj_after_cmd(sf_1104, ["WorkSetConst", 16624, pwt_step], [
                     *_jump_if_not_mode(1, f"lbl_1104_pwt_s{pwt_step}"),
                     Line("command", ["FlagSet", pwt_flag]),
                     Line("label", [f"lbl_1104_pwt_s{pwt_step}"]),
                 ]):
                     mod_1104 = True
-            if _inj_after_cmd(sf_1104, ["WorkSetConst", 16624, 4], [Line("command", ["FlagSet", 2551])]):
+            if _inj_after_cmd(sf_1104, ["WorkSetConst", 16624, 4], [Line("command", ["FlagSet", 2617])]):
                 mod_1104 = True
             for r21_step_var in (16626, 16625):
                 if _inj_after_cmd(sf_1104, ["WorkSetConst", r21_step_var, 2], [
-                    Line("command", ["FlagSet", 2537]),
+                    Line("command", ["FlagSet", 2603]),
                 ]):
                     mod_1104 = True
             if _inj_after_cmd(sf_1104, ["FlagSet", 832], [
                 *_jump_if_not_mode(2, "lbl_1104_not_r21"),
-                Line("command", ["FlagSet", 2500]),
+                Line("command", ["FlagSet", 2590]),
                 Line("command", ["ObjInitWarpGPos", 2, 17, 0, 43]),
                 Line("label", ["lbl_1104_not_r21"]),
                 *_jump_if_not_mode(3, "lbl_1104_not_gc"),
-                Line("command", ["FlagSet", 2548]),
+                Line("command", ["FlagSet", 2614]),
                 Line("label", ["lbl_1104_not_gc"]),
             ]):
                 mod_1104 = True
@@ -1875,7 +1935,7 @@ def apply_story_roadblocks(rom: "NintendoDSRom", is_white2: bool, options: dict[
             lbl1_10_1104 = sf_1104.find_label("lbl1_10")
             lbl1_11_1104 = sf_1104.find_label("lbl1_11")
             if lbl1_8_1104 != -1 and lbl1_10_1104 != -1 and lbl1_11_1104 != -1:
-                # Insert lbl_1104_p2_warps before ObjInitWarpGPos 4, 0, 0, 0 under lbl1_10 and dispatch all 4 modes on flags 2540..2543
+                # Insert lbl_1104_p2_warps before ObjInitWarpGPos 4, 0, 0, 0 under lbl1_10 and dispatch all 4 modes on flags 2606..2609
                 for k in range(lbl1_10_1104 + 1, min(len(sf_1104.lines), lbl1_10_1104 + 10)):
                     if sf_1104.lines[k].type == "command" and sf_1104.lines[k].parts == ["ObjInitWarpGPos", 4, 0, 0, 0]:
                         sf_1104.lines.insert(k, Line("label", ["lbl_1104_p2_warps"]))
@@ -1888,7 +1948,7 @@ def apply_story_roadblocks(rom: "NintendoDSRom", is_white2: bool, options: dict[
                             *_jump_if_not_mode(2, "lbl_1104_chk34"),
                             Line("command", ["ObjInitWarpGPos", 4, 0, 0, 0]),
                             Line("command", ["ObjInitWarpGPos", 7, 0, 0, 0]),
-                            Line("command", ["StackPushFlag", 2500]),
+                            Line("command", ["StackPushFlag", 2590]),
                             Line("command", ["StackPushConst", 0]),
                             Line("command", ["StackCmp", 1]),
                             Line("command", ["VMJumpIf", 255, "lbl_1104_stairs_ok"]),
@@ -1913,6 +1973,24 @@ def apply_story_roadblocks(rom: "NintendoDSRom", is_white2: bool, options: dict[
                         *_hide_p2_balls(f"1104_{lbl_s}", [(26, 1478), (27, 1479)]),
                     ]
                     mod_1104 = True
+            scr22_1104 = sf_1104.find_label("scr22")
+            if scr22_1104 != -1:
+                sf_1104.lines[scr22_1104 + 1 : scr22_1104 + 1] = [
+                    Line("command", ["FlagGet", 2590, 32800]),
+                    Line("command", ["WorkCmpConst", 32800, 1]),
+                    Line("command", ["VMJumpIf", 5, "lbl_1104_scr22_ensure"]),
+                    Line("command", ["ActorUnlockAll"]),
+                    Line("command", ["VMHalt"]),
+                    Line("label", ["lbl_1104_scr22_ensure"]),
+                    Line("command", ["FlagGet", 832, 32800]),
+                    Line("command", ["WorkCmpConst", 32800, 0]),
+                    Line("command", ["VMJumpIf", 1, "lbl_1104_scr22_ok"]),
+                    Line("command", ["FlagReset", 832]),
+                    Line("command", ["ActorAdd", 14]),
+                    Line("command", ["ActorAdd", 15]),
+                    Line("label", ["lbl_1104_scr22_ok"]),
+                ]
+                mod_1104 = True
             if mod_1104:
                 scripts_narc.files[1104] = bytes(assemble(sf_1104))
                 modified_scripts = True
@@ -1926,14 +2004,14 @@ def apply_story_roadblocks(rom: "NintendoDSRom", is_white2: bool, options: dict[
                 sf_rm = disassemble(scripts_narc.files[room_sid])
                 extra_rm: list[Any] = [
                     *_jump_if_not_mode(2, f"lbl_rm_{room_sid}_chk3"),
-                    Line("command", ["FlagSet", 2545]),
+                    Line("command", ["FlagSet", 2611]),
                 ]
                 if room_sid == 1126:
-                    extra_rm.append(Line("command", ["FlagSet", 2500]))
+                    extra_rm.append(Line("command", ["FlagSet", 2590]))
                 extra_rm.extend([
                     Line("label", [f"lbl_rm_{room_sid}_chk3"]),
                     *_jump_if_not_mode(3, f"lbl_rm_{room_sid}_skip"),
-                    Line("command", ["FlagSet", 2544]),
+                    Line("command", ["FlagSet", 2610]),
                     Line("label", [f"lbl_rm_{room_sid}_skip"]),
                 ])
                 if _inj_after_cmd(sf_rm, ["FlagSet", room_src_flag], extra_rm):
@@ -1941,25 +2019,25 @@ def apply_story_roadblocks(rom: "NintendoDSRom", is_white2: bool, options: dict[
                         for sw_k in range(4):
                             _inj_after_cmd(sf_rm, ["WorkSetConst", 16629 + sw_k, 1], [
                                 *_jump_if_not_mode(2, f"lbl_rm1106_sw{sw_k}_chk3"),
-                                Line("command", ["FlagSet", 2553 + sw_k]),
+                                Line("command", ["FlagSet", 2619 + sw_k]),
                                 Line("label", [f"lbl_rm1106_sw{sw_k}_chk3"]),
                                 *_jump_if_not_mode(3, f"lbl_rm1106_sw{sw_k}_skip"),
-                                Line("command", ["FlagSet", 2503 + sw_k]),
+                                Line("command", ["FlagSet", 2593 + sw_k]),
                                 Line("label", [f"lbl_rm1106_sw{sw_k}_skip"]),
                             ])
                     scripts_narc.files[room_sid] = bytes(assemble(sf_rm))
                     modified_scripts = True
 
-        # Enforce active mode state table on s1116 (1F Deck) & clear NPCs/barriers in P2 Lab mode (flag 2543)
+        # Enforce active mode state table on s1116 (1F Deck) & clear NPCs/barriers in P2 Lab mode (flag 2609)
         if len(scripts_narc.files) > 1116 and scripts_narc.files[1116]:
             sf_1116 = disassemble(scripts_narc.files[1116])
             mod_1116 = False
             if _inj_after_cmd(sf_1116, ["WorkSetConst", 16639, 2], [
                 *_jump_if_not_mode(2, "lbl_1116_c_chk3"),
-                Line("command", ["FlagSet", 2536]),
+                Line("command", ["FlagSet", 2602]),
                 Line("label", ["lbl_1116_c_chk3"]),
                 *_jump_if_not_mode(3, "lbl_1116_c_skip"),
-                Line("command", ["FlagSet", 2535]),
+                Line("command", ["FlagSet", 2601]),
                 Line("label", ["lbl_1116_c_skip"]),
             ]):
                 mod_1116 = True
@@ -1999,12 +2077,12 @@ def apply_story_roadblocks(rom: "NintendoDSRom", is_white2: bool, options: dict[
 
         # Hide Frigate item balls in Mode 4 (without setting item flags) & track Mode 3 lower-deck milestones
         m3_hooks: dict[int, list[tuple[list[Any], int]]] = {
-            1114: [(["WorkSetConst", 16628, 2], 2501), (["WorkSetConst", 16641, 2], 2502)],
-            1122: [(["WorkSetConst", 16634, 1], 2531), (["WorkSetConst", 16644, 1], 2532), (["WorkSetConst", 16677, 2], 2534)],
+            1114: [(["WorkSetConst", 16628, 2], 2591), (["WorkSetConst", 16641, 2], 2592)],
+            1122: [(["WorkSetConst", 16634, 1], 2597), (["WorkSetConst", 16644, 1], 2598), (["WorkSetConst", 16677, 2], 2600)],
             1128: [
-                *[(["WorkSetConst", 16629 + k, 1], 2503 + k) for k in range(4)],
-                (["WorkSetConst", 16645, 1], 2532),
-                (["WorkSetConst", 16677, 2], 2534),
+                *[(["WorkSetConst", 16629 + k, 1], 2593 + k) for k in range(4)],
+                (["WorkSetConst", 16645, 1], 2598),
+                (["WorkSetConst", 16677, 2], 2600),
             ],
         }
         for hk_sid, hk_list in m3_hooks.items():
@@ -2033,6 +2111,13 @@ def apply_story_roadblocks(rom: "NintendoDSRom", is_white2: bool, options: dict[
                     if idx_scr1 != -1:
                         sf_hk.lines[idx_scr1 + 1 : idx_scr1 + 1] = _hide_p2_balls(f"{hk_sid}_scr1", pairs_balls, extra_balls)
                         mod_hk = True
+                    if hk_sid == 1122:
+                        # Password machine (scr11): never require Plasma Card / Flag 356 in either frigate
+                        for idx_pw, ln_pw in enumerate(sf_hk.lines):
+                            if ln_pw.type == "command" and ln_pw.parts == ["StackPushFlag", 356]:
+                                sf_hk.lines[idx_pw] = Line("command", ["StackPushConst", 1])
+                                mod_hk = True
+                                break
                 if mod_hk:
                     scripts_narc.files[hk_sid] = bytes(assemble(sf_hk))
                     modified_scripts = True
@@ -2063,10 +2148,10 @@ def apply_story_roadblocks(rom: "NintendoDSRom", is_white2: bool, options: dict[
                     _sync_ow_init(rm_ow, new_init_rm)
                 modified_scripts = True
 
-        # s1112 (Route 21 departure): mark Route 21 Frigate done (2552) and keep 16452=1 (Route 21)
+        # s1112 (Route 21 departure): mark Route 21 Frigate done (2618) and keep 16452=1 (Route 21)
         if len(scripts_narc.files) > 1112 and scripts_narc.files[1112]:
             sf_1112 = disassemble(scripts_narc.files[1112])
-            mod_1112 = _inj_after_cmd(sf_1112, ["WorkSetConst", 16646, 4], [Line("command", ["FlagSet", 2552])])
+            mod_1112 = _inj_after_cmd(sf_1112, ["WorkSetConst", 16646, 4], [Line("command", ["FlagSet", 2618])])
             for idx_12, ln_12 in enumerate(sf_1112.lines):
                 if ln_12.type == "command" and ln_12.parts == ["WorkSetConst", 16452, 2]:
                     sf_1112.lines[idx_12] = Line("command", ["WorkSetConst", 16452, 1])
@@ -2075,10 +2160,10 @@ def apply_story_roadblocks(rom: "NintendoDSRom", is_white2: bool, options: dict[
                 scripts_narc.files[1112] = bytes(assemble(sf_1112))
                 modified_scripts = True
 
-        # s1208 (Giant Chasm Kyurem): mark Giant Chasm Frigate done (2549) and keep western roadblock (879) gated on DNA Splicers
+        # s1208 (Giant Chasm Kyurem): mark Giant Chasm Frigate done (2615) and keep western roadblock (879) gated on DNA Splicers
         if len(scripts_narc.files) > 1208 and scripts_narc.files[1208]:
             sf_1208 = disassemble(scripts_narc.files[1208])
-            mod_1208 = _inj_after_cmd(sf_1208, ["FlagSet", 885], [Line("command", ["FlagSet", 2549])])
+            mod_1208 = _inj_after_cmd(sf_1208, ["FlagSet", 885], [Line("command", ["FlagSet", 2615])])
             new_1208_lines = [l for l in sf_1208.lines if not (l.type == "command" and l.parts == ["FlagSet", 879])]
             if len(new_1208_lines) != len(sf_1208.lines):
                 sf_1208.lines = new_1208_lines
@@ -2392,20 +2477,21 @@ def apply_story_roadblocks(rom: "NintendoDSRom", is_white2: bool, options: dict[
         except Exception:
             pass
 
-    # Mistralton Cargo Service Pilot (Script 222 sub63): bypass Flying/Psychic type check (flag 472)
+    # Mistralton Cargo Service Worker (Script 222 sub63): bypass Flying/Psychic type check (flag 472)
     try:
         if len(scripts_narc.files) > 222 and scripts_narc.files[222]:
             sf_222 = disassemble(scripts_narc.files[222])
             changed_222 = False
-            for i, line in enumerate(sf_222.lines[:-1]):
+            for i in range(len(sf_222.lines) - 1):
+                line = sf_222.lines[i]
                 if (
                     line.type == "command"
-                    and line.parts == ["VMJumpIf", 255, "lbl10_65"]
+                    and line.parts[:2] == ["VMJumpIf", 255]
                     and sf_222.lines[i + 1].type == "command"
                     and sf_222.lines[i + 1].parts == ["StackPush", 32808]
                 ):
-                    sf_222.lines[i] = Line("command", ["VMJumpIf", 255, "lbl_pilot_any_mon"])
-                    sf_222.lines.insert(i + 1, Line("label", ["lbl_pilot_any_mon"]))
+                    sf_222.lines[i] = Line("command", ["VMJumpIf", 255, "lbl_worker_any_mon"])
+                    sf_222.lines.insert(i + 1, Line("label", ["lbl_worker_any_mon"]))
                     changed_222 = True
                     break
             if changed_222:
